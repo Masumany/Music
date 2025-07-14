@@ -4,7 +4,7 @@ package com.example.module_recommened.model
 /**
  * 根响应类（对应整个JSON）
  */
-data class SongRecommendResponse(
+data class ListData(
   val code: Int,
   val data: SongData?
 )

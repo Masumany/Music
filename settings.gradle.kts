@@ -34,4 +34,6 @@ rootProject.name = "Music"
 include(":app")
     }
 }
- 
+include(":lib_base")
+
+include(":module_recommened")

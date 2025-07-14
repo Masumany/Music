@@ -94,7 +94,7 @@ import com.google.gson.annotations.SerializedName
   ]
 }
 */
-data class BannData(
+data class BannerData(
     @SerializedName("banners")
     val banners: List<Banner>,
     @SerializedName("code")
