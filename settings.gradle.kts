@@ -37,3 +37,4 @@ include(":app")
 include(":lib_base")
 
 include(":module_recommened")
+include(":module_musicplayer")

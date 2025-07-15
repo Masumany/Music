@@ -3,14 +3,15 @@ package com.example.module_recommened.viewmodel
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.module_recommened.api.BannerData
-import com.example.module_recommened.api.NetWorkClient
+import com.example.lib.base.BannerData
+import com.example.lib.base.ApiService
+import com.example.lib.base.NetWorkClient
 
 class BannerViewModel :ViewModel (){
     val bannerData = MutableLiveData<BannerData>()
     suspend fun getBannerData(): Result<BannerData> {
         try{
-           val response = NetWorkClient.apiService.getBanner()
+           val response = NetWorkClient.apiService.getBanner("imageUrl","url")
             Log.d("BannerViewModel", "getBannerData: $response")
             return Result.success( response)
         }catch (e:Exception){

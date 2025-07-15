@@ -1,16 +1,14 @@
 package com.example.music
 
-import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.example.module_recommened.RecommendFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -22,6 +20,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+        try {
+            val fragmentTransactionTooLargeException=supportFragmentManager.beginTransaction()
+            fragmentTransactionTooLargeException.replace(R.id.mainContent,RecommendFragment())
+            fragmentTransactionTooLargeException.commit()
+        }catch (e: Exception){
+            Log.e("MainActivity", "Error loading fragment: ${e.message}", e)
+        }
+
+
         bottomNavigationView = findViewById(R.id.bottomNavigationView)
         DrawerLayout = findViewById(R.id.mainDrawerLayout)
         TopButton = findViewById(R.id.drawerButton)
