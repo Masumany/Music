@@ -37,6 +37,10 @@ android {
 
 dependencies {
 
+    // OkHttp 核心库
+    implementation(" 'com.squareup.okhttp3:okhttp:4.11.0'")
+    // 可选：如果需要使用 OkHttp 的 logging 拦截器
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.11.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
