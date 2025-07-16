@@ -3,6 +3,7 @@ plugins {
     id("com.android.library")
     //alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+
 }
 
 android {
@@ -13,11 +14,11 @@ android {
     compileSdk = 35
 
     defaultConfig {
-       // applicationId = "com.example.module_recommened"
+        //applicationId = "com.example.module_recommened"
         minSdk = 24
         targetSdk = 35
        // versionCode = 1
-        //versionName = "1.0"
+       // versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -41,6 +42,7 @@ android {
 }
 
 dependencies {
+
     implementation(project(":lib_base"))
     implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation ("com.github.bumptech.glide:glide:4.16.0")

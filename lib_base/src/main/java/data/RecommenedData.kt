@@ -403,14 +403,14 @@ import com.google.gson.annotations.SerializedName
 }
 */
 data class RecommenedData(
-    @SerializedName("category")
-    val category: Int, // 0
-    @SerializedName("code")
-    val code: Int, // 200
-    @SerializedName("hasTaste")
-    val hasTaste: Boolean, // false
-    @SerializedName("result")
-    val result: List<Result>
+  @SerializedName("category")
+  val category: Int, // 0
+  @SerializedName("code")
+  val code: Int, // 200
+  @SerializedName("hasTaste")
+  val hasTaste: Boolean, // false
+  @SerializedName("result")
+  val result: List<Result>?
 ) {
     data class Result(
         @SerializedName("alg")

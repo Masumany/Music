@@ -1,6 +1,8 @@
 plugins {
+    //id("com.android.library")
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+
 }
 
 android {
@@ -16,7 +18,9 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    buildFeatures {
+        viewBinding =true
+    }
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -37,6 +41,7 @@ android {
 
 dependencies {
 
+    implementation(project(":lib_base"))
     implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")

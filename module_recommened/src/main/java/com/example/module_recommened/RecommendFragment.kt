@@ -164,8 +164,10 @@ class RecommendFragment : Fragment() {
     private suspend fun fetchRecommendedData() {
         try {
             val result = recommendedViewModel.getRecommenedData().result
-            if (result.isNotEmpty()) {
-                recyclerView.adapter = ReAdapter(result)
+            if (result != null) {
+                if (result.isNotEmpty()) {
+                    recyclerView.adapter = ReAdapter(result)
+                }
             }
         } catch (e: Exception) {
             Log.e("RecommendedData", "Error fetching recommended data: ${e.message}")

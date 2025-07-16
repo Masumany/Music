@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
             DrawerLayout.openDrawer(GravityCompat.START)
         }
 
-        }
+    }
     override fun onBackPressed() {
         if (DrawerLayout.isDrawerOpen(GravityCompat.START)) {
             DrawerLayout.closeDrawer(GravityCompat.START)
