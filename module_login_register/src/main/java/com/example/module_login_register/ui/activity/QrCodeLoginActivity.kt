@@ -6,7 +6,6 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -75,6 +74,7 @@ class QrCodeLoginActivity : AppCompatActivity() {
                     }
                     is LoginState.Success -> {
                         Toast.makeText(this@QrCodeLoginActivity, "登录成功", Toast.LENGTH_SHORT).show()
+//                        navigateToPersonageActivity()
                     }
                     is LoginState.Error -> {
                         stateText.text = "登录失败,请刷新"
