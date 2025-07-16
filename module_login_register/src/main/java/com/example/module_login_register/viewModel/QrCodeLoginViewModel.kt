@@ -1,5 +1,6 @@
 package com.example.module_login_register.viewModel
 
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,7 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class QrCodeLoginViewModel : ViewModel() {
+class QrCodeLoginViewModel(private  val sharedPreferences : SharedPreferences) : ViewModel() {
     private val _QrCodeKey = MutableStateFlow(QrLoginData(0, Data(0, "")))
     val QrCodeKey: StateFlow<QrLoginData> = _QrCodeKey.asStateFlow()
 
@@ -28,15 +29,18 @@ class QrCodeLoginViewModel : ViewModel() {
     private val _loginState = MutableStateFlow<LoginState>(LoginState.Init)
     val loginState: StateFlow<LoginState> = _loginState.asStateFlow()
 
+    private val _qrState = MutableStateFlow<QrLoadState>(QrLoadState.Init)
+    val qrState: StateFlow<QrLoadState> = _qrState.asStateFlow()
+
     private var checkQrJob: Job? = null
 
     fun getQrCodeKey() {
-        if (_loginState.value is LoginState.Loading){
+        if (_qrState.value is QrLoadState.Loading){
              return
         }
         viewModelScope.launch {
             try {
-                _loginState.value = LoginState.Loading
+                _qrState.value = QrLoadState.Loading
                 val time = System.currentTimeMillis().toString()
                 val response = NetRepository.apiService.getQRKey(time)
                 Log.d("QrCodeLoginViewModel", "key获取成功 ${response.message()}")
@@ -44,58 +48,59 @@ class QrCodeLoginViewModel : ViewModel() {
                     val data = response.body()
                     if (data != null && data.code == 200){
                         _QrCodeKey.value = data
-                        _loginState.value = LoginState.Success
-                        createQrCode(data.data.unikey)
+                        _qrState.value = QrLoadState.Success
+                        createQrCode(data.data.unikey, qrimg = "true")
                     }else{
                         if (data == null){
-                            _loginState.value = LoginState.Error("获取失败 ${response.message()}")
+                            _qrState.value = QrLoadState.Error("获取失败 ${response.message()}")
                         }else{
-                            _loginState.value = LoginState.Error("未知错误 ${response.message()}")
+                            _qrState.value = QrLoadState.Error("未知错误 ${response.message()}")
                         }
                     }
 
                 }else{
-                    _loginState.value = LoginState.Error("key获取失败 ${response.message()}")
+                    _qrState.value = QrLoadState.Error("key获取失败 ${response.message()}")
                     Log.e("QrCodeLoginViewModel", "key获取失败 ${response.message()}")
                 }
             }catch (e: Exception){
                 Log.e("QrCodeLoginViewModel", "key获取异常 ${e.message}")
-                _loginState.value = LoginState.Error("key获取异常 ${e.message}")
+                _qrState.value = QrLoadState.Error("key获取异常 ${e.message}")
                 e.printStackTrace()
             }
         }
     }
 
-    fun createQrCode(key: String) {
+    fun createQrCode(key: String,qrimg: String = "true") {
         if (key.isEmpty()){
-            _loginState.value = LoginState.Error("key为空")
+            _qrState.value = QrLoadState.Error("key为空")
             return
         }
         viewModelScope.launch {
             try {
-                _loginState.value = LoginState.Loading
-                val response = NetRepository.apiService.createQR(key)
+                _qrState.value = QrLoadState.Loading
+                val response = NetRepository.apiService.createQR(key,qrimg)
                 if (response.isSuccessful){
                     Log.d("QrCodeLoginViewModel", "二维码创建成功 ${response.message()}")
                     val data = response.body()
                     if (data != null && data.code == 200){
                         _QrCodeData.value = data
-                        _loginState.value = LoginState.Success
+                        _qrState.value = QrLoadState.Success
+                        Log.d("QrCodeLoginViewModel", "二维码地址: ${data.data.qrimg}")
                         checkQrCode(key)
                     }else{
                         if (data == null){
-                            _loginState.value = LoginState.Error("创建二维码失败 ${response.message()}")
+                            _qrState.value = QrLoadState.Error("创建二维码失败 ${response.message()}")
                         }else{
-                            _loginState.value = LoginState.Error("未知错误 ${response.message()}")
+                            _qrState.value = QrLoadState.Error("未知错误 ${response.message()}")
                         }
                     }
                 }else{
-                    _loginState.value = LoginState.Error("请求失败 ${response.message()}")
+                    _qrState.value = QrLoadState.Error("请求失败 ${response.message()}")
                     Log.e("QrCodeLoginViewModel", "请求失败 ${response.message()}")
                 }
             }catch (e: Exception){
                 Log.e("QrCodeLoginViewModel", "请求异常 ${e.message}")
-                _loginState.value = LoginState.Error("请求异常 ${e.message}")
+                _qrState.value = QrLoadState.Error("请求异常 ${e.message}")
                 e.printStackTrace()
             }
         }
@@ -113,13 +118,17 @@ class QrCodeLoginViewModel : ViewModel() {
                             _checkQrCodeData.value = data
                             when(data.code){
                                 800 ->{
-                                    _loginState.value = LoginState.Loading
+                                    _loginState.value = LoginState.Error("二维码已过期")
                                 }
                                 801 ->{
-                                    _loginState.value = LoginState.Loading
+                                    _qrState.value = QrLoadState.Success
                                 }
                                 802 ->{
+                                    _loginState.value = LoginState.Loading
+                                }
+                                803 ->{
                                     _loginState.value = LoginState.Success
+                                    sharedPreferences.edit().putString("cookie", data.cookie).apply()
                                     break
                                 }
                                 else ->{
