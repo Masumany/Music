@@ -37,6 +37,8 @@ android {
 
 dependencies {
 
+    implementation(project(":module_login_register"))
+    implementation(project(":module_personage"))
     implementation(project(":lib_base"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

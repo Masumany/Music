@@ -7,6 +7,6 @@ plugins {
 // 根目录 build.gradle
 buildscript {
     dependencies {
-        classpath ("com.android.tools.build:gradle:8.6.1")
+        classpath (libs.gradle)
     }
 }
