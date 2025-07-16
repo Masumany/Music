@@ -18,6 +18,7 @@ import com.example.module_musicplayer.databinding.MusicPlayerBinding
 
 class MusicPlayerActivity : AppCompatActivity() {
 
+
     private var mediaPlayer: MediaPlayer? = null
     private var isPlaying = false
     private lateinit var binding: MusicPlayerBinding

@@ -11,7 +11,7 @@ import com.bumptech.glide.Glide
 import com.example.lib.base.RecommenedData
 import com.example.module_recommened.R
 
-
+@Route(path = "/recommened/ReAdapter")
 class ReAdapter (private val ReText:List<RecommenedData.Result>):
     RecyclerView.Adapter<ReAdapter.ReViewHolder>(){
 
@@ -36,6 +36,7 @@ class ReAdapter (private val ReText:List<RecommenedData.Result>):
         Glide.with(holder.imgView.context)
             .load(item.picUrl)
             .into(holder.imgView )
+
 
     }
 

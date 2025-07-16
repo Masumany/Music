@@ -2,7 +2,7 @@ plugins {
     //id("com.android.library")
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-
+    id("kotlin-kapt")
 }
 
 android {
@@ -40,7 +40,8 @@ android {
 }
 
 dependencies {
-
+    implementation ("com.bytedance.therouter:therouter-api:1.1.0")
+    kapt ("com.bytedance.therouter:therouter-compiler:1.1.0" )
     implementation(project(":lib_base"))
     implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation ("com.github.bumptech.glide:glide:4.16.0")
