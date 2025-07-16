@@ -1,5 +1,6 @@
 package com.example.module_login_register.ui.activity
 
+import android.content.Context
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
@@ -8,12 +9,14 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import com.example.module_login_register.viewModel.LoginState
 import com.example.module_login_register.viewModel.QrCodeLoginViewModel
 import com.example.module_login_register.R
+import com.example.module_login_register.viewModel.QrCodeLoginViewModelFactory
+import com.example.module_login_register.viewModel.QrLoadState
 import kotlinx.coroutines.launch
 
 class QrCodeLoginActivity : AppCompatActivity() {
@@ -31,10 +34,13 @@ class QrCodeLoginActivity : AppCompatActivity() {
         qrCodeImg = findViewById(R.id.qr_code_image)
         stateText = findViewById(R.id.state_textView)
 
+        val sharedPreferences = getSharedPreferences("qr_code", Context.MODE_PRIVATE)
+        val viewModel = ViewModelProvider(this, QrCodeLoginViewModelFactory(sharedPreferences))[QrCodeLoginViewModel::class.java]
+
         initClick()
         collectState()
-
-        // 启动时自动请求二维码（新增代码）
+        collectQrState()
+        // 启动时自动请求二维码
         autoLoadQrCode()
     }
 
@@ -72,6 +78,31 @@ class QrCodeLoginActivity : AppCompatActivity() {
                     }
                     is LoginState.Error -> {
                         stateText.text = "登录失败,请刷新"
+                    }
+                }
+            }
+        }
+    }
+    private fun collectQrState() {
+        lifecycleScope.launch {
+            viewModel.qrState.collect {
+                when (it) {
+                    is QrLoadState.Init -> {
+                        stateText.text = "请稍等"
+                    }
+                    is QrLoadState.Loading -> {
+                        stateText.text = "正在加载二维码"
+                    }
+                    is QrLoadState.Success -> {
+                        stateText.text = "请扫码登录"
+                        Glide.with(this@QrCodeLoginActivity)
+                            .load(viewModel.QrCodeData.value.data.qrimg)
+                            .placeholder(R.drawable.loading)
+                            .error(R.drawable.error)
+                            .into(qrCodeImg)
+                    }
+                    is QrLoadState.Error -> {
+                        stateText.text = "二维码加载失败,请刷新"
                     }
                 }
             }

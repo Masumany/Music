@@ -55,7 +55,8 @@ object NetRepository {
 
         @GET("/login/qr/create")
         suspend fun createQR(
-            @Query("key") key: String
+            @Query("key") key: String,
+            @Query("qrimg") qrimg: String
         ): Response<QrCreateData>
 
         @GET("/login/qr/check")
