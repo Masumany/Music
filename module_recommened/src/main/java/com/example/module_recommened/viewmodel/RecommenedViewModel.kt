@@ -10,7 +10,7 @@ class RecommenedViewModel :ViewModel (){
     val reData= MutableLiveData<RecommenedData>()
     suspend fun getRecommenedData(): RecommenedData {
         try {
-            val result= NetWorkClient.apiService1.getRecommended("name","picUrl")
+            val result= NetWorkClient.apiService1.getRecommended()
             Log.d("TAG", "getRecommenedData: $result")
             return  result
         }catch (e:Exception){

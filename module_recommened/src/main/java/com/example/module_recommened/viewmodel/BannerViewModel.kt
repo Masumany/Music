@@ -11,7 +11,7 @@ class BannerViewModel :ViewModel (){
     val bannerData = MutableLiveData<BannerData>()
     suspend fun getBannerData(): Result<BannerData> {
         try{
-           val response = NetWorkClient.apiService.getBanner("imageUrl","url")
+           val response = NetWorkClient.apiService.getBanner()
             Log.d("BannerViewModel", "getBannerData: $response")
             return Result.success( response)
         }catch (e:Exception){

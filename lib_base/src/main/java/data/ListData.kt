@@ -9,6 +9,7 @@ data class ListData(
   val data: SongData?
 )
 
+
 /**
  * 数据容器类（对应JSON中的data字段）
  */
@@ -23,7 +24,8 @@ data class SongData(
 data class Song(
   val name: String, // 歌曲名称
   val ar: List<Artist>, // 歌手列表
-  val al: Album // 专辑信息
+  val al: Album ,
+  val id: Long, // 歌曲ID
 )
 
 /**

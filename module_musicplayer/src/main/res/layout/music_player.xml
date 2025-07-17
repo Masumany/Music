@@ -9,24 +9,31 @@
     >
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/mp_name"
+        android:layout_width="120dp"
+        android:layout_height="50dp"
         android:layout_marginStart="28dp"
         android:layout_marginTop="488dp"
         android:text="歌词"
-        android:textColor="#512659"
-        android:textSize="30sp"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:marqueeRepeatLimit="-1"
+        android:textColor="#673670"
+        android:textSize="25sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:id="@+id/mp_singer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="28dp"
         android:layout_marginTop="564dp"
         android:text="歌手"
-        android:textColor="#D5D0D6"
+        android:textColor="#EBE6EC"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -85,30 +92,25 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/mp_center"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="250dp"
+        android:layout_height="250dp"
         android:layout_gravity="center"
         android:layout_marginBottom="356dp"
-        android:src="@drawable/mp_music"
+        app:cardCornerRadius="360dp"
+        app:cardElevation="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.554"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent">
+        <ImageView
+            android:id="@+id/mp_center"
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:src="@drawable/mp_music" />
+    </androidx.cardview.widget.CardView>
 
-
-    <ImageView
-        android:id="@+id/mp_record"
-        android:layout_width="150dp"
-        android:layout_height="200dp"
-        android:layout_gravity="center"
-        android:layout_marginBottom="424dp"
-        android:src="@drawable/img"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
         android:id="@+id/mp_like"
@@ -172,6 +174,7 @@
         />
 
     <ImageView
+        android:id="@+id/mp_list"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginEnd="16dp"
@@ -190,6 +193,20 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         tools:layout="@layout/fragment_comment" />
+
+
+    <ImageView
+        android:id="@+id/mp_record"
+        android:layout_width="150dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="488dp"
+        android:elevation="40dp"
+        android:src="@drawable/img"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.007"
+        app:layout_constraintStart_toStartOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

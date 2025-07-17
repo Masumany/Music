@@ -11,7 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.lib.base.Song
 import com.example.module_recommened.R
-
+import com.therouter.TheRouter
+import com.therouter.router.Route
 
 class LiAdapter: ListAdapter<Song, LiAdapter.LiViewHolder>(SongDiffCallback()) {
     class SongDiffCallback: DiffUtil.ItemCallback<Song>() {
@@ -45,7 +46,7 @@ class LiAdapter: ListAdapter<Song, LiAdapter.LiViewHolder>(SongDiffCallback()) {
         if (song != null) {
             holder.textView1.text = song.ar.firstOrNull()?.name?:"未知歌手"
         }
-
+        val id=song.id
         val cover= song?.al?.picUrl
         if (cover.isNullOrEmpty()){
             holder.imgView.setImageResource(R.drawable.ic_launcher_background)
@@ -55,6 +56,15 @@ class LiAdapter: ListAdapter<Song, LiAdapter.LiViewHolder>(SongDiffCallback()) {
                 .error(R.drawable.ic_launcher_background)
                 .into(holder.imgView)
 
+        }
+        holder.itemView.setOnClickListener {
+            val route=TheRouter.build("/module_musicplayer/musicplayer")
+                .withString("songListName",song.name)
+                .withString("singer",song.al.name)
+                .withString("cover",cover)
+                .withString("id",id.toString())
+                .withString("athour",song.ar.firstOrNull()?.name?:"未知歌手")
+            route.navigation(holder.itemView.context)
         }
     }
     fun addMoreData(newData: List<Song>) {
