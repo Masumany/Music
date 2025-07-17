@@ -25,6 +25,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
 @Route(path = "/module_musicplayer/musicplayer")
 class MusicPlayerActivity : AppCompatActivity() {
 
@@ -86,7 +87,7 @@ class MusicPlayerActivity : AppCompatActivity() {
 
         // 初始化UI - 处理空值
         song?.let {
-            updateMusicInfoBySong(it)
+            it.al.picUrl?.let { it1 -> updateMusicInfo(it.name, it1) }
         } ?: run {
             val safeSongName = songName ?: "未知歌曲"
             val safeCover = cover ?: ""
@@ -223,15 +224,6 @@ class MusicPlayerActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    private fun updateMusicInfoBySong(song: Song) {
-        binding.mpName.text = songListName
-        binding.mpSinger.text=athour
-        Glide.with(this)
-            .load(song.al.picUrl)
-            .error(R.drawable.ic_launcher_background)
-            .into(binding.mpCenter)
     }
 
     private fun updateMusicInfo(songName: String, coverUrl: String) {
