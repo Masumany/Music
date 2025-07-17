@@ -129,7 +129,6 @@ class QrCodeLoginViewModel(private  val sharedPreferences : SharedPreferences) :
                                 803 ->{
                                     _loginState.value = LoginState.Success
                                     sharedPreferences.edit().putString("cookie", data.cookie).apply()
-
                                     break
                                 }
                                 else ->{

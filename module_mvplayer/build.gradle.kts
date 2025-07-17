@@ -5,17 +5,21 @@ plugins {
 }
 
 android {
-    namespace = "com.example.module_login_register"
+    namespace = "com.example.module_mvplayer"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.module_login_register"
+        applicationId = "com.example.module_mvplayer"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        viewBinding = true
     }
 
     buildTypes {
@@ -38,10 +42,6 @@ android {
 
 dependencies {
 
-    // OkHttp 核心库，用于进行网络请求
-    implementation ("com.squareup.okhttp3:okhttp:4.11.0")
-    // 日志拦截器，用于在开发过程中打印请求和响应的详细信息，方便调试，可选添加
-    implementation ("com.squareup.okhttp3:logging-interceptor:4.11.0")
     // 协程库
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     // Retrofit
@@ -58,28 +58,26 @@ dependencies {
     implementation ("com.github.bumptech.glide:glide:4.12.0")
     // Glide注解处理器
     kapt ("com.github.bumptech.glide:compiler:4.12.0")
-    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
-    implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
-    implementation ("androidx.lifecycle:lifecycle-common-java8:2.7.0")
     // 内存泄漏检测
     debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.8.1")
-    // 兼容库
-    implementation(libs.androidx.legacy.support.v4)
-    implementation(libs.androidx.fragment.ktx)
-    // 导航组件
-    val nav_version = "2.7.7"
-    implementation("androidx.navigation:navigation-fragment-ktx:$nav_version")
-    implementation("androidx.navigation:navigation-ui-ktx:$nav_version")
-    // 动态特性模块支持
-    implementation("androidx.navigation:navigation-dynamic-features-fragment:$nav_version")
-    implementation("com.google.android.play:feature-delivery:2.1.0") // 替换有问题的 2.0.1 版本，避免 Play Console 拒绝
-    // 基础组件
+    implementation ("androidx.viewpager2:viewpager2:1.1.0")
+    implementation ("com.google.android.material:material:1.8.0")
+    // 核心库
+    implementation ("androidx.media3:media3-exoplayer:1.7.1")
+    implementation("androidx.media3:media3-common:1.7.1")
+    // UI 组件
+    implementation ("androidx.media3:media3-ui:1.7.1")
+    // 可选 DASH 支持
+    implementation ("androidx.media3:media3-exoplayer-dash:1.7.1")
+    // 可选 HLS 支持
+    implementation( "androidx.media3:media3-exoplayer-hls:1.7.1")
+    // 可选，支持 RTSP
+    implementation( "androidx.media3:media3-exoplayer-rtsp:1.7.1")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    // 测试依赖
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

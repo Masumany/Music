@@ -1,5 +1,7 @@
 package com.example.module_login_register.repository
 
+import android.content.Context
+import android.content.SharedPreferences
 import com.example.module_login_register.bean.AuthVerifyData
 import com.example.module_login_register.bean.PassWordLoginData
 import com.example.module_login_register.bean.QrCheckData
@@ -8,6 +10,8 @@ import com.example.module_login_register.bean.QrLoginData
 import com.example.module_login_register.bean.RefreshData
 import com.example.module_login_register.bean.SendData
 import com.example.module_login_register.bean.VisitorLoginData
+import com.example.module_login_register.netWork.CookieInterceptor
+import okhttp3.OkHttpClient
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
@@ -16,8 +20,21 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 object NetRepository {
+
+    private lateinit var sharedPreferences: SharedPreferences
+
+    fun init(context: Context) {
+        sharedPreferences = context.applicationContext
+            .getSharedPreferences("cookie", Context.MODE_PRIVATE)
+    }
+
+    val okHttpClient = OkHttpClient.Builder()
+        .addInterceptor(CookieInterceptor(sharedPreferences))
+        .build()
+
     private var retrofit = Retrofit.Builder()
         .baseUrl("http://43.139.173.183:3000")
+        .client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
         .build()
