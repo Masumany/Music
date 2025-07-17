@@ -1,7 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)  // 使用版本目录中的定义
     alias(libs.plugins.kotlin.android)
+
 }
+apply (plugin= "therouter")
 
 android {
     namespace = "com.example.music"
@@ -16,7 +18,9 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    buildFeatures{
+        viewBinding=true
+    }
     buildTypes {
         release {
             isMinifyEnabled = false
