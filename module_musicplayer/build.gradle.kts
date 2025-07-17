@@ -10,12 +10,14 @@ android {
     compileSdk = 35
 
     defaultConfig {
-       // applicationId = "com.example.module_musicplayer"
+        // applicationId = "com.example.module_musicplayer"
         minSdk = 24
         targetSdk = 35
         //versionCode = 1
-      //  versionName = "1.0"
-
+        //  versionName = "1.0"
+        dependencies {
+            kapt("org.jetbrains.kotlin:kotlin-annotation-processing:1.9.20")
+        }
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures {

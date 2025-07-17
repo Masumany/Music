@@ -1,7 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)  // 使用版本目录中的定义
     alias(libs.plugins.kotlin.android)
+
 }
+apply (plugin= "therouter")
 
 android {
     namespace = "com.example.music"
@@ -16,7 +18,9 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    buildFeatures{
+        viewBinding=true
+    }
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -36,11 +40,9 @@ android {
 }
 
 dependencies {
-
-    // OkHttp 核心库
-    implementation(" 'com.squareup.okhttp3:okhttp:4.11.0'")
-    // 可选：如果需要使用 OkHttp 的 logging 拦截器
-    implementation ("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    implementation(project(":module_musicplayer"))
+    implementation(project(":lib_base"))
+    implementation(project(":module_recommened"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
