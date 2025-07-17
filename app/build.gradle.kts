@@ -40,10 +40,9 @@ android {
 }
 
 dependencies {
-
-    implementation(project(":module_login_register"))
-    implementation(project(":module_personage"))
+    implementation(project(":module_musicplayer"))
     implementation(project(":lib_base"))
+    implementation(project(":module_recommened"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
