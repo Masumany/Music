@@ -34,8 +34,3 @@ dependencyResolutionManagement {
         include(":app")
     }
 }
-
-include(":lib_base")
-include(":module_musicplayer")
-
-include(":module_recommened")
