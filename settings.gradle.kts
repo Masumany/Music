@@ -23,15 +23,19 @@ dependencyResolutionManagement {
                 .versionRef("agp")
             plugin("kotlin-android", "org.jetbrains.kotlin.android")
                 .versionRef("kotlin")
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        google()
-        mavenCentral()
+            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+            repositories {
+                google()
+                mavenCentral()
+            }
+        }
+
+        rootProject.name = "Music"
+        include(":app")
     }
 }
 
-rootProject.name = "Music"
-include(":app")
-    }
-}
- 
+include(":lib_base")
+include(":module_musicplayer")
+
+include(":module_recommened")
