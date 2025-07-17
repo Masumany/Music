@@ -14,8 +14,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.example.module_musicplayer.databinding.MusicPlayerBinding
+import com.therouter.TheRouter
+import com.therouter.router.Route
 
-
+@Route(path = "/module_musicplayer/musicplayer")
 class MusicPlayerActivity : AppCompatActivity() {
 
 
@@ -54,8 +56,10 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
 
         // 返回按钮点击事件
+
         binding.mpMback.setOnClickListener {
-            finish()
+           val router =TheRouter.build ("/module_recommened/recommend")
+            router.navigation( this)
         }
 
         // 评论按钮点击事件

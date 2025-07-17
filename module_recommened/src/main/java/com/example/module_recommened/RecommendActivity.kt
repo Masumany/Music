@@ -2,7 +2,9 @@ package com.example.module_recommened
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.therouter.router.Route
 
+@Route(path = "/module_recommened/recommend")
 class RecommendActivity: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

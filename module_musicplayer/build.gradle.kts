@@ -1,6 +1,6 @@
 plugins {
-    //id("com.android.library")
-    alias(libs.plugins.android.application)
+    id("com.android.library")
+    //alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("kotlin-kapt")
 }
@@ -10,11 +10,11 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.module_musicplayer"
+       // applicationId = "com.example.module_musicplayer"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        //versionCode = 1
+      //  versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -40,8 +40,8 @@ android {
 }
 
 dependencies {
-    implementation ("com.bytedance.therouter:therouter-api:1.1.0")
-    kapt ("com.bytedance.therouter:therouter-compiler:1.1.0" )
+    kapt("cn.therouter:apt:1.2.2")
+    implementation("cn.therouter:router:1.2.2")
     implementation(project(":lib_base"))
     implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation ("com.github.bumptech.glide:glide:4.16.0")

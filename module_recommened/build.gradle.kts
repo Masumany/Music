@@ -43,10 +43,10 @@ android {
 }
 
 dependencies {
+    kapt("cn.therouter:apt:1.2.2")
+    implementation("cn.therouter:router:1.2.2")
 
 // Kotlin 扩展（可选，Kotlin 项目推荐）
-    implementation ("com.bytedance.therouter:therouter-api:1.1.4")
-    kapt ("com.bytedance.therouter:therouter-compiler:1.1.4" )// Java 用 annotationPro
     implementation(project(":lib_base"))
     implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation ("com.github.bumptech.glide:glide:4.16.0")
