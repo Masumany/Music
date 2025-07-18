@@ -42,6 +42,12 @@ android {
 }
 
 dependencies {
+    // 核心 Lifecycle 库（包含 ViewModel）
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+    // 可选：如果需要使用 LiveData
+    implementation( "androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
+    // 可选：ViewModel 与 Activity/Fragment 集成
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2")
     kapt("cn.therouter:apt:1.2.2")
     implementation("cn.therouter:router:1.2.2")
     implementation(project(":lib_base"))

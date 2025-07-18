@@ -1,5 +1,6 @@
 package com.example.lib.base
 
+import data.CommentData
 import data.ListMusicData
 import data.MusicData
 import retrofit2.http.GET
@@ -50,4 +51,10 @@ interface ApiService4 {
     suspend fun getPlayList(
         @Query("id") playlistId: Long // 歌单 ID
     ): ListMusicData
+}
+interface ApiService5 {
+    @GET("comment/music")
+    suspend fun getComment(
+        @Query("id") commentId: String
+    ):CommentData
 }

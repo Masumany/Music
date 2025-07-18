@@ -44,7 +44,7 @@
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="28dp"
-        android:layout_marginTop="612dp"
+        android:layout_marginTop="630dp"
         android:progressTint="@color/white"
         android:thumbTint="@color/white"
         app:layout_constraintStart_toStartOf="parent"
@@ -56,7 +56,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="2dp"
-        android:layout_marginTop="612dp"
+        android:layout_marginTop="630dp"
         android:text="00:00"
         android:textColor="#CCCACA"
         app:layout_constraintStart_toStartOf="parent"
@@ -67,7 +67,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="320dp"
-        android:layout_marginTop="612dp"
+        android:layout_marginTop="630dp"
         android:text="00:00"
         android:textColor="#CCCACA"
         app:layout_constraintStart_toStartOf="parent"
@@ -84,6 +84,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
+        android:id="@+id/mp_share"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginStart="304dp"
@@ -134,40 +135,43 @@
 
     <ImageView
         android:id="@+id/mp_start"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
         android:layout_marginEnd="156dp"
-        android:layout_marginBottom="36dp"
+        android:layout_marginBottom="40dp"
         android:src="@drawable/mp_start"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         />
 
     <ImageView
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:id="@+id/mp_last"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
         android:layout_marginEnd="224dp"
-        android:layout_marginBottom="36dp"
+        android:layout_marginBottom="40dp"
         android:src="@drawable/mp_before"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         />
 
     <ImageView
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:id="@+id/mp_next"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
         android:layout_marginEnd="92dp"
-        android:layout_marginBottom="36dp"
+        android:layout_marginBottom="40dp"
         android:src="@drawable/mp_next"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         />
 
     <ImageView
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:id="@+id/mp_count"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
         android:layout_marginEnd="292dp"
-        android:layout_marginBottom="36dp"
+        android:layout_marginBottom="40dp"
         android:src="@drawable/play_count"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -175,10 +179,10 @@
 
     <ImageView
         android:id="@+id/mp_list"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="36dp"
+        android:layout_marginBottom="40dp"
         android:src="@drawable/music_list"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -186,13 +190,13 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/mp_fragment"
-        android:name="com.example.module_musicplayer.CommentFragment"
+        android:name="com.example.module_musicplayer.ListFragment"
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:layout="@layout/fragment_comment" />
+        tools:layout="@layout/fragment_list" />
 
 
     <ImageView

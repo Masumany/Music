@@ -37,14 +37,6 @@ class ReAdapter (private val ReText:List<RecommenedData.Result>):
         Glide.with(holder.imgView.context)
             .load(item.picUrl)
             .into(holder.imgView )
-        holder.itemView.setOnClickListener {
-            val router = TheRouter.build("/module_musicplayer/musicplayer")
-            router.withString("id", item.id.toString())
-                .withString("cover", item.picUrl)
-                .withString("song", item.name)
-
-            router.navigation(holder.itemView.context)
-        }
     }
     }
 
