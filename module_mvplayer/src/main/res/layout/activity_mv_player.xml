@@ -8,15 +8,173 @@
     android:layout_height="match_parent"
     tools:context=".ui.activity.MvPlayerActivity">
 
-    <!-- ExoPlayer播放器视图 -->
-    <androidx.media3.ui.PlayerView
-        android:id="@+id/player_view"
-        android:layout_width="250dp"
-        android:layout_height="250dp"
-        app:use_controller="true"
+    <android.widget.Button
+        android:id="@+id/mv_back"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/back"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.044"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.023" />
 
+    <com.google.android.exoplayer2.ui.StyledPlayerView
+        android:id="@+id/player_view"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginHorizontal="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/mv_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:resize_mode="zoom"
+        app:use_controller="true"
+        app:controller_show_timeout="2000"
+        app:show_buffering="when_playing"
+        app:controller_layout_id="@layout/exo_player_control_view"
+        app:controller_hide_on_touch="true"
+        app:controller_forward_increment="5000"
+        app:controller_rewind_increment="5000">
+
+
+        <ProgressBar
+            android:id="@+id/pb_mv"
+            android:indeterminateTint="#FFFFFF"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
+
+        <android.widget.Button
+            android:id="@+id/fullscreenButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="16dp"
+            android:contentDescription="全屏"
+            android:layout_gravity="end|bottom"
+            android:background= "@drawable/full"/>
+
+    </com.google.android.exoplayer2.ui.StyledPlayerView>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="280dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/player_view"
+        app:layout_constraintVertical_bias="0.673">
+
+        <ImageView
+            android:id="@+id/mv_author_img"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.08"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.138" />
+
+        <TextView
+            android:id="@+id/mv_author_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:textSize="25sp"
+            android:textColor="#CBB1FA"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.236"
+            app:layout_constraintStart_toEndOf="@+id/mv_author_img"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.134" />
+
+        <android.widget.Button
+            android:id="@+id/mv_like_button"
+            android:contentDescription="点赞"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="45dp"
+            android:layout_marginBottom="40dp"
+            android:background="@drawable/like"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.113"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/mv_author_img"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <TextView
+            android:id="@+id/mv_like_tv"
+            android:layout_width="60dp"
+            android:layout_height="25dp"
+            android:layout_marginBottom="4dp"
+            android:textColor="#CBB1FA"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/mv_like_button"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/mv_like_button"
+            app:layout_constraintTop_toBottomOf="@+id/mv_like_button"
+            app:layout_constraintVertical_bias="0.450" />
+
+        <android.widget.Button
+            android:id="@+id/mv_comment_button"
+            android:contentDescription="评论"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="52dp"
+            android:background="@drawable/comment"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.115"
+            app:layout_constraintStart_toEndOf="@+id/mv_like_button"
+            app:layout_constraintTop_toTopOf="@+id/mv_like_button"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <TextView
+            android:id="@+id/mv_comment_tv"
+            android:layout_width="60dp"
+            android:layout_height="25dp"
+            android:layout_marginBottom="4dp"
+            android:textColor="#CBB1FA"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/mv_comment_button"
+            app:layout_constraintHorizontal_bias="0.113"
+            app:layout_constraintStart_toStartOf="@+id/mv_comment_button"
+            app:layout_constraintTop_toBottomOf="@+id/mv_comment_button"
+            app:layout_constraintVertical_bias="0.450" />
+
+        <android.widget.Button
+            android:id="@+id/mv_share_button"
+            android:contentDescription="分享"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@drawable/share"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.629"
+            app:layout_constraintStart_toEndOf="@+id/mv_comment_button"
+            app:layout_constraintTop_toTopOf="@+id/mv_comment_button"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <TextView
+            android:id="@+id/mv_share_tv"
+            android:layout_width="60dp"
+            android:layout_height="25dp"
+            android:layout_marginBottom="4dp"
+            android:textColor="#CBB1FA"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/mv_share_button"
+            app:layout_constraintHorizontal_bias="0.113"
+            app:layout_constraintStart_toStartOf="@+id/mv_share_button"
+            app:layout_constraintTop_toBottomOf="@+id/mv_share_button"
+            app:layout_constraintVertical_bias="0.450" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

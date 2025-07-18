@@ -62,17 +62,9 @@ dependencies {
     debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.8.1")
     implementation ("androidx.viewpager2:viewpager2:1.1.0")
     implementation ("com.google.android.material:material:1.8.0")
-    // 核心库
-    implementation ("androidx.media3:media3-exoplayer:1.7.1")
-    implementation("androidx.media3:media3-common:1.7.1")
-    // UI 组件
-    implementation ("androidx.media3:media3-ui:1.7.1")
-    // 可选 DASH 支持
-    implementation ("androidx.media3:media3-exoplayer-dash:1.7.1")
-    // 可选 HLS 支持
-    implementation( "androidx.media3:media3-exoplayer-hls:1.7.1")
-    // 可选，支持 RTSP
-    implementation( "androidx.media3:media3-exoplayer-rtsp:1.7.1")
+    // ExoPlayer
+    implementation ("com.google.android.exoplayer:exoplayer-core:2.18.7")
+    implementation ("com.google.android.exoplayer:exoplayer-ui:2.18.7")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
