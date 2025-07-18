@@ -10,6 +10,7 @@ import com.example.module_login_register.databinding.ActivityPersonageBinding
 import com.example.module_personage.adapter.ViewPagerAdapter
 import com.example.module_personage.viewModel.PersonageViewModel
 
+@Route(path = "/module_personage/personage")
 class PersonageActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPersonageBinding
     private val viewModel: PersonageViewModel by viewModels()
@@ -44,7 +45,6 @@ class PersonageActivity : AppCompatActivity() {
     }
     private fun initClick() {
         binding.personageImageView.setOnClickListener {
-
         }
         binding.likeButton.setOnClickListener {
             val intent = Intent(this, LikeActivity::class.java)

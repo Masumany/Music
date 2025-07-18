@@ -49,7 +49,7 @@ class HistoryAdapter (
             }
 
             binding.root.setOnClickListener {
-                onItemClick(song)  // 用于跳转详情
+                onItemClick(song)  // 播放
             }
         }
     }
