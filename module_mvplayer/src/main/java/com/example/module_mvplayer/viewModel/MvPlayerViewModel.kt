@@ -17,33 +17,32 @@ class MvPlayerViewModel : ViewModel() {
     private val _playState = MutableStateFlow(PlayerState())
     val playState: StateFlow<PlayerState> = _playState.asStateFlow()
 
-    //快退增量
     var seekBackIncrementMs: Long = 5000
-    //快进增量
     var seekForwardIncrementMs: Long = 5000
 
-    private var mvId : String? = null
+    private var mvId: String? = null
 
     fun setMvId(id: String?) {
         mvId = id
     }
 
-    @OptIn(androidx.media3.common.util.UnstableApi::class)
+    //  ExoPlayer 构造
     fun createPlayer(context: Context): ExoPlayer {
         return ExoPlayer.Builder(context)
             .setSeekBackIncrementMs(seekBackIncrementMs)
             .setSeekForwardIncrementMs(seekForwardIncrementMs)
             .build()
     }
-    @OptIn(androidx.media3.common.util.UnstableApi::class)
+
     fun preparePlayer(player: ExoPlayer, mvId: String) {
         val mediaItem = MediaItem.fromUri(mvId)
         player.setMediaItem(mediaItem)
         player.prepare()
     }
-    @OptIn(androidx.media3.common.util.UnstableApi::class)
-    fun playerListeners(player: ExoPlayer): Player.Listener {
-        return object : Player.Listener {
+
+    // 监听
+    fun attachPlayerListeners(player: ExoPlayer) {
+        player.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 val state = when (playbackState) {
                     Player.STATE_IDLE -> PlayBackState.IDLE
@@ -59,18 +58,20 @@ class MvPlayerViewModel : ViewModel() {
                     )
                 }
             }
+
             override fun onPlayerError(error: PlaybackException) {
-                _playState.update { it.copy(
-                    playBackState = PlayBackState.ERROR,
-                    errorMessage = error.message
-                ) }
+                _playState.update {
+                    it.copy(
+                        playBackState = PlayBackState.ERROR,
+                        errorMessage = error.message
+                    )
+                }
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-                _playState.update { it.copy(isPlaying = isPlaying)}
+                _playState.update { it.copy(isPlaying = isPlaying) }
             }
 
-            @OptIn(androidx.media3.common.util.UnstableApi::class)
             override fun onPositionDiscontinuity(
                 oldPosition: Player.PositionInfo,
                 newPosition: Player.PositionInfo,
@@ -78,25 +79,24 @@ class MvPlayerViewModel : ViewModel() {
             ) {
                 _playState.update { it.copy(currentPosition = newPosition.positionMs) }
             }
-        }
-     }
+        })
+    }
 
-    fun positionUpdates(player: ExoPlayer){
+    fun togglePlayback(player: ExoPlayer) {
         player.playWhenReady = !player.playWhenReady
     }
 
-    fun seekForward(player: ExoPlayer){
+    fun seekForward(player: ExoPlayer) {
         val newPosition = player.currentPosition + seekForwardIncrementMs
         player.seekTo(newPosition)
     }
 
-    fun seekBack(player: ExoPlayer){
+    fun seekBack(player: ExoPlayer) {
         val newPosition = player.currentPosition - seekBackIncrementMs
         player.seekTo(newPosition)
     }
 
-    //跳转到指定位置
-    fun seekTo(player: ExoPlayer, position: Long){
+    fun seekTo(player: ExoPlayer, position: Long) {
         player.seekTo(position)
     }
 
