@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)  // 使用版本目录中的定义
     alias(libs.plugins.kotlin.android)
-
+    id("kotlin-kapt")
 }
 apply (plugin= "therouter")
 
@@ -40,9 +40,10 @@ android {
 }
 
 dependencies {
-    implementation(project(":module_musicplayer"))
-    implementation(project(":lib_base"))
+    kapt("cn.therouter:apt:1.2.2")
+    implementation("cn.therouter:router:1.2.2")
     implementation(project(":module_recommened"))
+    implementation(project(":module_musicplayer"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

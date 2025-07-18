@@ -9,16 +9,16 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.module_musicplayer.databinding.FragmentCommentBinding
+import com.example.module_musicplayer.databinding.FragmentListBinding
 import com.example.module_recommened.adapter.LiAdapter
 import com.example.module_recommened.viewmodel.ListViewModel
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.launch
 import androidx.lifecycle.lifecycleScope
 
-class CommentFragment : Fragment() {
+class ListFragment : Fragment() {
 
-    private lateinit var binding: FragmentCommentBinding
+    private lateinit var binding: FragmentListBinding
     private val songAdapter = LiAdapter()  // 复用RecommendFragment的适配器
     private lateinit var listViewModel: ListViewModel  // 复用RecommendFragment的ViewModel
 
@@ -33,7 +33,7 @@ class CommentFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentCommentBinding.inflate(inflater, container, false)
+        binding = FragmentListBinding.inflate(inflater, container, false)
         return binding.root
     }
 

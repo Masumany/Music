@@ -28,4 +28,7 @@ object NetWorkClient {
     val apiService4:ApiService4 by lazy {
         retrofit.create(ApiService4::class.java)
     }
+    val apiService5:ApiService5 by lazy {
+        retrofit.create(ApiService5::class.java)
+    }
 }
