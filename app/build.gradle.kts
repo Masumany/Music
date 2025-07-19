@@ -41,6 +41,7 @@ android {
 
 dependencies {
     implementation ("org.greenrobot:eventbus:3.3.1")
+    implementation ("com.google.android.material:material:1.0.0")
     implementation(project(":lib_base"))
     implementation(project(":lib_base"))
     implementation(libs.glide)

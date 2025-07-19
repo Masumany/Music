@@ -49,111 +49,122 @@
             android:layout_height="0dp"
             app:layout_constraintTop_toBottomOf="@id/searchView"
             app:layout_constraintBottom_toTopOf="@id/player"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.cardview.widget.CardView
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
             android:id="@+id/player"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="5dp"
+            android:padding="10dp"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="50dp"
             android:background="@color/white"
             android:elevation="8dp"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+            app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
 
-        <!-- 歌曲封面 -->
-        <ImageView
-            android:id="@+id/music"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="16dp"
-            android:src="@drawable/music"
-            android:scaleType="centerCrop"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            <androidx.cardview.widget.CardView
+                android:id="@+id/music_cd"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="5dp"
+                app:cardCornerRadius="20dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-        <!-- 歌曲名 -->
-        <TextView
-            android:id="@+id/tv_song"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="歌曲"
-            android:textStyle="bold"
-            android:maxLines="1"
-            android:ellipsize="end"
-            app:layout_constraintStart_toEndOf="@id/music"
-            app:layout_constraintTop_toTopOf="@id/music"
-            android:layout_marginStart="12dp"/>
+                <ImageView
+                    android:id="@+id/music"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/music" />
+            </androidx.cardview.widget.CardView>
 
-        <!-- 歌手名 -->
-        <TextView
-            android:id="@+id/tv_artist"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="歌手"
-            android:textColor="#A6A6A6"
-            android:maxLines="1"
-            android:ellipsize="end"
-            app:layout_constraintStart_toEndOf="@id/music"
-            app:layout_constraintTop_toBottomOf="@id/tv_song"
-            android:layout_marginStart="12dp"/>
+            <!-- 歌曲名 -->
+            <TextView
+                android:id="@+id/tv_song"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="歌曲"
+                android:textStyle="bold"
+                android:layout_marginTop="5dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                app:layout_constraintStart_toEndOf="@id/music_cd"
+                app:layout_constraintTop_toTopOf="@id/music_cd"
+                android:layout_marginStart="60dp"/>
 
-        <!-- 播放/暂停按钮 -->
+            <!-- 歌手名 -->
 
-            <!-- 更多按钮 -->
+            <!-- 播放/暂停按钮 -->
+            <TextView
+                android:id="@+id/tv_artist"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="60dp"
+                android:layout_marginTop="25dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="歌手"
+                android:textColor="#A6A6A6" />
 
             <ImageView
                 android:id="@+id/stop"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="250dp"
                 android:src="@drawable/list_start"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/iv_more"
                 app:layout_constraintHorizontal_bias="0.876"
                 app:layout_constraintStart_toEndOf="@id/tv_artist"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="1.0" />
+                app:layout_constraintVertical_bias="1.0"/>
 
+            <!-- 更多按钮 -->
             <ImageView
-            android:id="@+id/iv_more"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginEnd="16dp"
-            android:src="@drawable/m_more"
+                android:id="@+id/iv_more"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="300dp"
+                android:src="@drawable/m_more"
+                android:layout_marginTop="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+        </androidx.cardview.widget.CardView>
+
+        <!-- 底部导航栏 -->
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNavigationView"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:background="@color/white"
+            app:itemIconTint="@color/color"
+            app:itemTextColor="@color/color"
+            app:elevation="10dp"
+            app:labelVisibilityMode="labeled"
+            app:menu="@menu/bottommenu"
+            app:itemRippleColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- 底部导航栏（在最底部） -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNavigationView"
-        android:layout_width="match_parent"
-        android:layout_height="72dp"
-        android:background="@color/white"
-        app:itemIconTint="@color/color"
-        app:itemTextColor="@color/color"
-        app:elevation="10dp"
-        app:labelVisibilityMode="labeled"
-        app:menu="@menu/bottommenu"
-        app:itemRippleColor="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"/>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
-
     <!-- 侧边栏 -->
-<com.google.android.material.navigation.NavigationView
-android:id="@+id/navigationView"
-android:layout_width="wrap_content"
-android:layout_height="match_parent"
-android:layout_gravity="start"
-app:headerLayout="@layout/nav_header"
-android:background="@color/white"/>
-
-    </androidx.drawerlayout.widget.DrawerLayout>
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navigationView"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:headerLayout="@layout/nav_header"
+        android:background="@color/white"/>
+</androidx.drawerlayout.widget.DrawerLayout>

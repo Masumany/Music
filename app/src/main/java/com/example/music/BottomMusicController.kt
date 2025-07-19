@@ -9,7 +9,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.startActivity
 import com.bumptech.glide.Glide
 import com.example.lib.base.Song
 import com.example.module_musicplayer.MusicPlayService
