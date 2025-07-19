@@ -10,9 +10,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
-import com.example.lib.base.Song
 import com.example.module_musicplayer.MusicPlayService
 import com.example.module_musicplayer.MusicPlayerActivity
+import data.ListMusicData
 
 class BottomMusicController(
     private val context: Context,
@@ -135,7 +135,7 @@ class BottomMusicController(
     }
 
     // 更新歌曲信息到UI
-    private fun updateSongInfo(song: Song?) {
+    private fun updateSongInfo(song: ListMusicData.Song?) {
         if (song == null) return
 
         val tvSong = view.findViewById<TextView>(R.id.tv_song)

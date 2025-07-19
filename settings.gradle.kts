@@ -36,5 +36,7 @@ dependencyResolutionManagement {
         include(":lib_base")
         include(":module_musicplayer")
         include(":module_recommened")
+        include(":module_details")
     }
 }
+

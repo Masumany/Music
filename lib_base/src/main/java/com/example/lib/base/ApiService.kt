@@ -49,9 +49,12 @@ interface ApiService3 {
 interface ApiService4 {
     @GET("playlist/track/all") // 去掉多余的斜杠
     suspend fun getPlayList(
-        @Query("id") playlistId: Long // 歌单 ID
+        @Query("id") playListId: String, // 歌单 ID
     ): ListMusicData
 }
+/**
+ * 获取评论接口
+ **/
 interface ApiService5 {
     @GET("comment/music")
     suspend fun getComment(

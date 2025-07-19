@@ -1,6 +1,7 @@
 package com.example.module_recommened.adapter
 
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,6 +38,19 @@ class ReAdapter (private val ReText:List<RecommenedData.Result>):
         Glide.with(holder.imgView.context)
             .load(item.picUrl)
             .into(holder.imgView )
+        holder.itemView.setOnClickListener {
+            Log.d("ReAdapter", "点击的item.id = ${item.id}")
+            try {
+                // TheRouter跳转并获取返回值
+                val result = TheRouter.build("/song/SongActivity")
+                    .withLong("id", item.id)
+                    .navigation(holder.itemView.context)
+
+            } catch (e: Exception) {
+                // 捕获所有异常（如类找不到、权限问题等）
+                Log.e("ReAdapter", "跳转发生异常", e)
+            }
+        }
     }
     }
 

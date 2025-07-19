@@ -2,6 +2,7 @@ package data
 
 
 import com.google.gson.annotations.SerializedName
+import java.io.Serializable
 
 data class ListMusicData(
     @SerializedName("code")
@@ -205,7 +206,7 @@ data class ListMusicData(
         val v: Int, // 49
         @SerializedName("version")
         val version: Int // 15
-    ) {
+    ): Serializable {
         data class Al(
             @SerializedName("id")
             val id: Int, // 2430770
@@ -219,7 +220,7 @@ data class ListMusicData(
             val picUrl: String, // https://p1.music.126.net/z8nX5tL0SCV9ohvAY9nY5A==/6625657070008115.jpg
             @SerializedName("tns")
             val tns: List<Any?>
-        )
+        ):Serializable
 
         data class Ar(
             @SerializedName("alias")
@@ -230,7 +231,7 @@ data class ListMusicData(
             val name: String, // Army of Lovers
             @SerializedName("tns")
             val tns: List<Any?>
-        )
+        ):Serializable
 
         data class H(
             @SerializedName("br")
@@ -242,8 +243,8 @@ data class ListMusicData(
             @SerializedName("sr")
             val sr: Int, // 44100
             @SerializedName("vd")
-            val vd: Int // -18500
-        )
+            val vd: Double // -18500
+        ):Serializable
 
         data class Hr(
             @SerializedName("br")
@@ -255,8 +256,8 @@ data class ListMusicData(
             @SerializedName("sr")
             val sr: Int, // 48000
             @SerializedName("vd")
-            val vd: Int // -60532
-        )
+            val vd: Double // -60532
+        ):Serializable
 
         data class L(
             @SerializedName("br")
@@ -268,8 +269,8 @@ data class ListMusicData(
             @SerializedName("sr")
             val sr: Int, // 44100
             @SerializedName("vd")
-            val vd: Int // -15100
-        )
+            val vd: Double // -15100
+        ):Serializable
 
         data class M(
             @SerializedName("br")
@@ -281,8 +282,8 @@ data class ListMusicData(
             @SerializedName("sr")
             val sr: Int, // 44100
             @SerializedName("vd")
-            val vd: Int // -16100
-        )
+            val vd: Double // -16100
+        ):Serializable
 
         data class Sq(
             @SerializedName("br")
@@ -294,7 +295,7 @@ data class ListMusicData(
             @SerializedName("sr")
             val sr: Int, // 44100
             @SerializedName("vd")
-            val vd: Int // -18500
-        )
+            val vd: Double // -18500
+        ):Serializable
     }
 }

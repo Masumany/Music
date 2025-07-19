@@ -17,18 +17,19 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.MutableLiveData
-import com.example.lib.base.Song
 import data.ListMusicData
 
 class MusicPlayService : Service() {
     private val CHANNEL_ID = "music_service_channel"
     private val NOTIFICATION_ID = 10086
-    val currentSongLiveData = MutableLiveData<Song?>()
+    // 修复1：统一使用data包下的Song类型
+    val currentSongLiveData = MutableLiveData<ListMusicData.Song?>()
     val isPlayingLiveData = MutableLiveData<Boolean>()
 
     private var mediaPlayer: MediaPlayer? = null
     var currentUrl: String? = null
-    var currentSong: Song? = null
+    // 修复2：将currentSong类型改为ListMusicData.Song
+    var currentSong: ListMusicData.Song? = null
     var isPlaying = false // 公开变量便于Activity直接访问
 
     // 播放完成回调（用于自动播放下一首）
@@ -61,11 +62,9 @@ class MusicPlayService : Service() {
                         .build()
                 )
 
-                // 核心修复：系统播放播放完成监听，触发自定义回调
                 setOnCompletionListener {
                     this@MusicPlayService.isPlaying = false
                     onPlayStateChanged?.invoke(false, it.duration)
-                    // 调用Activity设置的播放完成回调（自动播放下一首）
                     onCompletionListener?.invoke()
                 }
 
@@ -79,14 +78,16 @@ class MusicPlayService : Service() {
         }
     }
 
-    // 播放新歌曲或继续播放当前歌曲
-    fun play(url: String, song: Song?) {
+    // 修复3：参数类型明确为ListMusicData.Song
+    fun play(url: String, song: ListMusicData.Song?) {
         currentUrl = url
         currentSong = song
-        isPlaying=true
+        isPlaying = true
+        // 修复4：LiveData发送正确类型
         currentSongLiveData.postValue(song)
         Log.d("ServiceData", "发送歌曲更新: ${song?.name}")
         isPlayingLiveData.postValue(true)
+
         if (url.isBlank()) {
             Log.e("ServiceError", "播放地址为空")
             onPlayStateChanged?.invoke(false, 0)
@@ -94,8 +95,7 @@ class MusicPlayService : Service() {
         }
 
         try {
-            // 关键修复：即使是同一URL，也强制重置并重新加载（确保单曲循环能从头播放）
-            mediaPlayer?.reset() // 无论是否同一首歌，先重置
+            mediaPlayer?.reset()
             mediaPlayer?.setDataSource(url)
             mediaPlayer?.prepareAsync()
             mediaPlayer?.setOnPreparedListener { mp ->
@@ -118,7 +118,6 @@ class MusicPlayService : Service() {
         }
     }
 
-    // 暂停播放
     fun pause() {
         if (mediaPlayer?.isPlaying == true) {
             mediaPlayer?.pause()
@@ -128,19 +127,17 @@ class MusicPlayService : Service() {
         }
     }
 
-    // 停止播放并重置
     fun stop() {
         mediaPlayer?.let {
             if (it.isPlaying) {
                 it.stop()
             }
-            it.reset() // 完全重置，确保下一首从头开始
+            it.reset()
         }
         isPlaying = false
         onPlayStateChanged?.invoke(false, 0)
     }
 
-    // 从暂停状态恢复播放
     fun resume() {
         if (currentUrl != null && !isPlaying) {
             try {
@@ -181,9 +178,11 @@ class MusicPlayService : Service() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
+        // 修复5：使用正确的歌曲名称显示在通知中
+        val songName = currentSong?.name ?: "未知歌曲"
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("正在播放")
-            .setContentText(currentUrl?.split("/")?.last() ?: "未知歌曲")
+            .setContentText(songName) // 显示实际歌曲名而非URL
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(pendingIntent)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -225,5 +224,6 @@ class MusicPlayService : Service() {
         mediaPlayer?.release()
         mediaPlayer = null
         currentUrl = null
+        currentSong = null // 清理资源
     }
 }
