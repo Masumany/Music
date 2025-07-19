@@ -65,6 +65,8 @@ dependencies {
     // ExoPlayer
     implementation ("com.google.android.exoplayer:exoplayer-core:2.18.7")
     implementation ("com.google.android.exoplayer:exoplayer-ui:2.18.7")
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

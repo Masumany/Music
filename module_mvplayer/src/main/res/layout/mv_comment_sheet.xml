@@ -6,7 +6,6 @@
     android:background="@color/white">
 
     <TextView
-        android:id="@+id/tvTitle"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:gravity="center"

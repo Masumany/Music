@@ -1,4 +1,4 @@
-package com.example.module_mvplayer.repository
+package com.example.module_mvplayer.Repositorty
 
 import com.example.module_mvplayer.bean.commentData.CommentData
 import com.example.module_mvplayer.bean.mvData.MvData
@@ -23,11 +23,12 @@ object NetRepository {
     interface ApiService {
         @GET("/comment/mv")
         suspend fun getMvComment(
-            @Query("mv id") mvId: String,
+            @Query("id") id: String,
             @Query("offset") offset: Int, // 偏移量（分页）
             @Query("limit") limit: Int // 每页数量
         ): Response<CommentData>
 
+        //搜索使用
         @GET("/mv/detail")
         suspend fun getMvDetail(
             @Query("mvid") mvId: String

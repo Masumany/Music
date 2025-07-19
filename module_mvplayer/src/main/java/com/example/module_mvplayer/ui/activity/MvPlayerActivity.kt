@@ -14,9 +14,9 @@ import com.example.module_mvplayer.R
 import com.example.module_mvplayer.bean.player.PlayBackState
 import com.example.module_mvplayer.bean.player.PlayerState
 import com.example.module_mvplayer.databinding.ActivityMvPlayerBinding
+import com.example.module_mvplayer.ui.fragment.CommentBottomSheetDialogFragment
 import com.example.module_mvplayer.viewModel.MvPlayerViewModel
 import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.Player
 import kotlinx.coroutines.flow.collectLatest
 
 class MvPlayerActivity : AppCompatActivity() {
@@ -24,6 +24,7 @@ class MvPlayerActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMvPlayerBinding
     private val viewModel: MvPlayerViewModel by viewModels()
     private var player: ExoPlayer? = null
+    private lateinit var mvId: String
     private var currentPlaybackState = PlayBackState.IDLE
     private var isFullscreen = false //全屏状态标记
 
@@ -32,7 +33,7 @@ class MvPlayerActivity : AppCompatActivity() {
         binding = ActivityMvPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val mvId = intent.getStringExtra("mvId") ?: run {
+        mvId = intent.getStringExtra("mvId") ?: run {
             Toast.makeText(this,"缺少MV ID", Toast.LENGTH_SHORT)
             finish()
             return
@@ -58,6 +59,8 @@ class MvPlayerActivity : AppCompatActivity() {
         }
         binding.mvCommentButton.setOnClickListener {
             // 跳转到评论页面
+            val dialog = CommentBottomSheetDialogFragment(mvId)
+            dialog.show(supportFragmentManager, "CommentBottomSheet")
         }
         binding.mvLikeButton.setOnClickListener {
             // 跳转到收藏页面

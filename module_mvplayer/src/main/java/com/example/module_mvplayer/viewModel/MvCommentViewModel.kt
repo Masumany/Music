@@ -1,12 +1,13 @@
 package com.example.module_mvplayer.viewModel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.module_mvplayer.Repositorty.NetRepository
 import com.example.module_mvplayer.bean.commentData.Comment
-import com.example.module_mvplayer.repository.NetRepository
-import com.example.module_mvplayer.repository.NetRepository.apiService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class MvCommentViewModel: ViewModel() {
     private val _commentList = MutableStateFlow<List<Comment>>(emptyList())
