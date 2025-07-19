@@ -1,12 +1,15 @@
 package com.example.module_musicplayer
 
+import android.animation.Animator
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -14,14 +17,12 @@ import android.view.animation.LinearInterpolator
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.bumptech.glide.Glide
 import com.example.lib.base.NetWorkClient
 import com.example.lib.base.Song
 import com.example.module_musicplayer.databinding.MusicPlayerBinding
-import com.example.module_recommened.RecommendActivity
 import com.therouter.TheRouter
 import com.therouter.router.Autowired
 import com.therouter.router.Route
@@ -29,7 +30,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 import kotlin.random.Random
 
 @Route(path = "/module_musicplayer/musicplayer")
@@ -69,7 +69,7 @@ class MusicPlayerActivity : AppCompatActivity() {
     private var currentRotation = ROTATION_PAUSED // 当前旋转角度
     private var animation: Animation? = null
     private var isLiked = false
-    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val handler = Handler(Looper.getMainLooper())
     private var currentMusic: String? = null
     private var musicList: List<Song>? = null
     private var currentIndex = -1
@@ -92,6 +92,38 @@ class MusicPlayerActivity : AppCompatActivity() {
             musicService = binder.service
             isServiceBound = true
             isServiceReady = true
+
+            val targetSongId = intent.getStringExtra("target_song_id")
+            val currentPlayUrl = intent.getStringExtra("current_play_url")
+            val songName = intent.getStringExtra("song_name")
+            val songCover = intent.getStringExtra("song_cover")
+            val songArtist = intent.getStringExtra("song_artist")
+            val currentPosition = intent.getIntExtra("current_position", 0)
+            val isPlayingOrigin = intent.getBooleanExtra("is_playing_origin", false) // 原始播放状态
+
+
+            if (targetSongId != null && currentPlayUrl != null) {
+                // 从列表中找到目标歌曲的索引
+                currentIndex = findSongIndexById(targetSongId)
+                // 强制更新当前播放URL
+                currentMusic = currentPlayUrl
+                // 同步UI显示
+                updateMusicInfo(songName ?: "未知歌曲", songCover ?: "", songArtist)
+                musicService?.seekTo(currentPosition)
+                if (isPlayingOrigin) {
+                    musicService?.resume() // 恢复播放（关键：不执行暂停）
+                    isPlaying = true // 同步状态变量
+                    startCenterImg() // 启动旋转动画
+                    rotateToPlaying() // 同步旋转状态
+                    binding.mpStart.setImageResource(R.drawable.mp_stop) // 显示暂停图标
+                } else {
+                    // 原始状态是暂停，则保持暂停
+                    musicService?.pause()
+                    isPlaying = false
+                    // ...同步暂停状态的UI...
+                }
+
+            }
 
             // 同步服务状态到UI
             syncServiceState()
@@ -514,9 +546,12 @@ class MusicPlayerActivity : AppCompatActivity() {
                 if (dailySongsResponse.code == 200 && !dailySongsResponse.data?.dailySongs.isNullOrEmpty()) {
                     musicList = dailySongsResponse.data?.dailySongs
                     withContext(Dispatchers.Main) {
-                        currentIndex = findSongIndexById(id ?: "")
-                        if (currentIndex == -1) {
-                            currentIndex = 0
+                        val targetId= intent.getStringExtra("target_song_id")
+                        if(targetId.isNullOrBlank()) {
+                            currentIndex = findSongIndexById(id ?: "")
+                            if (currentIndex == -1) {
+                                currentIndex = 0
+                            }
                         }
                         fetchAndPlayWithStateCheck(musicList!![currentIndex].id.toString(), musicList!![currentIndex].name)
                     }
@@ -525,8 +560,7 @@ class MusicPlayerActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(this@MusicPlayerActivity, "获取歌曲列表失败: ${e.message}", Toast.LENGTH_SHORT).show()
-                    binding.mpStart.setImageResource(R.drawable.mp_start)
+                    binding.mpStart.setImageResource(R.drawable.mp_stop)
                 }
             }
         }
@@ -537,7 +571,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         binding.mpSinger.text = singer ?: athour ?: "未知歌手"
         Glide.with(this)
             .load(coverUrl)
-            .error(R.drawable.ic_launcher_background)
+            .error(R.drawable.mp_music)
             .into(binding.mpCenter)
     }
 
@@ -638,10 +672,19 @@ class MusicPlayerActivity : AppCompatActivity() {
                 // 有播放地址时恢复播放
                 try {
                     val currentPos = musicService?.getCurrentPosition() ?: 0
+                    val currentSong = if (currentIndex in musicList?.indices ?: emptyList()) {
+                        musicList!![currentIndex]
+                    } else {
+                        song //  fallback 到初始化时的 song 参数
+                    }
                     if (currentPos > 0 && currentPos < (musicService?.getDuration() ?: 0)) {
                         musicService?.resume()
                     } else {
-                        musicService?.play(currentMusic!!)
+                        if (currentSong != null) {
+                            musicService?.play(currentMusic!!, currentSong)
+                        } else {
+                            throw Exception("无法获取歌曲信息")
+                        }
                     }
                     isPlaying = true
                     handler.post(updateSeekBarRunnable)
@@ -670,17 +713,17 @@ class MusicPlayerActivity : AppCompatActivity() {
 
             anim.interpolator = LinearInterpolator()
 
-            anim.setListener(object : android.animation.Animator.AnimatorListener {
-                override fun onAnimationStart(animation: android.animation.Animator) {}
+            anim.setListener(object : Animator.AnimatorListener {
+                override fun onAnimationStart(animation: Animator) {}
 
-                override fun onAnimationEnd(animation: android.animation.Animator) {
+                override fun onAnimationEnd(animation: Animator) {
                     currentRotation = ROTATION_PLAYING
                     anim.setListener(null)
                 }
 
-                override fun onAnimationCancel(animation: android.animation.Animator) {}
+                override fun onAnimationCancel(animation: Animator) {}
 
-                override fun onAnimationRepeat(animation: android.animation.Animator) {}
+                override fun onAnimationRepeat(animation: Animator) {}
             })
             anim.start()
         }
@@ -696,17 +739,17 @@ class MusicPlayerActivity : AppCompatActivity() {
 
             anim.interpolator = LinearInterpolator()
 
-            anim.setListener(object : android.animation.Animator.AnimatorListener {
-                override fun onAnimationStart(animation: android.animation.Animator) {}
+            anim.setListener(object : Animator.AnimatorListener {
+                override fun onAnimationStart(animation: Animator) {}
 
-                override fun onAnimationEnd(animation: android.animation.Animator) {
+                override fun onAnimationEnd(animation: Animator) {
                     currentRotation = ROTATION_PAUSED
                     anim.setListener(null)
                 }
 
-                override fun onAnimationCancel(animation: android.animation.Animator) {}
+                override fun onAnimationCancel(animation: Animator) {}
 
-                override fun onAnimationRepeat(animation: android.animation.Animator) {}
+                override fun onAnimationRepeat(animation: Animator) {}
             })
             anim.start()
         }
@@ -760,7 +803,16 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
 
         try {
-            musicService?.play(url)
+            // 从本地列表获取当前歌曲（100%可靠，因为url能播放说明列表有效）
+            val currentSong = musicList?.getOrNull(currentIndex)
+                ?: throw Exception("当前歌曲不存在于列表中")
+
+            // 播放时传递本地列表中的song对象
+            musicService?.play(
+                url,
+                song = currentSong  // 不再依赖服务的currentSong
+            )
+            Log.d("FixSuccess", "传递歌曲信息: ${currentSong.name}")  // 验证日志
         } catch (e: Exception) {
             Log.e("AudioError", "播放异常: ${e.message}")
             onPrepared(false)

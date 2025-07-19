@@ -40,6 +40,11 @@ android {
 }
 
 dependencies {
+    implementation ("org.greenrobot:eventbus:3.3.1")
+    implementation(project(":lib_base"))
+    implementation(project(":lib_base"))
+    implementation(libs.glide)
+    implementation(libs.firebase.crashlytics.buildtools)
     kapt("cn.therouter:apt:1.2.2")
     implementation("cn.therouter:router:1.2.2")
     implementation(project(":module_recommened"))

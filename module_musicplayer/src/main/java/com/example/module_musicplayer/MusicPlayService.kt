@@ -16,13 +16,19 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.MutableLiveData
+import com.example.lib.base.Song
+import data.ListMusicData
 
 class MusicPlayService : Service() {
     private val CHANNEL_ID = "music_service_channel"
     private val NOTIFICATION_ID = 10086
+    val currentSongLiveData = MutableLiveData<Song?>()
+    val isPlayingLiveData = MutableLiveData<Boolean>()
 
     private var mediaPlayer: MediaPlayer? = null
-    private var currentUrl: String? = null
+    var currentUrl: String? = null
+    var currentSong: Song? = null
     var isPlaying = false // 公开变量便于Activity直接访问
 
     // 播放完成回调（用于自动播放下一首）
@@ -74,7 +80,13 @@ class MusicPlayService : Service() {
     }
 
     // 播放新歌曲或继续播放当前歌曲
-    fun play(url: String) {
+    fun play(url: String, song: Song?) {
+        currentUrl = url
+        currentSong = song
+        isPlaying=true
+        currentSongLiveData.postValue(song)
+        Log.d("ServiceData", "发送歌曲更新: ${song?.name}")
+        isPlayingLiveData.postValue(true)
         if (url.isBlank()) {
             Log.e("ServiceError", "播放地址为空")
             onPlayStateChanged?.invoke(false, 0)
@@ -112,6 +124,7 @@ class MusicPlayService : Service() {
             mediaPlayer?.pause()
             isPlaying = false
             onPlayStateChanged?.invoke(false, mediaPlayer!!.duration)
+            isPlayingLiveData.postValue(false)
         }
     }
 
