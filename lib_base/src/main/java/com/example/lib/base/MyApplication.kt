@@ -1,7 +1,7 @@
-package com.example.module_login_register.netWork
+package com.example.lib.base
 
 import android.app.Application
-import com.example.module_login_register.repository.NetRepository
+
 
 // 自定义 Application 类
 class MyApplication : Application() {

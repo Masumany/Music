@@ -9,7 +9,9 @@ import com.example.module_login_register.R
 import com.example.module_login_register.databinding.ActivityPersonageBinding
 import com.example.module_personage.adapter.ViewPagerAdapter
 import com.example.module_personage.viewModel.PersonageViewModel
+import com.therouter.router.Route
 
+@Route(path = "/module_personage")
 class PersonageActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPersonageBinding
     private val viewModel: PersonageViewModel by viewModels()
@@ -20,7 +22,7 @@ class PersonageActivity : AppCompatActivity() {
         setContentView(binding.root)
         binding.personageViewPager.adapter = ViewPagerAdapter(this)
 
-        // 底部导航与ViewPager2联动
+        // 导航与ViewPager2联动
         binding.personageBottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.menu_item_song_list -> binding.personageViewPager.currentItem = 0

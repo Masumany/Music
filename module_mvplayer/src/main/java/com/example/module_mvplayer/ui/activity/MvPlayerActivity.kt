@@ -1,5 +1,6 @@
 package com.example.module_mvplayer.ui.activity
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import com.example.module_mvplayer.R
 import com.example.module_mvplayer.bean.player.PlayBackState
 import com.example.module_mvplayer.bean.player.PlayerState
@@ -25,6 +27,7 @@ class MvPlayerActivity : AppCompatActivity() {
     private val viewModel: MvPlayerViewModel by viewModels()
     private var player: ExoPlayer? = null
     private lateinit var mvId: String
+    private var mvPlayUrl: String? = null
     private var currentPlaybackState = PlayBackState.IDLE
     private var isFullscreen = false //全屏状态标记
 
@@ -39,6 +42,8 @@ class MvPlayerActivity : AppCompatActivity() {
             return
         }
 
+        viewModel.loadMvInfo(mvId)
+
         viewModel.setMvId(mvId)
 
         // 监听播放状态变化
@@ -47,7 +52,53 @@ class MvPlayerActivity : AppCompatActivity() {
                 updatePlaybackState(it)
             }
         }
+        collectMvData()
+        collectMvPlayUrl()
+        collectMvInfo()
         initClick()
+    }
+
+    private fun collectMvInfo() {
+        viewModel.loadMvInfo(mvId)
+        lifecycleScope.launchWhenStarted {
+            viewModel.mvInfo.collectLatest {
+                it?.let {
+                    binding.mvLikeTv.text = it.likedCount.toString()
+                    binding.mvShareTv.text = it.shareCount.toString()
+                    binding.mvCommentTv.text = it.commentCount.toString()
+                }
+            }
+        }
+    }
+
+    private fun collectMvData() {
+        viewModel.loadMvData(mvId)
+        lifecycleScope.launchWhenStarted {
+            viewModel.mvDetail.collectLatest {
+                it?.let {
+                    val mvItem = it.data.firstOrNull() ?: return@let
+                    binding.mvAuthorTv.text = mvItem.artistName
+
+                    Glide.with(this@MvPlayerActivity)
+                        .load(mvItem.cover)
+                        .circleCrop()
+                        .placeholder(R.drawable.loading)
+                        .error(R.drawable.error)
+                        .into(binding.mvAuthorImg)
+
+                    binding.mvDescTv.text = mvItem.mv.desc
+                }
+            }
+        }
+    }
+
+    private fun collectMvPlayUrl() {
+        viewModel.loadMvPlayUrl(mvId)
+        lifecycleScope.launchWhenStarted {
+            viewModel.mvPlayUrl.collect {
+                mvPlayUrl = it?.data?.url
+            }
+        }
     }
 
     private fun initClick() {
@@ -67,7 +118,16 @@ class MvPlayerActivity : AppCompatActivity() {
         }
         binding.mvShareButton.setOnClickListener {
             // 跳转到分享页面
-        }
+            mvPlayUrl?.let {
+                val shareIntent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_SUBJECT, "分享 MV")
+                    putExtra(Intent.EXTRA_TEXT, "快来看看这个 MV：$it")
+                    type = "text/plain"
+                }
+                startActivity(Intent.createChooser(shareIntent, "分享到..."))
+            }
+            }
     }
     private fun initializePlayer() {
         if (player == null) {

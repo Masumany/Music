@@ -41,7 +41,8 @@ object NetRepository {
 
         @GET("/mv/url")
         suspend fun getMvPlayUrl(
-            @Query("id") mvId: String
+            @Query("id") mvId: String,
+            @Query("r") r: Int = 1080
         ): Response<MvPlayUrl>
     }
 }

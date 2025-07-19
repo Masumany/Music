@@ -3,6 +3,7 @@ package com.example.module_personage.repository
 import com.example.module_personage.bean.history.HistoryData
 import com.example.module_personage.bean.like.LikeData
 import com.example.module_personage.bean.liked.LikedData
+import com.example.module_personage.bean.user.Userdetail
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
@@ -19,6 +20,11 @@ object NetRepository {
 
     val apiService = retrofit.create(ApiService::class.java)
     interface ApiService {
+        @GET("/user/detail")
+        suspend fun getUserDetail(
+            @Query("uid") uid: Int
+        ): Response<Userdetail>
+
         @GET("/user/follows")
         suspend fun getFollows(
             @Query("uid") uid: String

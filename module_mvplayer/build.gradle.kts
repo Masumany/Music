@@ -42,6 +42,10 @@ android {
 
 dependencies {
 
+    // TheRouter 核心库
+    implementation("cn.therouter:router:1.2.2")
+    // 注解处理器（用于生成路由表）
+    kapt("cn.therouter:compiler:1.2.2")
     // 协程库
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     // Retrofit
@@ -65,8 +69,15 @@ dependencies {
     // ExoPlayer
     implementation ("com.google.android.exoplayer:exoplayer-core:2.18.7")
     implementation ("com.google.android.exoplayer:exoplayer-ui:2.18.7")
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.fragment.ktx)
+    // 替换 legacy.support.v4
+    implementation("androidx.legacy:legacy-support-v4:1.0.0")  // 或使用更具体的 androidx 组件
+
+    // Lifecycle 组件
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
+
+    // Fragment
+    implementation("androidx.fragment:fragment-ktx:1.6.1")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

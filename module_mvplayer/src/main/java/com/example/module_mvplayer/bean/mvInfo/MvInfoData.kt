@@ -5,5 +5,5 @@ data class MvInfoData (
     val likedCount: Long,
     val shareCount: Long,
     val commentCount: Long,
-    val liked: String
+    val liked: Boolean
 )

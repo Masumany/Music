@@ -2,6 +2,11 @@ package com.example.module_mvplayer.viewModel
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.module_mvplayer.Repositorty.NetRepository
+import com.example.module_mvplayer.bean.mvData.MvData
+import com.example.module_mvplayer.bean.mvInfo.MvInfoData
+import com.example.module_mvplayer.bean.mvPlayUrl.MvPlayUrl
 import com.example.module_mvplayer.bean.player.PlayBackState
 import com.example.module_mvplayer.bean.player.PlayerState
 import com.google.android.exoplayer2.ExoPlayer
@@ -12,10 +17,23 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class MvPlayerViewModel : ViewModel() {
     private val _playState = MutableStateFlow(PlayerState())
     val playState: StateFlow<PlayerState> = _playState.asStateFlow()
+
+    private val _mvDetail = MutableStateFlow<MvData?>(null)
+    val mvDetail: StateFlow<MvData?> = _mvDetail.asStateFlow()
+
+    private val _mvInfo = MutableStateFlow<MvInfoData?>(null)
+    val mvInfo: StateFlow<MvInfoData?> = _mvInfo.asStateFlow()
+
+    private val _mvPlayUrl = MutableStateFlow<MvPlayUrl?>(null)
+    val mvPlayUrl: StateFlow<MvPlayUrl?> = _mvPlayUrl.asStateFlow()
+
+    private val _loadState = MutableStateFlow<LoadState>(LoadState.Init)
+    val loadState: StateFlow<LoadState> = _loadState.asStateFlow()
 
     var seekBackIncrementMs: Long = 5000
     var seekForwardIncrementMs: Long = 5000
@@ -28,6 +46,55 @@ class MvPlayerViewModel : ViewModel() {
 
     fun getMvId(): String? {
         return mvId
+    }
+
+    fun loadMvData(mvId: String) {
+        viewModelScope.launch {
+            _loadState.value = LoadState.Loading
+            try {
+                val mvDetail = NetRepository.apiService.getMvDetail(mvId!!)
+                if (mvDetail.isSuccessful) {
+                    _mvDetail.value = mvDetail.body()
+                    _loadState.value = LoadState.Success
+                } else {
+                    _loadState.value = LoadState.Error("获取MV详情失败")
+                }
+            } catch (e: Exception) {
+                _loadState.value = LoadState.Error("网络错误: ${e.localizedMessage}")
+            }
+        }
+    }
+    fun loadMvInfo(mvId: String) {
+        viewModelScope.launch {
+            _loadState.value = LoadState.Loading
+            try {
+                val response = NetRepository.apiService.getMvInfo(mvId)
+                if (response.isSuccessful) {
+                    _mvInfo.value = response.body()
+                    _loadState.value = LoadState.Success
+                } else {
+                    _loadState.value = LoadState.Error("获取信息失败")
+                }
+            } catch (e: Exception) {
+                _loadState.value = LoadState.Error("网络错误: ${e.localizedMessage}")
+            }
+        }
+    }
+    fun loadMvPlayUrl(mvId: String) {
+        viewModelScope.launch {
+            _loadState.value = LoadState.Loading
+            try {
+                val response =NetRepository.apiService.getMvPlayUrl(mvId)
+                if (response.isSuccessful) {
+                    _mvPlayUrl.value = response.body()
+                    _loadState.value = LoadState.Success
+                } else {
+                    _loadState.value = LoadState.Error("获取播放地址失败")
+                }
+            } catch (e: Exception) {
+                _loadState.value = LoadState.Error("网络错误: ${e.localizedMessage}")
+            }
+        }
     }
 
     // 创建ExoPlayer实例
