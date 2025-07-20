@@ -44,6 +44,8 @@ class ReAdapter (private val ReText:List<RecommenedData.Result>):
                 // TheRouter跳转并获取返回值
                 val result = TheRouter.build("/song/SongActivity")
                     .withLong("id", item.id)
+                    .withString("recommendName", item.name)
+                    .withString("recommendCover", item.picUrl)
                     .navigation(holder.itemView.context)
 
             } catch (e: Exception) {

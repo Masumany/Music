@@ -22,6 +22,7 @@ import androidx.fragment.app.FragmentTransaction
 import com.bumptech.glide.Glide
 import com.example.lib.base.NetWorkClient
 import com.example.lib.base.Song
+import com.example.module_details.MusicDataCache
 import com.example.module_musicplayer.databinding.MusicPlayerBinding
 import com.therouter.TheRouter
 import com.therouter.router.Autowired
@@ -34,10 +35,6 @@ import kotlin.random.Random
 
 @Route(path = "/module_musicplayer/musicplayer")
 class MusicPlayerActivity : AppCompatActivity() {
-
-    @JvmField
-    @Autowired
-    var songList: List<data.ListMusicData.Song>? = null
 
     @JvmField
     @Autowired
@@ -141,7 +138,11 @@ class MusicPlayerActivity : AppCompatActivity() {
                 }
 
                 if (currentSongId.isBlank()) {
-                    Toast.makeText(this@MusicPlayerActivity, "无法获取歌曲ID，无法查看评论", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@MusicPlayerActivity,
+                        "无法获取歌曲ID，无法查看评论",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return@setOnClickListener
                 }
 
@@ -175,7 +176,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         binding.mpName.requestFocus()
 
         TheRouter.inject(this)
-        Log.d("MusicPlayer", "初始化参数: id=$id, cover=$cover, songListName=$songListName, songListSize=${songList?.size}")
+        Log.d("MusicPlayer", "初始化参数: id=$id, cover=$cover, songListName=$songListName}")
 
         restorePlayMode()
 
@@ -486,7 +487,12 @@ class MusicPlayerActivity : AppCompatActivity() {
     }
 
     private fun fetchMusic() {
-        // 修复语法错误：正确处理currentPosition的可空性
+        val songList = MusicDataCache.currentSongList
+        if (songList.isNullOrEmpty()) {
+            Toast.makeText(this, "未找到歌曲列表", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
         if (songList != null && songList!!.isNotEmpty()) {
             musicList = songList
             // 正确设置当前索引（处理可空情况）
@@ -520,9 +526,9 @@ class MusicPlayerActivity : AppCompatActivity() {
                     } else {
                         throw Exception("获取歌曲列表失败")
                     }
-                } catch (e: Exception) {
+                } catch (e: Exception){
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(this@MusicPlayerActivity, "加载歌曲失败", Toast.LENGTH_SHORT).show()
+                        Log.d("SongError", "获取歌曲列表失败: ${e.message}")
                     }
                 }
             }
