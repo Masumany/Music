@@ -141,6 +141,25 @@ class MusicPlayerActivity : AppCompatActivity() {
                     .navigation()
             }
 
+            binding.mpCenter.setOnClickListener{
+                val currentSongId = if (currentIndex in musicList?.indices ?: emptyList()) {
+                    musicList!![currentIndex].id.toString()
+                } else {
+                    id ?: ""
+                }
+                if (currentSongId.isBlank()) {
+                    Toast.makeText(
+                        this@MusicPlayerActivity,
+                        "无法获取歌曲ID，无法查看歌词",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@setOnClickListener
+                }
+                val route=TheRouter.build("/song/SongWord")
+                    .withString("id",currentSongId)
+                route.navigation()
+            }
+
             // 执行等待中的播放任务
             pendingPlayTask?.invoke()
             pendingPlayTask = null

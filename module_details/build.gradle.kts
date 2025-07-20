@@ -41,6 +41,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
     kapt("cn.therouter:apt:1.2.2")
     implementation("cn.therouter:router:1.2.2")
     implementation(libs.androidx.core.ktx)

@@ -3,6 +3,7 @@ package com.example.lib.base
 import data.CommentData
 import data.ListMusicData
 import data.MusicData
+import data.SongWordData
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -60,4 +61,14 @@ interface ApiService5 {
     suspend fun getComment(
         @Query("id") commentId: String
     ):CommentData
+}
+
+/**
+ * 获取歌词接口
+  **/
+interface ApiService6 {
+    @GET("/lyric")
+    suspend fun getSongWord(
+        @Query("id") songWordId: String
+    ): SongWordData
 }

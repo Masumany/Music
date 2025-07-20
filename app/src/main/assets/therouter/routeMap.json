@@ -35,6 +35,13 @@
     "params": {}
   },
   {
+    "path": "/song/SongWord",
+    "className": "com.example.module_details.SongWord",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
     "path": "/song/SongActivity",
     "className": "com.example.module_details.SongActivity",
     "action": "",
