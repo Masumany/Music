@@ -28,16 +28,17 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 }
 
 dependencies {
 
+    implementation(project(":lib_base"))
     // TheRouter 核心库
     implementation("cn.therouter:router:1.2.2")
     // 注解处理器（用于生成路由表）
@@ -69,10 +70,6 @@ dependencies {
     debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.8.1")
     // 替换 legacy.support.v4
     implementation("androidx.legacy:legacy-support-v4:1.0.0")  // 或使用更具体的 androidx 组件
-
-    // Lifecycle 组件
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
 
     // Fragment
     implementation("androidx.fragment:fragment-ktx:1.6.1")

@@ -12,6 +12,11 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
     versionCatalogs {
         create("libs") {
             version("agp", "8.6.1")  // 指定兼容的 AGP 版本
@@ -23,17 +28,13 @@ dependencyResolutionManagement {
                 .versionRef("agp")
             plugin("kotlin-android", "org.jetbrains.kotlin.android")
                 .versionRef("kotlin")
-            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-            repositories {
-                google()
-                mavenCentral()
-            }
         }
-        rootProject.name = "Music"
-        include(":app")
-        include(":lib_base")
-        include(":module_login_register")
-        include(":module_personage")
-        include(":module_mvplayer")
     }
 }
+rootProject.name = "Music"
+include(":app")
+include(":lib_base")
+include(":module_login_register")
+include(":module_personage")
+include(":module_mvplayer")
+include(":module_hot")

@@ -2,6 +2,7 @@ package com.example.module_login_register.repository
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.example.lib.base.CookieInterceptor
 import com.example.module_login_register.bean.AuthVerifyData
 import com.example.module_login_register.bean.LoginStatus
 import com.example.module_login_register.bean.PassWordLoginData
@@ -12,7 +13,6 @@ import com.example.module_login_register.bean.RefreshData
 import com.example.module_login_register.bean.SendData
 import com.example.module_login_register.bean.UserAccount
 import com.example.module_login_register.bean.VisitorLoginData
-import com.example.module_login_register.netWork.CookieInterceptor
 import okhttp3.OkHttpClient
 import retrofit2.Response
 import retrofit2.Retrofit

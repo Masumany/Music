@@ -1,26 +1,22 @@
 plugins {
-    alias(libs.plugins.android.application)  // 使用版本目录中的定义
+    alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-
 }
-apply (plugin= "therouter")
 
 android {
-    namespace = "com.example.music"
-    compileSdk = 35
+    namespace = "com.example.module_hot"
+    compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.music"
+        applicationId = "com.example.module_hot"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-    buildFeatures{
-        viewBinding=true
-    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -31,20 +27,16 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "1.8"
     }
 }
 
 dependencies {
 
-    implementation(project(":lib_base"))
-    implementation(project(":module_login_register"))
-    implementation(project(":module_personage"))
-    implementation(project(":module_mvplayer"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
