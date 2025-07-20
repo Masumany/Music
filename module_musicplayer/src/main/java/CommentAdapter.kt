@@ -12,7 +12,6 @@ import com.bumptech.glide.request.RequestOptions
 import data.CommentData
 
 class CommentAdapter(
-    // 初始化时可以传空列表
     private var commentText: List<CommentData.HotComment> = emptyList()
 ) : RecyclerView.Adapter<CommentAdapter.CommentViewHolder>() {
 
@@ -45,7 +44,6 @@ class CommentAdapter(
 
     override fun getItemCount() = commentText.size
 
-    // 关键修复：更新内部数据源并刷新
     fun updateComments(newComments: List<CommentData.HotComment>) {
         commentText = newComments  // 替换内部数据源
         notifyDataSetChanged()    // 通知列表刷新

@@ -14,14 +14,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager2.widget.ViewPager2
+import com.example.lib.base.Song as BaseSong
 import com.example.module_recommened.adapter.BannerAdapter
 import com.example.module_recommened.adapter.LiAdapter
 import com.example.module_recommened.adapter.ReAdapter
 import com.example.module_recommened.databinding.FragmentRecommendBinding
-
 import com.example.module_recommened.viewmodel.BannerViewModel
 import com.example.module_recommened.viewmodel.ListViewModel
 import com.example.module_recommened.viewmodel.RecommenedViewModel
+import com.example.yourproject.converter.DataConverter
+import data.ListMusicData
 import kotlinx.coroutines.launch
 
 class RecommendFragment : Fragment() {
@@ -39,13 +41,11 @@ class RecommendFragment : Fragment() {
 
     private var isPlaying = false
     private val handler = Handler(Looper.getMainLooper())
-
-    private val songAdapter= LiAdapter()
-    private var currentPage=1
-    private val pageSize=5
-    private var hasMoreData=true
-
-    private var isLoading=false
+    private val songAdapter = LiAdapter()
+    private var currentPage = 1
+    private val pageSize = 5
+    private var hasMoreData = true
+    private var isLoading = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -64,26 +64,22 @@ class RecommendFragment : Fragment() {
         viewPager = binding.viewPager
         recyclerView = binding.recyclerView
 
-        rvlist.adapter=songAdapter
-        val layoutManager=LinearLayoutManager(requireContext())
+        rvlist.adapter = songAdapter
+        val layoutManager = LinearLayoutManager(requireContext())
         rvlist.layoutManager = layoutManager
+
         rvlist.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
+                if (dy <= 0) return // 只处理向下滚动
 
-                val lastPosition=layoutManager.findLastVisibleItemPosition()
-                val totalItem=layoutManager.itemCount
-                if (lastPosition >= totalItem - 1 && hasMoreData) {
-                    lastPosition>=totalItem-1
+                val lastPosition = layoutManager.findLastVisibleItemPosition()
+                val totalItem = layoutManager.itemCount
+
+
+                if (lastPosition >= totalItem - 1 && hasMoreData && !isLoading) {
                     loadNextPage()
                 }
-            }
-
-            private fun loadNextPage() {
-                if (isLoading) return
-                isLoading = true
-                currentPage ++
-                fetchListData(currentPage)
             }
         })
 
@@ -94,14 +90,15 @@ class RecommendFragment : Fragment() {
             false
         )
 
-        // 初始化 ViewModel
+
         bannerViewModel = ViewModelProvider(this)[BannerViewModel::class.java]
         recommendedViewModel = ViewModelProvider(this)[RecommenedViewModel::class.java]
         listViewModel = ViewModelProvider(this)[ListViewModel::class.java]
 
-        loadFirstPage()
+        // 加载数据
         loadData()
 
+        // 下拉刷新
         swipeRefreshLayout.setOnRefreshListener {
             lifecycleScope.launch {
                 refreshData()
@@ -110,106 +107,106 @@ class RecommendFragment : Fragment() {
         }
     }
 
+    // 刷新数据
     private fun refreshData() {
         currentPage = 1
         lifecycleScope.launch {
-            loadData()
-            swipeRefreshLayout.isRefreshing = false
+            loadFirstPage()
         }
     }
 
+    // 加载第一页
     private fun loadFirstPage() {
-        currentPage=1
+        currentPage = 1
         fetchListData(currentPage)
     }
 
+    // 加载下一页
+    private fun loadNextPage() {
+        if (isLoading) return
+        isLoading = true
+        currentPage++
+        fetchListData(currentPage)
+    }
+
+    // 加载所有数据
     private fun loadData() {
-        try {
-            lifecycleScope.launch {
-                val bannerDeferred = lifecycleScope.launch {
-                    fetchBannerData()
-                }
-
-                val recommendedDeferred = lifecycleScope.launch {
-                    fetchRecommendedData()
-                }
-
-                val listDeferred = lifecycleScope.launch {
-                    loadFirstPage()
-                }
-
-                bannerDeferred.join()
-                recommendedDeferred.join()
-                listDeferred.join()
+        lifecycleScope.launch {
+            try {
+                // 并行加载不同数据
+                launch { fetchBannerData() }
+                launch { fetchRecommendedData() }
+                launch { loadFirstPage() }
+            } catch (e: Exception) {
+                Log.e("RecommendFragment", "加载数据失败: ${e.message}")
             }
-        } catch (e: Exception) {
-            Log.e("RecommendFragment", "Error fetching data: ${e.message}")
         }
     }
 
+    // 获取轮播图数据
     private suspend fun fetchBannerData() {
         try {
             val result = bannerViewModel.getBannerData()
             if (result.isSuccess) {
                 result.getOrNull()?.banners?.let { banners ->
                     viewPager.adapter = BannerAdapter(banners)
-                    startPlay()
+                    startPlay() // 启动轮播
                 }
             }
         } catch (e: Exception) {
-            Log.e("BannerData", "Error fetching banner data: ${e.message}")
+            Log.e("BannerData", "轮播图加载失败: ${e.message}")
         }
     }
 
+    // 获取推荐数据
     private suspend fun fetchRecommendedData() {
         try {
             val result = recommendedViewModel.getRecommenedData().result
-            if (result != null) {
-                if (result.isNotEmpty()) {
-                    recyclerView.adapter = ReAdapter(result)
-                }
+            if (!result.isNullOrEmpty()) {
+                recyclerView.adapter = ReAdapter(result)
             }
         } catch (e: Exception) {
-            Log.e("RecommendedData", "Error fetching recommended data: ${e.message}")
+            Log.e("RecommendedData", "推荐数据加载失败: ${e.message}")
         }
     }
 
-    private fun fetchListData(page:Int) {
+    private fun fetchListData(page: Int) {
         lifecycleScope.launch {
             try {
-                val result = listViewModel.getListData(page,pageSize)
-                Log.d("ListData", "原始响应: $result")
+                val result = listViewModel.getListData(page, pageSize)
+                Log.d("ListData", "响应码: ${result.code}")
 
-                if (result.code == 200 && result != null) {
-                    val songs=result.data?.dailySongs
-                    hasMoreData= songs?.size!! >=pageSize
-
-                    if(page==1){
-                        songAdapter.submitList(songs)
-                    }else{
-                        songAdapter.addMoreData(songs)
+                if (result.code == 200) {
+                    val originalSongs: List<BaseSong> = result.data?.dailySongs ?: emptyList()
+                    val convertedSongs = DataConverter.convertBaseSongList(originalSongs)
+                    hasMoreData = convertedSongs.size >= pageSize
+                    if (page == 1) {
+                        songAdapter.submitList(convertedSongs)
+                    } else {
+                        songAdapter.addMoreData(convertedSongs)
                     }
                 } else {
-                    Log.e("ListData", "数据为空: ${result.code}")
-                    hasMoreData=false
+                    hasMoreData = false
+                    Log.e("ListData", "数据错误: ${result.code}")
                 }
             } catch (e: Exception) {
-                Log.e("ListData", "错误: ${e.message}")
+                Log.e("ListData", "加载失败: ${e.message}")
+            } finally {
+                isLoading = false // 无论成功失败都标记为未加载
             }
         }
     }
 
+    // 启动轮播
     private fun startPlay() {
         if (!isPlaying && viewPager.adapter != null) {
             isPlaying = true
             val runnable = object : Runnable {
                 override fun run() {
-                    if (viewPager.adapter != null) {
-                        val itemCount = viewPager.adapter!!.itemCount
-                        if (itemCount > 1) {
-                            val nextItem = (viewPager.currentItem + 1) % itemCount
-                            viewPager.setCurrentItem(nextItem, true)
-                        }
+                    val itemCount = viewPager.adapter?.itemCount ?: 0
+                    if (itemCount > 1) {
+                        val nextItem = (viewPager.currentItem + 1) % itemCount
+                        viewPager.setCurrentItem(nextItem, true)
                     }
                     if (isPlaying) {
                         handler.postDelayed(this, 3000)
@@ -223,9 +220,10 @@ class RecommendFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         stopPlay()
-        _binding = null
+        _binding = null // 清除绑定避免内存泄漏
     }
 
+    // 停止轮播
     private fun stopPlay() {
         isPlaying = false
         handler.removeCallbacksAndMessages(null)

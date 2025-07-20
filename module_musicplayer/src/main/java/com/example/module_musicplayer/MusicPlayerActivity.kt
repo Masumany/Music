@@ -38,7 +38,7 @@ class MusicPlayerActivity : AppCompatActivity() {
 
     @JvmField
     @Autowired
-    var currentPosition: Int? = null  // 注意：这里是可空类型
+    var currentPosition: Int? = null
 
     @Autowired
     @JvmField
@@ -54,7 +54,7 @@ class MusicPlayerActivity : AppCompatActivity() {
 
     @Autowired
     @JvmField
-    var song: Song? = null  // 这个字段可能未使用，或需要类型转换
+    var song: Song? = null
 
     @Autowired
     @JvmField
@@ -64,6 +64,12 @@ class MusicPlayerActivity : AppCompatActivity() {
     @JvmField
     var athour: String? = null
 
+    @Autowired
+    @JvmField
+    var playProgress: Int = 0
+
+    // 是否需要应用传递的进度
+    private var needApplyPlayProgress = false
 
     private var isPlaying = false
     private lateinit var binding: MusicPlayerBinding
@@ -75,8 +81,8 @@ class MusicPlayerActivity : AppCompatActivity() {
     private var isLiked = false
     private val handler = Handler(Looper.getMainLooper())
     private var currentMusic: String? = null
-    private var musicList: List<data.ListMusicData.Song>? = null  // 统一使用data包下的Song类型
-    private var currentIndex = -1
+    var musicList: List<data.ListMusicData.Song>? = null
+    var currentIndex = -1
 
     private val MODE_SEQUENTIAL = 0
     private val MODE_SINGLE = 1
@@ -88,6 +94,7 @@ class MusicPlayerActivity : AppCompatActivity() {
     private var isServiceReady = false
     private var pendingPlayTask: (() -> Unit)? = null
 
+    // 服务连接的回调
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             val binder = service as MusicPlayService.MusicBinder
@@ -95,31 +102,13 @@ class MusicPlayerActivity : AppCompatActivity() {
             isServiceBound = true
             isServiceReady = true
 
-            val targetSongId = intent.getStringExtra("target_song_id")
-            val currentPlayUrl = intent.getStringExtra("current_play_url")
-            val songName = intent.getStringExtra("song_name")
-            val songCover = intent.getStringExtra("song_cover")
-            val songArtist = intent.getStringExtra("song_artist")
-            val currentPosition = intent.getIntExtra("current_position", 0)
-            val isPlayingOrigin = intent.getBooleanExtra("is_playing_origin", false)
-
-
-            if (targetSongId != null && currentPlayUrl != null) {
-                currentIndex = findSongIndexById(targetSongId)
-                currentMusic = currentPlayUrl
-                updateMusicInfo(songName ?: "未知歌曲", songCover ?: "", songArtist)
-                musicService?.seekTo(currentPosition)
-                if (isPlayingOrigin) {
-                    musicService?.resume()
-                    isPlaying = true
-                    startCenterImg()
-                    rotateToPlaying()
-                    binding.mpStart.setImageResource(R.drawable.mp_stop)
-                } else {
-                    musicService?.pause()
-                    isPlaying = false
-                }
-
+            // 优先应用playProgress，避免被覆盖
+            if (needApplyPlayProgress && playProgress > 0) {
+                Log.d("MusicPlayer", "服务连接后应用进度: $playProgress")
+                musicService?.seekTo(playProgress)
+                binding.mpSeekBar.progress = playProgress
+                binding.mpTimestart.text = formatTime(playProgress)
+                needApplyPlayProgress = false
             }
 
             syncServiceState()
@@ -130,6 +119,7 @@ class MusicPlayerActivity : AppCompatActivity() {
                 }
             }
 
+            // 评论区跳转
             binding.mpCommon.setOnClickListener {
                 val currentSongId = if (currentIndex in musicList?.indices ?: emptyList()) {
                     musicList!![currentIndex].id.toString()
@@ -146,10 +136,14 @@ class MusicPlayerActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
 
-                val router = TheRouter.build("/module_musicplayer/commentActivity")
+                TheRouter.build("/module_musicplayer/commentActivity")
                     .withString("id", currentSongId)
-                router.navigation()
+                    .navigation()
             }
+
+            // 执行等待中的播放任务
+            pendingPlayTask?.invoke()
+            pendingPlayTask = null
         }
 
         override fun onServiceDisconnected(arg0: ComponentName) {
@@ -158,6 +152,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
+    // 进度条更新任务
     private val updateSeekBarRunnable = object : Runnable {
         override fun run() {
             if (isServiceReady && musicService?.isPlaying == true) {
@@ -165,7 +160,7 @@ class MusicPlayerActivity : AppCompatActivity() {
                 binding.mpSeekBar.progress = currentPosition
                 binding.mpTimestart.text = formatTime(currentPosition)
             }
-            handler.postDelayed(this, 500)
+            handler.postDelayed(this, 500)  // 每500ms更新一次
         }
     }
 
@@ -175,22 +170,185 @@ class MusicPlayerActivity : AppCompatActivity() {
         setContentView(binding.root)
         binding.mpName.requestFocus()
 
+        // 注入路由参数
         TheRouter.inject(this)
-        Log.d("MusicPlayer", "初始化参数: id=$id, cover=$cover, songListName=$songListName}")
+        // 初始化标记位：是否需要应用底部栏传递的进度
+        needApplyPlayProgress = playProgress > 0
+        Log.d("MusicPlayer", "初始化参数: 进度=$playProgress，是否应用=$needApplyPlayProgress，索引=$currentPosition")
 
+        // 初始化播放模式
         restorePlayMode()
-
         binding.mpRecord.rotation = ROTATION_PAUSED
         currentRotation = ROTATION_PAUSED
 
+        // 绑定服务
         val serviceIntent = Intent(this, MusicPlayService::class.java)
         startService(serviceIntent)
         bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE)
 
-        binding.mpCount.setOnClickListener{
+        // 初始化事件监听
+        initEventListeners()
+        initCenterImg()
+        initSeekBarListener()
+        initPlayButton()
+        initNextSong()
+        initLastSong()
+        updateModeIcon()
+
+        // 初始化歌曲信息和列表
+        initMusicInfo()
+        initFragment()
+        fetchMusic()
+
+        // 启动进度更新
+        handler.post(updateSeekBarRunnable)
+    }
+
+    // 获取音频文件URI（用于分享）
+    private fun getCurrentAudioUri(): Uri? {
+        return try {
+            currentMusic?.let { url ->
+                Uri.parse(url)
+            }
+        } catch (e: Exception) {
+            Log.e("AudioShare", "获取音频URI失败", e)
+            null
+        }
+    }
+
+    // 恢复播放模式
+    private fun restorePlayMode() {
+        val prefs: SharedPreferences = getSharedPreferences("MusicPlayerPrefs", MODE_PRIVATE)
+        currentMode = prefs.getInt("play_mode", MODE_SEQUENTIAL)
+    }
+
+    // 保存播放模式
+    private fun savePlayMode() {
+        val prefs: SharedPreferences = getSharedPreferences("MusicPlayerPrefs", MODE_PRIVATE)
+        prefs.edit().putInt("play_mode", currentMode).apply()
+    }
+
+    // 更新播放模式图标
+    private fun updateModeIcon() {
+        val iconRes = when (currentMode) {
+            MODE_SEQUENTIAL -> R.drawable.play_count
+            MODE_SINGLE -> R.drawable.mp_one
+            MODE_RANDOM -> R.drawable.mp_change
+            else -> R.drawable.play_count
+        }
+        binding.mpCount.setImageResource(iconRes)
+    }
+
+    // 切换播放模式
+    private fun changeMode() {
+        currentMode = (currentMode + 1) % 3
+        updateModeIcon()
+        savePlayMode()
+
+        val modeName = when (currentMode) {
+            MODE_SEQUENTIAL -> "顺序播放"
+            MODE_SINGLE -> "单曲循环"
+            MODE_RANDOM -> "随机播放"
+            else -> "顺序播放"
+        }
+        Toast.makeText(this, "已切换为$modeName", Toast.LENGTH_SHORT).show()
+    }
+
+    // 初始化歌曲信息UI
+    private fun initMusicInfo() {
+        song?.let {
+            updateMusicInfo(it.name, it.al.picUrl ?: "", it.ar.joinToString { a -> a.name })
+        } ?: run {
+            val safeSongName = songListName ?: "未知歌曲"
+            val safeCover = cover ?: ""
+            updateMusicInfo(safeSongName, safeCover)
+        }
+    }
+
+    // 初始化列表Fragment
+    private fun initFragment() {
+        fragment = supportFragmentManager.findFragmentById(binding.mpFragment.id)
+        if (fragment != null) {
+            supportFragmentManager.beginTransaction().hide(fragment!!).commit()
+        } else {
+            Log.w("MusicPlayer", "Fragment容器为空")
+        }
+    }
+
+    // 同步服务状态到UI
+    private fun syncServiceState() {
+        if (isServiceReady && musicService != null) {
+            val serviceIsPlaying = musicService?.isPlaying == true
+            val serviceDuration = musicService?.getDuration() ?: 0
+            // 优先使用未应用的进度，否则使用服务当前进度
+            val servicePosition = if (needApplyPlayProgress) playProgress else musicService?.getCurrentPosition() ?: 0
+
+            // 更新播放状态
+            isPlaying = serviceIsPlaying
+            binding.mpStart.setImageResource(if (serviceIsPlaying) R.drawable.mp_stop else R.drawable.mp_start)
+
+            // 更新进度条
+            binding.mpSeekBar.max = serviceDuration
+            binding.mpSeekBar.progress = servicePosition
+            binding.mpTimestart.text = formatTime(servicePosition)
+            binding.mpTimend.text = formatTime(serviceDuration)
+
+            // 更新动画状态
+            if (serviceIsPlaying) {
+                startCenterImg()
+                if (currentRotation != ROTATION_PLAYING) {
+                    rotateToPlaying()
+                }
+            } else {
+                stopCenterImg()
+                if (currentRotation != ROTATION_PAUSED) {
+                    rotateToPaused()
+                }
+            }
+        }
+    }
+
+    // 上一首按钮监听
+    private fun initLastSong() {
+        binding.mpLast.setOnClickListener {
+            playLastSong()
+        }
+    }
+
+    // 下一首按钮监听
+    private fun initNextSong() {
+        binding.mpNext.setOnClickListener {
+            playNextSong()
+        }
+    }
+
+    // 通用事件监听
+    private fun initEventListeners() {
+        // 返回按钮
+        binding.mpMback.setOnClickListener {
+            TheRouter.build("/main/main").navigation()
+            finish()
+        }
+
+        // 列表按钮
+        binding.mpList.setOnClickListener {
+            fragment?.let { changeFragment() }
+                ?: Toast.makeText(this, "列表加载失败", Toast.LENGTH_SHORT).show()
+        }
+
+        // 收藏按钮
+        binding.mpLike.setOnClickListener {
+            isLiked = !isLiked
+            binding.mpLike.setImageResource(if (isLiked) R.drawable.like_last else R.drawable.like)
+            Toast.makeText(this, if (isLiked) "已收藏" else "已取消", Toast.LENGTH_SHORT).show()
+        }
+
+        // 播放模式按钮
+        binding.mpCount.setOnClickListener {
             changeMode()
         }
 
+        // 分享按钮
         binding.mpShare.setOnClickListener {
             val audioUri = getCurrentAudioUri()
             if (audioUri == null) {
@@ -206,148 +364,11 @@ class MusicPlayerActivity : AppCompatActivity() {
             }
             startActivity(Intent.createChooser(shareIntent, "分享音频到"))
         }
-
-        initMusicInfo()
-        initFragment()
-        fetchMusic()
-        initEventListeners()
-        initCenterImg()
-        initSeekBarListener()
-        initPlayButton()
-        initNextSong()
-        initLastSong()
-        updateModeIcon()
-
-        handler.post(updateSeekBarRunnable)
     }
 
-    private fun getCurrentAudioUri(): Uri? {
-        return try {
-            currentMusic?.let { url ->
-                Uri.parse(url)
-            }
-        } catch (e: Exception) {
-            Log.e("AudioShare", "获取音频URI失败", e)
-            null
-        }
-    }
-
-    private fun restorePlayMode() {
-        val prefs: SharedPreferences = getSharedPreferences("MusicPlayerPrefs", MODE_PRIVATE)
-        currentMode = prefs.getInt("play_mode", MODE_SEQUENTIAL)
-    }
-
-    private fun savePlayMode() {
-        val prefs: SharedPreferences = getSharedPreferences("MusicPlayerPrefs", MODE_PRIVATE)
-        prefs.edit().putInt("play_mode", currentMode).apply()
-    }
-
-    private fun updateModeIcon() {
-        val iconRes = when (currentMode) {
-            MODE_SEQUENTIAL -> R.drawable.play_count
-            MODE_SINGLE -> R.drawable.mp_one
-            MODE_RANDOM -> R.drawable.mp_change
-            else -> R.drawable.play_count
-        }
-        binding.mpCount.setImageResource(iconRes)
-    }
-
-    private fun changeMode() {
-        currentMode = (currentMode + 1) % 3
-        updateModeIcon()
-        savePlayMode()
-
-        val modeName = when (currentMode) {
-            MODE_SEQUENTIAL -> "顺序播放"
-            MODE_SINGLE -> "单曲循环"
-            MODE_RANDOM -> "随机播放"
-            else -> "顺序播放"
-        }
-        Toast.makeText(this, "已切换为$modeName", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun initMusicInfo() {
-        // 注意：这里使用song字段时需要确保类型匹配，或注释掉不使用
-        song?.let {
-            // 如果需要使用com.example.lib.base.Song，需要转换
-            updateMusicInfo(it.name, it.al.picUrl ?: "", it.ar.joinToString { a -> a.name })
-        } ?: run {
-            val safeSongName = songListName ?: "未知歌曲"
-            val safeCover = cover ?: ""
-            updateMusicInfo(safeSongName, safeCover)
-        }
-    }
-
-    private fun initFragment() {
-        fragment = supportFragmentManager.findFragmentById(binding.mpFragment.id)
-        if (fragment != null) {
-            supportFragmentManager.beginTransaction().hide(fragment!!).commit()
-        } else {
-            Log.w("MusicPlayer", "Fragment容器为空")
-        }
-    }
-
-    private fun syncServiceState() {
-        if (isServiceReady && musicService != null) {
-            val serviceIsPlaying = musicService?.isPlaying == true
-            val serviceDuration = musicService?.getDuration() ?: 0
-            val servicePosition = musicService?.getCurrentPosition() ?: 0
-
-            isPlaying = serviceIsPlaying
-            binding.mpStart.setImageResource(if (serviceIsPlaying) R.drawable.mp_stop else R.drawable.mp_start)
-            binding.mpSeekBar.max = serviceDuration
-            binding.mpSeekBar.progress = servicePosition
-            binding.mpTimestart.text = formatTime(servicePosition)
-            binding.mpTimend.text = formatTime(serviceDuration)
-
-            if (serviceIsPlaying) {
-                startCenterImg()
-                if (currentRotation != ROTATION_PLAYING) {
-                    rotateToPlaying()
-                }
-            } else {
-                stopCenterImg()
-                if (currentRotation != ROTATION_PAUSED) {
-                    rotateToPaused()
-                }
-            }
-        }
-    }
-
-    private fun initLastSong() {
-        binding.mpLast.setOnClickListener {
-            playLastSong()
-        }
-    }
-
-    private fun initNextSong() {
-        binding.mpNext.setOnClickListener {
-            playNextSong()
-        }
-    }
-
-    private fun initEventListeners() {
-        binding.mpMback.setOnClickListener {
-            val router= TheRouter.build("/main/main")
-            router.navigation()
-            finish()
-        }
-
-        binding.mpList.setOnClickListener {
-            fragment?.let { changeFragment() }
-                ?: Toast.makeText(this, "列表加载失败", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.mpLike.setOnClickListener {
-            isLiked = !isLiked
-            binding.mpLike.setImageResource(if (isLiked) R.drawable.like_last else R.drawable.like)
-            Toast.makeText(this, if (isLiked) "已收藏" else "已取消", Toast.LENGTH_SHORT).show()
-        }
-    }
-
+    // 根据歌曲ID查找索引
     private fun findSongIndexById(targetId: String): Int {
-        if (targetId.isBlank() || musicList.isNullOrEmpty())
-            return -1
+        if (targetId.isBlank() || musicList.isNullOrEmpty()) return -1
         return try {
             val targetIdLong = targetId.toLong()
             musicList?.indexOfFirst { it.id == targetIdLong } ?: -1
@@ -357,7 +378,8 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
-    private fun playCurrentMusicWithCheck() {
+    // 检查并播放当前歌曲
+    fun playCurrentMusicWithCheck() {
         if (musicList?.indices?.contains(currentIndex) == true) {
             val currentSong = musicList!![currentIndex]
             updateMusicInfo(
@@ -366,6 +388,7 @@ class MusicPlayerActivity : AppCompatActivity() {
                 singer = currentSong.ar.joinToString { it.name }
             )
 
+            // 重置进度（切换歌曲时）
             musicService?.stop()
             binding.mpSeekBar.progress = 0
             binding.mpTimestart.text = formatTime(0)
@@ -378,6 +401,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
+    // 获取播放地址并播放（带状态检查）
     private fun fetchAndPlayWithStateCheck(songId: String, songName: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -417,6 +441,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
+    // 处理歌曲播放错误
     private fun handleSongError(songName: String) {
         Toast.makeText(this, "歌曲《$songName》无法播放", Toast.LENGTH_SHORT).show()
         binding.mpStart.setImageResource(R.drawable.mp_start)
@@ -428,6 +453,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
+    // 播放上一首
     private fun playLastSong() {
         if (musicList.isNullOrEmpty()) {
             Toast.makeText(this, "没有上一首", Toast.LENGTH_SHORT).show()
@@ -457,6 +483,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         playCurrentMusicWithCheck()
     }
 
+    // 播放下一首
     private fun playNextSong() {
         if (musicList.isNullOrEmpty()) {
             Toast.makeText(this, "播放列表为空", Toast.LENGTH_SHORT).show()
@@ -486,27 +513,41 @@ class MusicPlayerActivity : AppCompatActivity() {
         playCurrentMusicWithCheck()
     }
 
+    // 获取歌曲列表并初始化播放
     private fun fetchMusic() {
+        musicList = MusicDataCache.currentSongList ?: emptyList()
         val songList = MusicDataCache.currentSongList
         if (songList.isNullOrEmpty()) {
             Toast.makeText(this, "未找到歌曲列表", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
-        if (songList != null && songList!!.isNotEmpty()) {
+        if (songList != null && songList.isNotEmpty()) {
             musicList = songList
-            // 正确设置当前索引（处理可空情况）
-            currentIndex = currentPosition ?: 0  // 如果为null，默认0
-            Log.d("MusicPlayer", "使用传递的列表，大小: ${songList!!.size}, 当前位置: $currentIndex")
+            currentIndex = currentPosition ?: 0
+            Log.d("MusicPlayer", "列表大小: ${songList.size}, 当前索引: $currentIndex")
 
-            // 播放当前歌曲
-            if (musicList?.indices?.contains(currentIndex) == true == true) {
-                fetchAndPlayWithStateCheck(
-                    musicList!![currentIndex].id.toString(),
-                    musicList!![currentIndex].name
+            // 核心优化：如果需要应用进度，仅同步UI，不重新加载歌曲
+            if (needApplyPlayProgress && musicList?.indices?.contains(currentIndex) == true) {
+                val currentSong = musicList!![currentIndex]
+                // 更新歌曲信息UI
+                updateMusicInfo(
+                    songName = currentSong.name,
+                    coverUrl = currentSong.al.picUrl ?: "",
+                    singer = currentSong.ar.joinToString { it.name }
                 )
+                // 不重新加载，等待服务连接后应用进度
+                Log.d("MusicPlayer", "等待服务连接后应用进度: $playProgress")
             } else {
-                Toast.makeText(this, "无效的歌曲位置", Toast.LENGTH_SHORT).show()
+                // 不需要应用进度时，正常加载歌曲
+                if (musicList?.indices?.contains(currentIndex) == true) {
+                    fetchAndPlayWithStateCheck(
+                        musicList!![currentIndex].id.toString(),
+                        musicList!![currentIndex].name
+                    )
+                } else {
+                    Log.d("MusicPlayerActivity", "currentIndex out of range")
+                }
             }
         } else {
             // 加载默认列表
@@ -535,6 +576,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
+    // 更新歌曲信息UI
     private fun updateMusicInfo(songName: String, coverUrl: String, singer: String? = null) {
         binding.mpName.text = songName
         binding.mpSinger.text = singer ?: athour ?: "未知歌手"
@@ -544,6 +586,7 @@ class MusicPlayerActivity : AppCompatActivity() {
             .into(binding.mpCenter)
     }
 
+    // 切换列表Fragment显示状态
     private fun changeFragment() {
         fragment?.let { frag ->
             val transaction = supportFragmentManager.beginTransaction()
@@ -557,6 +600,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
+    // 隐藏列表Fragment
     fun hideFragment() {
         fragment?.let {
             if (it.isVisible) {
@@ -565,18 +609,21 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
+    // 初始化中心图片动画
     private fun initCenterImg() {
         animation = AnimationUtils.loadAnimation(this, R.anim.img_animation).apply {
             interpolator = LinearInterpolator()
         }
     }
 
+    // 格式化时间（毫秒转分:秒）
     private fun formatTime(milliseconds: Int): String {
         val minutes = (milliseconds / 1000) / 60
         val seconds = (milliseconds / 1000) % 60
         return String.format("%02d:%02d", minutes, seconds)
     }
 
+    // 初始化进度条监听
     private fun initSeekBarListener() {
         binding.mpSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -596,6 +643,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         })
     }
 
+    // 初始化播放按钮
     private fun initPlayButton() {
         binding.mpStart.setImageResource(R.drawable.mp_start)
         binding.mpStart.setOnClickListener {
@@ -608,6 +656,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
+    // 处理播放/暂停点击
     private fun handlePlayClick() {
         if (!isServiceBound || musicService == null) {
             Toast.makeText(this, "服务连接失败", Toast.LENGTH_SHORT).show()
@@ -636,18 +685,16 @@ class MusicPlayerActivity : AppCompatActivity() {
             } else {
                 try {
                     val currentPos = musicService?.getCurrentPosition() ?: 0
-                    // 移除对com.example.lib.base.Song的依赖，仅使用musicList中的data.ListMusicData.Song
                     val currentSong = if (currentIndex in musicList?.indices ?: emptyList()) {
                         musicList!![currentIndex]
                     } else {
-                        null  // 不使用song字段，避免类型错误
+                        null
                     }
 
                     if (currentPos > 0 && currentPos < (musicService?.getDuration() ?: 0)) {
                         musicService?.resume()
                     } else {
                         if (currentSong != null) {
-                            // 确保MusicPlayService的play方法参数类型为data.ListMusicData.Song
                             musicService?.play(currentMusic!!, currentSong)
                         } else {
                             throw Exception("无法获取歌曲信息")
@@ -670,6 +717,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
+    // 旋转到播放状态
     private fun rotateToPlaying() {
         binding.mpRecord.post {
             binding.mpRecord.animate().cancel()
@@ -692,6 +740,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
+    // 旋转到暂停状态
     private fun rotateToPaused() {
         binding.mpRecord.post {
             binding.mpRecord.animate().cancel()
@@ -714,18 +763,21 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
+    // 启动中心图片动画
     private fun startCenterImg() {
         animation?.let {
             binding.mpCenter.startAnimation(it)
         }
     }
 
+    // 停止中心图片动画
     private fun stopCenterImg() {
         animation?.let {
             binding.mpCenter.clearAnimation()
         }
     }
 
+    // 播放音频
     private fun playAudio(url: String, onPrepared: (Boolean) -> Unit) {
         if (!isServiceReady || musicService == null) {
             onPrepared(false)
@@ -763,7 +815,7 @@ class MusicPlayerActivity : AppCompatActivity() {
 
             musicService?.play(
                 url,
-                song = currentSong  // 确保参数类型匹配
+                song = currentSong
             )
             Log.d("FixSuccess", "传递歌曲信息: ${currentSong.name}")
         } catch (e: Exception) {
@@ -772,14 +824,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
-    private fun pauseAudio() {
-        musicService?.pause()
-        isPlaying = false
-        handler.removeCallbacks(updateSeekBarRunnable)
-        stopCenterImg()
-        rotateToPaused()
-    }
-
+    // 销毁时清理资源
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)

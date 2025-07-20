@@ -32,6 +32,8 @@ import com.therouter.router.Route
 import kotlinx.coroutines.launch
 import android.content.res.Resources
 import androidx.cardview.widget.CardView
+import com.example.lib.base.Song
+import com.example.yourproject.converter.DataConverter
 
 @Route(path = "/main/main")
 class MainActivity : AppCompatActivity() {
@@ -39,33 +41,30 @@ class MainActivity : AppCompatActivity() {
     private lateinit var topButton: ImageView
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var bottomNavigationView: BottomNavigationView
-    private lateinit var serviceConnection: ServiceConnection // 服务连接对象
-    private lateinit var bottomMusicController: BottomMusicController // 音乐控制器
-    private lateinit var bottomSheetDialog: BottomSheetDialog // 底部弹窗
-    private lateinit var musicIv: ImageView // 唱片图标
-    private var rotationAnimation: Animation? = null // 旋转动画
+    private lateinit var serviceConnection: ServiceConnection
+    private lateinit var bottomMusicController: BottomMusicController
+    private lateinit var bottomSheetDialog: BottomSheetDialog
+    private lateinit var musicIv: ImageView
+    private var rotationAnimation: Animation? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        // 按依赖顺序初始化
-        initViews()           // 初始化视图
-        initMainFragment()    // 初始化主Fragment
-        initBottomSheetDialog() // 初始化底部弹窗
-        initMusicService()    // 初始化音乐服务（含serviceConnection）
-        initRotationAnimation() // 初始化动画
+
+        initViews()
+        initMainFragment()
+        initBottomSheetDialog()
+        initMusicService()
+        initRotationAnimation()
     }
 
-    /**
-     * 初始化所有视图控件
-     */
     private fun initViews() {
         topButton = findViewById(R.id.drawerButton)
         drawerLayout = findViewById(R.id.mainDrawerLayout)
         bottomNavigationView = findViewById(R.id.bottomNavigationView)
-        musicIv = findViewById(R.id.music) // 绑定唱片图标
+        musicIv = findViewById(R.id.music)
 
         // 侧边栏开关逻辑
         topButton.setOnClickListener {
@@ -77,9 +76,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * 初始化主界面Fragment
-     */
     private fun initMainFragment() {
         try {
             supportFragmentManager.beginTransaction()
@@ -90,27 +86,24 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * 初始化底部弹窗（播放列表）
-     */
     private fun initBottomSheetDialog() {
         bottomSheetDialog = BottomSheetDialog(this)
         val dialogView = LayoutInflater.from(this).inflate(R.layout.fragment_musicplayerlist, null)
         bottomSheetDialog.setContentView(dialogView)
 
-        // 初始化弹窗中的RecyclerView
         val recyclerView = dialogView.findViewById<RecyclerView>(R.id.rvlist)
         recyclerView.layoutManager = LinearLayoutManager(this)
         val songAdapter = LiAdapter()
         recyclerView.adapter = songAdapter
 
-        // 加载列表数据
         val listViewModel = ViewModelProvider(this)[ListViewModel::class.java]
         lifecycleScope.launch {
             try {
                 val result = listViewModel.getListData(1, 5)
                 if (result.code == 200) {
-                    songAdapter.submitList(result.data?.dailySongs) // 提交数据
+                    val originalSongs: List<Song> = result.data?.dailySongs ?: emptyList()
+                    val convertedSongs = DataConverter.convertBaseSongList(originalSongs)
+                    songAdapter.submitList(convertedSongs) // 提交数据
                 } else {
                     Toast.makeText(this@MainActivity, "数据错误: ${result.code}", Toast.LENGTH_SHORT).show()
                 }
@@ -130,7 +123,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // 绑定弹窗触发按钮（更多按钮）
         findViewById<ImageView>(R.id.iv_more).setOnClickListener {
             if (!bottomSheetDialog.isShowing) {
                 bottomSheetDialog.show()
@@ -138,11 +130,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * 初始化音乐服务（核心修复：先初始化serviceConnection再使用）
-     */
     private fun initMusicService() {
-        // 1. 先初始化serviceConnection（必须在使用前赋值）
         serviceConnection = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 // 服务连接成功时回调
@@ -164,19 +152,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // 2. 再创建音乐控制器（此时serviceConnection已初始化）
         val bottomBarView = findViewById<CardView>(R.id.player)
         bottomMusicController = BottomMusicController(this, bottomBarView, serviceConnection)
 
-        // 3. 启动并绑定音乐服务
         val musicServiceIntent = Intent(this, MusicPlayService::class.java)
         startService(musicServiceIntent) // 启动服务
         bindService(musicServiceIntent, serviceConnection, BIND_AUTO_CREATE) // 绑定服务
     }
 
-    /**
-     * 初始化唱片旋转动画
-     */
+
     private fun initRotationAnimation() {
         rotationAnimation = AnimationUtils.loadAnimation(this, R.anim.anim_player).apply {
             interpolator = LinearInterpolator() // 匀速旋转
@@ -185,14 +169,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * 根据播放状态更新动画
-     * @param isPlaying 是否正在播放
-     */
-    // MainActivity.kt 中完善动画更新方法
+
+
     fun updateAnimationState(isPlaying: Boolean) {
         if (isPlaying) {
-            // 播放中：启动动画（如果未启动）
             if (rotationAnimation == null) {
                 initRotationAnimation() // 确保动画已初始化
             }
@@ -201,21 +181,17 @@ class MainActivity : AppCompatActivity() {
             }
         } else {
             // 暂停/停止：立即停止动画并重置状态
-            musicIv.clearAnimation() // 清除动画（关键）
+            musicIv.clearAnimation() // 清除动画
         }
     }
 
-    /**
-     * dp转px工具方法
-     */
+
     private fun Int.dpToPx(): Int {
         val density = Resources.getSystem().displayMetrics.density
         return (this * density + 0.5f).toInt()
     }
 
-    /**
-     * 生命周期：销毁时清理资源
-     */
+
     override fun onDestroy() {
         super.onDestroy()
         // 解绑服务

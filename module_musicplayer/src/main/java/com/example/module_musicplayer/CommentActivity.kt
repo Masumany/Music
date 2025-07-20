@@ -20,7 +20,7 @@ class CommentActivity : AppCompatActivity() {
     var id: String? = null
 
     private lateinit var binding: FragmentCommentBinding
-    private lateinit var commentAdapter: CommentAdapter  // 保持一个适配器实例
+    private lateinit var commentAdapter: CommentAdapter
     private lateinit var commentViewModel: CommentViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,7 +59,6 @@ class CommentActivity : AppCompatActivity() {
             Log.d("CommentData", "评论数量: ${hotComments.size}")  // 调试用，确认数据不为空
 
             if (hotComments.isNotEmpty()) {
-                // 关键修复：通过现有适配器更新数据，而非创建新实例
                 commentAdapter.updateComments(hotComments)
             } else {
                 Toast.makeText(this, "暂无评论", Toast.LENGTH_SHORT).show()

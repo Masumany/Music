@@ -12,7 +12,6 @@ class SongViewModel : ViewModel() {
     suspend fun getListMusicData(id: Long) { // 接收从Activity传来的id
         try {
             Log.d("SongViewModel", "开始请求歌曲列表，id=$id")
-            // 将id传入接口（假设ApiService4的getPlayList需要id参数）
             val response = NetWorkClient.apiService4.getPlayList(id.toString())
             Log.d("SongViewModel", "接口返回：code=${response.code}，歌曲数=${response.songs.size}")
             listMusicData.postValue(response)

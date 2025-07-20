@@ -14,9 +14,7 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
 class CommentViewModel : ViewModel() {
-    // 热门评论数据（与你的Adapter中的HotComment类型对应）
     val hotComments = MutableLiveData<List<CommentData.HotComment>>()
-    // 错误信息
     val errorMsg = MutableLiveData<String>()
 
     // 获取评论数据（与Fragment中的调用对应）

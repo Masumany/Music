@@ -46,6 +46,7 @@ dependencies {
     implementation(project(":lib_base"))
     implementation(libs.glide)
     implementation(libs.firebase.crashlytics.buildtools)
+    implementation(project(":module_details"))
     kapt("cn.therouter:apt:1.2.2")
     implementation("cn.therouter:router:1.2.2")
     implementation(project(":module_recommened"))

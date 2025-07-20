@@ -46,6 +46,7 @@ class ReAdapter (private val ReText:List<RecommenedData.Result>):
                     .withLong("id", item.id)
                     .withString("recommendName", item.name)
                     .withString("recommendCover", item.picUrl)
+                    .withString("recommendAuthor", item.copywriter)
                     .navigation(holder.itemView.context)
 
             } catch (e: Exception) {

@@ -5,97 +5,120 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SongActivity"
-    android:background="@drawable/md_background">
+    android:background="@drawable/md_background"
+    tools:context=".SongActivity">
 
-    <!-- 返回按钮 -->
+    <!-- 固定显示的返回按钮 -->
     <ImageView
         android:id="@+id/back"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:src="@drawable/md_back"
         android:contentDescription="返回按钮"
+        android:elevation="8dp"
+        android:src="@drawable/md_back"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.cardview.widget.CardView
-        app:cardCornerRadius="25dp"
-        app:cardElevation="8dp"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_marginStart="16dp"
+    <!-- 专辑信息区（可隐藏，高度自适应） -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/album_area"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
         android:layout_marginTop="16dp"
-        android:id="@+id/md_cardview"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/back">
-        <ImageView
-            android:id="@+id/md_img"
+
+        <!-- 专辑图片 -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/md_cardview"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:src="@drawable/md_music"
-            android:contentDescription="专辑图片"/>
-    </androidx.cardview.widget.CardView>
+            android:layout_marginStart="16dp"
+            app:cardCornerRadius="25dp"
+            app:cardElevation="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-    <!-- 标题文本 -->
-    <TextView
-        android:id="@+id/md_title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="name"
-        android:maxLines="2"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintBottom_toBottomOf="@+id/md_cardview"
-        app:layout_constraintStart_toEndOf="@+id/md_cardview"
-        app:layout_constraintTop_toTopOf="@+id/md_cardview"
-        app:layout_constraintEnd_toEndOf="parent" />
+            <ImageView
+                android:id="@+id/md_img"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:contentDescription="专辑图片"
+                android:src="@drawable/md_music" />
+        </androidx.cardview.widget.CardView>
 
+        <!-- 专辑标题 -->
+        <TextView
+            android:id="@+id/md_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:maxLines="2"
+            android:text="专辑名称"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/md_cardview"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/md_cardview"
+            app:layout_constraintTop_toTopOf="@+id/md_cardview"
+            app:layout_constraintVertical_bias="0.0" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- “播放全部”区域 + 列表（可固定在顶部） -->
     <androidx.cardview.widget.CardView
+        android:id="@+id/fixed_area"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_margin="4dp"
+        android:padding="10dp"
         app:cardCornerRadius="20dp"
+        app:cardElevation="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:padding="10dp"
-        app:layout_constraintTop_toBottomOf="@+id/md_cardview">
+        app:layout_constraintTop_toBottomOf="@+id/album_area">
 
-        <ImageView
-            android:id="@+id/md_allstart"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_margin="4dp"
-            android:src="@drawable/md_start"
-            android:contentDescription="全部播放"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <TextView
+        <!-- 播放全部按钮区域 -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="20dp"
-            android:text="播放全部"
-            android:layout_marginStart="50dp"
-            android:textStyle="bold"
-            android:textColor="#8496F3"
-            android:textSize="15sp"
-            android:layout_marginTop="10dp"/>
+            android:layout_height="50dp"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
+            <ImageView
+                android:id="@+id/md_allstart"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_margin="4dp"
+                android:contentDescription="全部播放"
+                android:src="@drawable/md_start" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="播放全部"
+                android:textColor="#8496F3"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- 歌曲列表 -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/md_rv"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/white"
             android:layout_marginTop="50dp"
-            app:layout_constraintTop_toBottomOf="@+id/md_allstart"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            android:background="@color/white" />
     </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -15,7 +15,9 @@ import com.example.module_recommened.viewmodel.ListViewModel
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.launch
 import androidx.lifecycle.lifecycleScope
+import com.example.lib.base.Song
 import com.example.music.databinding.FragmentMusicplayerlistBinding
+import com.example.yourproject.converter.DataConverter
 
 class MusicPlayerListFragment : Fragment() {
 
@@ -23,7 +25,7 @@ class MusicPlayerListFragment : Fragment() {
     private val songAdapter = LiAdapter()  // 复用RecommendFragment的适配器
     private lateinit var listViewModel: ListViewModel  // 复用RecommendFragment的ViewModel
 
-    // 分页参数（与RecommendFragment保持一致）
+    // 分页参数（与RecommendFragment一致）
     private var currentPage = 1
     private val pageSize = 5
     private var hasMoreData = true
@@ -41,7 +43,7 @@ class MusicPlayerListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d("ListFragment", "songAdapter 是否为空: ${songAdapter == null}")  // 应输出 false
+        Log.d("ListFragment", "songAdapter 是否为空: ${songAdapter == null}")
         Log.d("ListFragment", "rvlist 是否为空: ${binding.rvlist == null}")
         initViewModel()
         initRecyclerView()
@@ -53,7 +55,7 @@ class MusicPlayerListFragment : Fragment() {
         listViewModel = ViewModelProvider(this)[ListViewModel::class.java]
     }
 
-    // 初始化RecyclerView（完全复制RecommendFragment的配置）
+    // 初始化RecyclerView）
     private fun initRecyclerView() {
         // 设置布局管理器（与RecommendFragment一致）
         binding.rvlist.adapter = songAdapter
@@ -91,26 +93,24 @@ class MusicPlayerListFragment : Fragment() {
         fetchListData(currentPage)
     }
 
-    // 请求列表数据（与RecommendFragment完全相同的逻辑）
-    // 请求列表数据（与RecommendFragment完全相同的逻辑）
     private fun fetchListData(page: Int) {
         lifecycleScope.launch {
             try {
-                // 调用与RecommendFragment相同的ViewModel方法获取数据
                 val result = listViewModel.getListData(page, pageSize)
                 Log.d("Mp", "数据响应: code=${result.code}")
 
                 if (result.code == 200) {
-                    val songs = result.data?.dailySongs  // 与RecommendFragment的数据字段一致
-                    hasMoreData = songs?.size ?: 0 >= pageSize  // 判断是否还有更多数据
+                    val originalSongs: List<Song> = result.data?.dailySongs ?: emptyList()
+                    val convertedSongs = DataConverter.convertBaseSongList(originalSongs)
+                    hasMoreData = convertedSongs?.size ?: 0 >= pageSize  // 判断是否还有更多数据
 
                     // 第一页替换数据，后续页追加数据
                     if (page == 1) {
-                        songAdapter.submitList(songs)  // 假设适配器有submitList方法
+                        songAdapter.submitList(convertedSongs)
                     } else {
-                        if (songs != null) {
-                            songAdapter.addMoreData(songs)
-                        }  // 假设适配器有addMoreData方法
+                        if (convertedSongs != null) {
+                            songAdapter.addMoreData(convertedSongs)
+                        }
                     }
                     songAdapter.notifyDataSetChanged()  // 刷新列表
                 } else {

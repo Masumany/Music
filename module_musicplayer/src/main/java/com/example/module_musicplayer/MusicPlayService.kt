@@ -22,13 +22,11 @@ import data.ListMusicData
 class MusicPlayService : Service() {
     private val CHANNEL_ID = "music_service_channel"
     private val NOTIFICATION_ID = 10086
-    // 修复1：统一使用data包下的Song类型
     val currentSongLiveData = MutableLiveData<ListMusicData.Song?>()
     val isPlayingLiveData = MutableLiveData<Boolean>()
 
     private var mediaPlayer: MediaPlayer? = null
     var currentUrl: String? = null
-    // 修复2：将currentSong类型改为ListMusicData.Song
     var currentSong: ListMusicData.Song? = null
     var isPlaying = false // 公开变量便于Activity直接访问
 
@@ -78,12 +76,10 @@ class MusicPlayService : Service() {
         }
     }
 
-    // 修复3：参数类型明确为ListMusicData.Song
     fun play(url: String, song: ListMusicData.Song?) {
         currentUrl = url
         currentSong = song
         isPlaying = true
-        // 修复4：LiveData发送正确类型
         currentSongLiveData.postValue(song)
         Log.d("ServiceData", "发送歌曲更新: ${song?.name}")
         isPlayingLiveData.postValue(true)
@@ -178,11 +174,10 @@ class MusicPlayService : Service() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        // 修复5：使用正确的歌曲名称显示在通知中
         val songName = currentSong?.name ?: "未知歌曲"
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("正在播放")
-            .setContentText(songName) // 显示实际歌曲名而非URL
+            .setContentText(songName)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(pendingIntent)
             .setPriority(NotificationCompat.PRIORITY_LOW)

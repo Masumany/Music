@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="200dp"
+    android:layout_height="wrap_content"
+    android:background="@color/white">
+
+    <!-- 分享选项 -->
+<LinearLayout
+android:id="@+id/ll_share"
+android:layout_width="match_parent"
+android:layout_height="50dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
+
+<ImageView
+android:layout_width="20dp"
+android:layout_height="20dp"
+android:layout_marginStart="16dp"
+    android:src="@drawable/md_share"
+    android:contentDescription="分享图标" />
+
+<TextView
+android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="12dp"
+    android:text="分享"
+    android:textColor="#000000"
+    android:textSize="15sp" />
+    </LinearLayout>
+
+    <!-- 分割线 -->
+<View
+android:layout_width="match_parent"
+android:layout_height="0.5dp"
+android:background="#A5A3A3"
+app:layout_constraintEnd_toEndOf="parent"
+app:layout_constraintStart_toStartOf="parent"
+app:layout_constraintTop_toBottomOf="@id/ll_share" />  <!-- 紧接分享选项下方 -->
+
+    <!-- 下载选项 -->
+<LinearLayout
+android:id="@+id/ll_download"
+android:layout_width="match_parent"
+android:layout_height="50dp"
+android:gravity="center_vertical"
+android:orientation="horizontal"
+app:layout_constraintEnd_toEndOf="parent"
+app:layout_constraintStart_toStartOf="parent"
+app:layout_constraintTop_toBottomOf="@id/ll_share">  <!-- 与分享选项上下排列 -->
+
+<ImageView
+    android:layout_width="20dp"
+    android:layout_height="20dp"
+    android:layout_marginStart="16dp"
+    android:src="@drawable/md_download"
+    android:contentDescription="下载图标" />
+
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="12dp"
+    android:text="下载"
+    android:textColor="#000000"
+    android:textSize="15sp" />
+</LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>

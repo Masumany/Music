@@ -1,63 +1,11 @@
 package data
 
-
 import com.google.gson.annotations.SerializedName
 
 /**
-{
-  "code": 200,
-  "data": [
-    {
-      "id": 33894312,
-      "url": "http://m7.music.126.net/20250717142827/bf4e29de325b55cf8e23c64c5335dae0/ymusic/0fd6/4f65/43ed/a8772889f38dfcb91c04da915b301617.mp3?vuutv=7iCEow9REOnu2ngSBcQIGLWOgi2uaBMWvz3Z3MuIVnny1pppb1cDrc0Hfvgl6zjiczDZMpA7OF7IJj/4oX7DAKI624bcm1CdAITERdV4Xts=",
-      "br": 320000,
-      "size": 10691439,
-      "md5": "a8772889f38dfcb91c04da915b301617",
-      "code": 200,
-      "expi": 1200,
-      "type": "mp3",
-      "gain": -6.3072,
-      "peak": 1,
-      "closedGain": -6,
-      "closedPeak": 1.0374,
-      "fee": 0,
-      "uf": null,
-      "payed": 0,
-      "flag": 1343489,
-      "canExtend": false,
-      "freeTrialInfo": null,
-      "level": "exhigh",
-      "encodeType": "mp3",
-      "channelLayout": null,
-      "freeTrialPrivilege": {
-        "resConsumable": false,
-        "userConsumable": false,
-        "listenType": null,
-        "cannotListenReason": null,
-        "playReason": null,
-        "freeLimitTagType": null
-      },
-      "freeTimeTrialPrivilege": {
-        "resConsumable": false,
-        "userConsumable": false,
-        "type": 0,
-        "remainTime": 0
-      },
-      "urlSource": 0,
-      "rightSource": 0,
-      "podcastCtrp": null,
-      "effectTypes": null,
-      "time": 267232,
-      "message": null,
-      "levelConfuse": null,
-      "musicId": "101045179",
-      "accompany": null,
-      "sr": 44100,
-      "auEff": null
-    }
-  ]
-}
-*/
+ * 歌曲播放链接接口的响应模型
+ * 修复 peak 字段类型错误，支持小数解析
+ */
 data class MusicData(
     @SerializedName("code")
     val code: Int, // 200
@@ -70,15 +18,15 @@ data class MusicData(
         @SerializedName("auEff")
         val auEff: Any?, // null
         @SerializedName("br")
-        val br: Int, // 320000
+        val br: Int, // 320000（比特率）
         @SerializedName("canExtend")
         val canExtend: Boolean, // false
         @SerializedName("channelLayout")
         val channelLayout: Any?, // null
         @SerializedName("closedGain")
-        val closedGain: Int, // -6
+        val closedGain: Float, // -6
         @SerializedName("closedPeak")
-        val closedPeak: Double, // 1.0374
+        val closedPeak: Double, // 1.0374（修正：保持Double，支持小数）
         @SerializedName("code")
         val code: Int, // 200
         @SerializedName("effectTypes")
@@ -86,9 +34,9 @@ data class MusicData(
         @SerializedName("encodeType")
         val encodeType: String, // mp3
         @SerializedName("expi")
-        val expi: Int, // 1200
+        val expi: Int, // 1200（有效期）
         @SerializedName("fee")
-        val fee: Int, // 0
+        val fee: Int, // 0（费用类型）
         @SerializedName("flag")
         val flag: Int, // 1343489
         @SerializedName("freeTimeTrialPrivilege")
@@ -98,11 +46,11 @@ data class MusicData(
         @SerializedName("freeTrialPrivilege")
         val freeTrialPrivilege: FreeTrialPrivilege,
         @SerializedName("gain")
-        val gain: Double, // -6.3072
+        val gain: Double, // -6.3072（修正：音量增益，支持小数）
         @SerializedName("id")
-        val id: Int, // 33894312
+        val id: Long, // 33894312（歌曲ID，用Long避免溢出）
         @SerializedName("level")
-        val level: String, // exhigh
+        val level: String, // exhigh（音质等级）
         @SerializedName("levelConfuse")
         val levelConfuse: Any?, // null
         @SerializedName("md5")
@@ -114,23 +62,23 @@ data class MusicData(
         @SerializedName("payed")
         val payed: Int, // 0
         @SerializedName("peak")
-        val peak: Int, // 1
+        val peak: Double, // 1（关键修正：从Int改为Double，支持小数如0.9231）
         @SerializedName("podcastCtrp")
         val podcastCtrp: Any?, // null
         @SerializedName("rightSource")
         val rightSource: Int, // 0
         @SerializedName("size")
-        val size: Int, // 10691439
+        val size: Long, // 10691439（文件大小，用Long避免大文件溢出）
         @SerializedName("sr")
-        val sr: Int, // 44100
+        val sr: Int, // 44100（采样率）
         @SerializedName("time")
-        val time: Int, // 267232
+        val time: Int, // 267232（时长，毫秒）
         @SerializedName("type")
         val type: String, // mp3
         @SerializedName("uf")
         val uf: Any?, // null
         @SerializedName("url")
-        val url: String, // http://m7.music.126.net/20250717142827/bf4e29de325b55cf8e23c64c5335dae0/ymusic/0fd6/4f65/43ed/a8772889f38dfcb91c04da915b301617.mp3?vuutv=7iCEow9REOnu2ngSBcQIGLWOgi2uaBMWvz3Z3MuIVnny1pppb1cDrc0Hfvgl6zjiczDZMpA7OF7IJj/4oX7DAKI624bcm1CdAITERdV4Xts=
+        val url: String, // 播放链接
         @SerializedName("urlSource")
         val urlSource: Int // 0
     ) {

@@ -15,6 +15,8 @@ import com.example.module_recommened.viewmodel.ListViewModel
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.launch
 import androidx.lifecycle.lifecycleScope
+import com.example.lib.base.Song
+import com.example.yourproject.converter.DataConverter
 
 class ListFragment : Fragment() {
 
@@ -97,15 +99,16 @@ class ListFragment : Fragment() {
                 Log.d("CommentFragment", "数据响应: code=${result.code}")
 
                 if (result.code == 200) {
-                    val songs = result.data?.dailySongs  // 与RecommendFragment的数据字段一致
-                    hasMoreData = songs?.size ?: 0 >= pageSize  // 判断是否还有更多数据
+                    val originalSongs: List<Song> = result.data?.dailySongs ?: emptyList()
+                    val convertedSongs = DataConverter.convertBaseSongList(originalSongs)
+                    hasMoreData = convertedSongs?.size ?: 0 >= pageSize  // 判断是否还有更多数据
 
                     // 第一页替换数据，后续页追加数据
                     if (page == 1) {
-                        songAdapter.submitList(songs)  // 假设适配器有submitList方法
+                        songAdapter.submitList(convertedSongs)  // 假设适配器有submitList方法
                     } else {
-                        if (songs != null) {
-                            songAdapter.addMoreData(songs)
+                        if (convertedSongs != null) {
+                            songAdapter.addMoreData(convertedSongs)
                         }  // 假设适配器有addMoreData方法
                     }
                     songAdapter.notifyDataSetChanged()  // 刷新列表
