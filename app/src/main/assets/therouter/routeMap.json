@@ -47,5 +47,26 @@
     "action": "",
     "description": "",
     "params": {}
+  },
+  {
+    "path": "/singer/SingerHomeFragment",
+    "className": "com.example.module_details.SingerHomeFragment",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "/singer/SingerActivity",
+    "className": "com.example.module_details.SingerActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "/singer/SingerSongFragment",
+    "className": "SingerSongFragment",
+    "action": "",
+    "description": "",
+    "params": {}
   }
 ]

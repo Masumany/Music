@@ -54,15 +54,12 @@ class SongWord : AppCompatActivity() {
             finish()
         }
 
-        // 初始隐藏歌词区域
-        binding.mdWord.visibility = View.GONE
 
         // 获取歌词数据
         fetchSongWordData()
     }
 
     private fun fetchSongWordData() {
-        // 调用ViewModel获取歌词（使用优化后的fetch方法）
         songWordViewModel.fetchSongWordData(id.toLong())
 
         // 观察歌词数据变化

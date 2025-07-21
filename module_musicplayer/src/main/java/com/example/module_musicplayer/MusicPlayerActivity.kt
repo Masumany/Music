@@ -68,6 +68,10 @@ class MusicPlayerActivity : AppCompatActivity() {
     @JvmField
     var playProgress: Int = 0
 
+    @JvmField
+    @Autowired
+    var singerId:Long?=0
+
     // 是否需要应用传递的进度
     private var needApplyPlayProgress = false
 
@@ -117,6 +121,31 @@ class MusicPlayerActivity : AppCompatActivity() {
                 runOnUiThread {
                     playNextSong()
                 }
+            }
+
+            binding.mpSinger.setOnClickListener {
+                // 修复1：重命名局部变量，避免与外部变量冲突
+                val targetSingerId = if (currentIndex in musicList?.indices ?: emptyList()) {
+                    // 直接获取歌手ID（Long类型）
+                    musicList!![currentIndex].ar.firstOrNull()?.id ?: 0L
+                } else {
+                    // 修复2：确保返回Long类型（使用 Elvis 表达式提供默认值0L）
+                    singerId?.toLong() ?: 0L
+                }
+
+                // 修复3：统一ID有效性检查（包含null和<=0的情况）
+                if (targetSingerId <= 0) {
+                    val errorMsg = "无法获取有效歌手ID（当前值：$targetSingerId）"
+                    Toast.makeText(this@MusicPlayerActivity, errorMsg, Toast.LENGTH_SHORT).show()
+                    Log.e("MusicPlayer", errorMsg)
+                    return@setOnClickListener
+                }
+
+                // 修复4：直接使用验证后的ID转发，无需再次判空
+                Log.d("MusicPlayerActivity", "转发的歌手ID: $targetSingerId")
+                TheRouter.build("/singer/SingerActivity")
+                    .withLong("id", targetSingerId) // 传递有效Long类型ID
+                    .navigation()
             }
 
             // 评论区跳转
@@ -191,6 +220,7 @@ class MusicPlayerActivity : AppCompatActivity() {
 
         // 注入路由参数
         TheRouter.inject(this)
+        Log.d("MusicPlayerActivity", "接收的歌手ID: $singerId")
         // 初始化标记位：是否需要应用底部栏传递的进度
         needApplyPlayProgress = playProgress > 0
         Log.d("MusicPlayer", "初始化参数: 进度=$playProgress，是否应用=$needApplyPlayProgress，索引=$currentPosition")

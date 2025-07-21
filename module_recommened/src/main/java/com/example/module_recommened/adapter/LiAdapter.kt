@@ -1,5 +1,6 @@
 package com.example.module_recommened.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -55,26 +56,27 @@ class LiAdapter : ListAdapter<ListMusicData.Song, LiAdapter.LiViewHolder>(SongDi
 
     override fun onBindViewHolder(holder: LiViewHolder, position: Int) {
         val song = getItem(position)
+        val singerId = song.ar.firstOrNull()?.id ?: 0L  // 核心修改
+        Log.d("LiAdapter", "歌曲名: ${song.name}, 歌手ID: $singerId")  // 确认是否为0
         holder.bind(song)
 
         holder.itemView.setOnClickListener {
-            // 触发外部监听器（传递 ListMusicData.Song）
             onItemClickListener?.invoke(position, song)
-            val convertedList = currentList.toList()
-            MusicDataCache.currentSongList = convertedList
+            MusicDataCache.currentSongList = currentList.toList()
 
+            // 构建路由（无需let函数，直接使用singerId）
             val route = TheRouter.build("/module_musicplayer/musicplayer")
                 .withString("songListName", song.name)
-                .withString("singer", song.al.name)
+                .withString("singer", song.ar.firstOrNull()?.name ?: "未知歌手")  // 修复：歌手名应为ar.name
                 .withString("cover", song.al.picUrl)
-                .withString("id", song.id.toString())
+                .withLong("id", song.id)  // 修复：用Long传递歌曲ID
                 .withString("athour", song.ar.firstOrNull()?.name ?: "未知歌手")
                 .withInt("currentPosition", position)
+                .withLong("singerId", singerId)  // 传递非null的Long类型
 
             route.navigation(holder.itemView.context)
         }
     }
-
     fun addMoreData(newData: List<ListMusicData.Song>) {
         val currentList = currentList.toMutableList()
         currentList.addAll(newData)
