@@ -3,7 +3,7 @@ package com.example.module_mvplayer.viewModel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.module_mvplayer.Repositorty.NetRepository
+import com.example.module_mvplayer.repositorty.NetRepository
 import com.example.module_mvplayer.bean.mvData.MvData
 import com.example.module_mvplayer.bean.mvInfo.MvInfoData
 import com.example.module_mvplayer.bean.mvPlayUrl.MvPlayUrl

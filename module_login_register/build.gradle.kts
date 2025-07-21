@@ -28,11 +28,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "11"
     }
 }
 
@@ -40,9 +40,10 @@ dependencies {
 
     implementation(project(":lib_base"))
     // TheRouter 核心库
-    implementation("cn.therouter:router:1.2.2")
-    // 注解处理器（用于生成路由表）
-    kapt("cn.therouter:compiler:1.2.2")
+//    implementation("cn.therouter:api:1.2.2" )
+//    // 注解处理器（用于生成路由表）
+//    kapt("cn.therouter:compiler:1.2.2")
+    implementation (files("libs/apt-1.2.2.jar"))
     // OkHttp 核心库，用于进行网络请求
     implementation ("com.squareup.okhttp3:okhttp:4.11.0")
     // 日志拦截器，用于在开发过程中打印请求和响应的详细信息，方便调试，可选添加
@@ -79,8 +80,7 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:$nav_version")
     // 动态特性模块支持
     implementation("androidx.navigation:navigation-dynamic-features-fragment:$nav_version")
-    implementation("com.google.android.play:feature-delivery:2.1.0") // 替换有问题的 2.0.1 版本，避免 Play Console 拒绝
-    // 基础组件
+    implementation("com.google.android.play:feature-delivery:2.1.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

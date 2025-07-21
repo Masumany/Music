@@ -1,4 +1,4 @@
-package com.example.module_mvplayer.Repositorty
+package com.example.module_mvplayer.repositorty
 
 import com.example.module_mvplayer.bean.commentData.CommentData
 import com.example.module_mvplayer.bean.mvData.MvData

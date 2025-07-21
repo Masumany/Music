@@ -9,7 +9,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Music">
         <activity
-            android:name=".HotActivity"
+            android:name=".ui.activity.ListSongsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.activity.HotActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

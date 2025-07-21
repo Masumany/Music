@@ -14,7 +14,7 @@ import com.example.module_personage.adapter.HistoryAdapter
 import com.example.module_personage.viewModel.HistoryViewModel
 import com.example.module_personage.viewModel.LoadState
 
-class HistoryFragment : Fragment() {
+class   HistoryFragment : Fragment() {
 
     companion object {
         fun newInstance() = HistoryFragment()

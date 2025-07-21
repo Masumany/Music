@@ -2,7 +2,7 @@ package com.example.module_mvplayer.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.module_mvplayer.Repositorty.NetRepository
+import com.example.module_mvplayer.repositorty.NetRepository
 import com.example.module_mvplayer.bean.commentData.Comment
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

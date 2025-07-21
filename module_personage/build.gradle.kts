@@ -31,21 +31,22 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "11"
     }
 }
 
 dependencies {
 
     implementation(project(":lib_base"))
-    // TheRouter 核心库
-    implementation("cn.therouter:router:1.2.2")
-    // 注解处理器（用于生成路由表）
-    kapt("cn.therouter:compiler:1.2.2")
+//    // TheRouter 核心库
+//    implementation("cn.therouter:api:1.2.2" )
+//    // 注解处理器（用于生成路由表）
+//    kapt("cn.therouter:compiler:1.2.2")
+    implementation (files("libs/apt-1.2.2.jar"))
     // 协程库
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     // Retrofit

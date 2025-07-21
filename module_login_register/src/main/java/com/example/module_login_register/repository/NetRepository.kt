@@ -26,20 +26,27 @@ object NetRepository {
     private lateinit var sharedPreferences: SharedPreferences
 
     fun init(context: Context) {
-        sharedPreferences = context.applicationContext
-            .getSharedPreferences("cookie", Context.MODE_PRIVATE)
+        if (!::sharedPreferences.isInitialized) {  // 避免重复初始化
+            sharedPreferences = context.applicationContext
+                .getSharedPreferences("cookie", Context.MODE_PRIVATE)
+        }
     }
 
-    val okHttpClient = OkHttpClient.Builder()
-        .addInterceptor(CookieInterceptor(sharedPreferences))
-        .build()
+    private val okHttpClient by lazy {
+        OkHttpClient.Builder()
+            .addInterceptor(CookieInterceptor(sharedPreferences))
+            .build()
+    }
 
-    private var retrofit = Retrofit.Builder()
-        .baseUrl("http://43.139.173.183:3000")
-        .client(okHttpClient)
-        .addConverterFactory(GsonConverterFactory.create())
-        .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
-        .build()
+
+    private val retrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl("http://43.139.173.183:3000")
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
+            .build()
+    }
 
     val apiService = retrofit.create(ApiService::class.java)
     interface ApiService {

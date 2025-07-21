@@ -4,6 +4,7 @@ plugins {
     id("org.jetbrains.kotlin.android") version libs.versions.kotlin.get() apply false
     id("cn.therouter.agp8")version "1.2.2" apply false
 }
+
 // 根目录 build.gradle
 //buildscript {
 //    dependencies {
