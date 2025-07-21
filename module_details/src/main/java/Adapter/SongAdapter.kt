@@ -1,4 +1,4 @@
-package com.example.module_details
+package Adapter
 
 import android.content.Context
 import android.content.Intent
@@ -14,6 +14,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.module_details.R
 import com.therouter.TheRouter
 import data.ListMusicData
 
@@ -34,13 +35,13 @@ class SongAdapter(private val songList: List<ListMusicData.Song>) :
         val moreImg: ImageView = itemView.findViewById(R.id.md_more)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongAdapter.SongViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_songlist, parent, false)
         return SongViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: SongAdapter.SongViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: SongViewHolder, position: Int) {
         val item = limitedSongList[position]
         holder.textView.text = item.name
         holder.textView1.text = item.ar[0].name

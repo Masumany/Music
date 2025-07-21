@@ -1,5 +1,6 @@
 package com.example.module_details
 
+import Adapter.SingMvAdapter
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -63,7 +64,7 @@ class SingerMvFragment:Fragment (){
     private fun observeMv() {
         singerMvViewModel.singerMvData.observe(viewLifecycleOwner){response->
             if (response!=null && response.code==200){
-                singerMvList.adapter=SingMvAdapter(response.mvs)
+                singerMvList.adapter= SingMvAdapter(response.mvs)
             }else{
                 Log.d("SingerMvActivity", "observeMv: ${response.mvs} ")
             }

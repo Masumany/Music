@@ -22,7 +22,7 @@ import androidx.fragment.app.FragmentTransaction
 import com.bumptech.glide.Glide
 import com.example.lib.base.NetWorkClient
 import com.example.lib.base.Song
-import com.example.module_details.MusicDataCache
+import Adapter.MusicDataCache
 import com.example.module_musicplayer.databinding.MusicPlayerBinding
 import com.therouter.TheRouter
 import com.therouter.router.Autowired

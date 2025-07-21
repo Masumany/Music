@@ -1,4 +1,4 @@
-package com.example.module_details
+package Adapter
 
 import android.view.View
 import android.view.ViewGroup
@@ -6,6 +6,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.module_details.R
 import com.therouter.TheRouter
 import data.SimilarData
 

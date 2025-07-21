@@ -10,12 +10,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.module_details.MusicDataCache
+import Adapter.MusicDataCache
 import com.example.module_recommened.R
-import com.example.yourproject.converter.DataConverter
 import com.therouter.TheRouter
 import data.ListMusicData
-import com.example.lib.base.Song as BaseSong  // 仅作为转换用
 
 class LiAdapter : ListAdapter<ListMusicData.Song, LiAdapter.LiViewHolder>(SongDiffCallback()) {
 

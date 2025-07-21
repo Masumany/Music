@@ -1,18 +1,14 @@
 package com.example.module_details
 
+import Adapter.MusicDataCache
+import Adapter.SongAdapter
 import SongViewModel
 import android.os.Bundle
-import android.text.TextUtils.replace
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,7 +18,6 @@ import com.example.module_details.databinding.ActivitySongBinding
 import com.therouter.TheRouter
 import com.therouter.router.Autowired
 import com.therouter.router.Route
-import data.ListMusicData
 import kotlinx.coroutines.launch
 
 @Route(path = "/song/SongActivity")

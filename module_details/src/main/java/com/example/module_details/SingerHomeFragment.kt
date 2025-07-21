@@ -1,5 +1,6 @@
 package com.example.module_details
 
+import Adapter.SimilarAdapter
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater

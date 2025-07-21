@@ -8,9 +8,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.module_details.TopAdapter
+import Adapter.TopAdapter
 import com.example.module_details.databinding.FragmentSingersongBinding
-import com.therouter.router.Route
 import kotlinx.coroutines.launch
 import viewmodel.TopViewModel
 

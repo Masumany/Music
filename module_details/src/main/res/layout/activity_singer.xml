@@ -25,9 +25,22 @@
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
             android:src="@drawable/md_music" />
+
     </androidx.cardview.widget.CardView>
 
     <!-- 歌手名称文本 -->
+    <ImageView
+        android:layout_width="90dp"
+        android:layout_height="90dp"
+        android:layout_marginTop="100dp"
+        android:layout_marginStart="-60dp"
+        android:src="@drawable/md_singer"
+        android:elevation="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.627"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <ImageView
         android:id="@+id/md_singerback"
         android:layout_width="40dp"

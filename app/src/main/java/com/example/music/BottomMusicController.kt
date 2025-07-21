@@ -11,7 +11,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
-import com.example.module_details.MusicDataCache
+import Adapter.MusicDataCache
 import com.example.module_musicplayer.MusicPlayService
 import com.therouter.TheRouter
 import data.ListMusicData

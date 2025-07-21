@@ -41,6 +41,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
+        android:id="@+id/singer_song_more"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_marginStart="272dp"
