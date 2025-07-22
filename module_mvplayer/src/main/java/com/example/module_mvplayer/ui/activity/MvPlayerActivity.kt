@@ -5,11 +5,11 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import androidx.media3.exoplayer.ExoPlayer
 import com.example.module_mvplayer.bean.player.PlayBackState
 import com.example.module_mvplayer.bean.player.PlayerState
 import com.example.module_mvplayer.databinding.ActivityMvPlayerBinding
 import com.example.module_mvplayer.viewModel.MvPlayerViewModel
+import com.google.android.exoplayer2.ExoPlayer
 
 class MvPlayerActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMvPlayerBinding

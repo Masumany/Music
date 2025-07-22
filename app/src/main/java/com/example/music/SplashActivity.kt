@@ -11,16 +11,20 @@ import android.view.animation.ScaleAnimation
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.music.databinding.ActivitySplashBinding
 
 
 class SplashActivity : AppCompatActivity() {
+
+    private lateinit var binding:ActivitySplashBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_splash)
+        binding=ActivitySplashBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        val iv_logo = findViewById<ImageView>(R.id.st_img)
-        val iv_logo_text = findViewById<TextView>(R.id.st_text)
-        val skip= findViewById<ImageView>(R.id.st_skip)
+        val iv_logo = binding.stImg
+        val iv_logo_text = binding.stText
+        val skip= binding.stSkip
 
         skip.setOnClickListener{
             startActivity(Intent(this, MainActivity::class.java))
@@ -32,13 +36,13 @@ class SplashActivity : AppCompatActivity() {
             Animation.RELATIVE_TO_SELF, 0.5f,
             Animation.RELATIVE_TO_SELF, 0.5f
         ).apply {
-            duration = 2000
+            duration = 3000
             fillAfter = true
         }
 
         // 淡入动画
         val alphaAnim = AlphaAnimation(0f, 1f).apply {
-            duration = 2000
+            duration = 3000
             fillAfter = true
         }
 
@@ -49,11 +53,11 @@ class SplashActivity : AppCompatActivity() {
         iv_logo_text.startAnimation(scaleAnim)
         iv_logo_text.startAnimation(alphaAnim)
 
-        // 延迟2秒后跳转到主页面
+        // 延迟3秒后跳转到主页面
         Handler(Looper.getMainLooper()).postDelayed({
             startActivity(Intent(this, MainActivity::class.java))
-            finish() // 关闭
-        }, 2000)
+            finish()
+        }, 3000)
     }
 }
     

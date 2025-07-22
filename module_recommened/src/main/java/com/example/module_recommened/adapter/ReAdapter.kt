@@ -11,20 +11,20 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.lib.base.RecommenedData
 import com.example.module_recommened.R
+import com.example.module_recommened.databinding.ItemRecommmenedBinding
 import com.therouter.TheRouter
 
 
 class ReAdapter (private val ReText:List<RecommenedData.Result>):
     RecyclerView.Adapter<ReAdapter.ReViewHolder>(){
 
-    inner class ReViewHolder(itemView: View):RecyclerView.ViewHolder(itemView){
-        var textView: TextView =itemView.findViewById(R.id.TextView)
-        val imgView:ImageView=itemView.findViewById(R.id.img)
+    inner class ReViewHolder(private val binding:ItemRecommmenedBinding):RecyclerView.ViewHolder(binding.root){
+        var textView: TextView =binding.TextView
+        val imgView:ImageView=binding.img
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReViewHolder {
-        val view=LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_recommmened,parent,false)
+        val view=ItemRecommmenedBinding.inflate(LayoutInflater.from(parent.context),parent,false)
         return ReViewHolder(view)
     }
 
@@ -41,7 +41,6 @@ class ReAdapter (private val ReText:List<RecommenedData.Result>):
         holder.itemView.setOnClickListener {
             Log.d("ReAdapter", "点击的item.id = ${item.id}")
             try {
-                // TheRouter跳转并获取返回值
                 val result = TheRouter.build("/song/SongActivity")
                     .withLong("id", item.id)
                     .withString("recommendName", item.name)
@@ -50,7 +49,6 @@ class ReAdapter (private val ReText:List<RecommenedData.Result>):
                     .navigation(holder.itemView.context)
 
             } catch (e: Exception) {
-                // 捕获所有异常（如类找不到、权限问题等）
                 Log.e("ReAdapter", "跳转发生异常", e)
             }
         }

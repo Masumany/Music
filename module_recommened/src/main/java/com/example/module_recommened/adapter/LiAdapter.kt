@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import Adapter.MusicDataCache
 import com.example.module_recommened.R
+import com.example.module_recommened.databinding.ItemListBinding
 import com.therouter.TheRouter
 import data.ListMusicData
 
@@ -30,10 +31,10 @@ class LiAdapter : ListAdapter<ListMusicData.Song, LiAdapter.LiViewHolder>(SongDi
         }
     }
 
-    inner class LiViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val textView: TextView = itemView.findViewById(R.id.list_tv)
-        val textView1: TextView = itemView.findViewById(R.id.list_tv1)
-        val imgView: ImageView = itemView.findViewById(R.id.list_img)
+    inner class LiViewHolder(private  val binding:ItemListBinding) : RecyclerView.ViewHolder(binding.root) {
+        val textView: TextView = binding.listTv
+        val textView1: TextView = binding.listTv1
+        val imgView: ImageView = binding.listImg
 
         fun bind(song: ListMusicData.Song) {
             textView.text = song.name
@@ -47,15 +48,14 @@ class LiAdapter : ListAdapter<ListMusicData.Song, LiAdapter.LiViewHolder>(SongDi
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LiViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_list, parent, false)
+        val view = ItemListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return LiViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: LiViewHolder, position: Int) {
         val song = getItem(position)
-        val singerId = song.ar.firstOrNull()?.id ?: 0L  // 核心修改
-        Log.d("LiAdapter", "歌曲名: ${song.name}, 歌手ID: $singerId")  // 确认是否为0
+        val singerId = song.ar.firstOrNull()?.id ?: 0L
+        Log.d("LiAdapter", "歌曲名: ${song.name}, 歌手ID: $singerId")
         holder.bind(song)
 
         holder.itemView.setOnClickListener {
@@ -65,12 +65,12 @@ class LiAdapter : ListAdapter<ListMusicData.Song, LiAdapter.LiViewHolder>(SongDi
             // 构建路由（无需let函数，直接使用singerId）
             val route = TheRouter.build("/module_musicplayer/musicplayer")
                 .withString("songListName", song.name)
-                .withString("singer", song.ar.firstOrNull()?.name ?: "未知歌手")  // 修复：歌手名应为ar.name
+                .withString("singer", song.ar.firstOrNull()?.name ?: "未知歌手")
                 .withString("cover", song.al.picUrl)
-                .withLong("id", song.id)  // 修复：用Long传递歌曲ID
+                .withLong("id", song.id)
                 .withString("athour", song.ar.firstOrNull()?.name ?: "未知歌手")
                 .withInt("currentPosition", position)
-                .withLong("singerId", singerId)  // 传递非null的Long类型
+                .withLong("singerId", singerId)
 
             route.navigation(holder.itemView.context)
         }

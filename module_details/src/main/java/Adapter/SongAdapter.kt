@@ -15,6 +15,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.module_details.R
+import com.example.module_details.databinding.ItemSonglistBinding
 import com.therouter.TheRouter
 import data.ListMusicData
 
@@ -25,24 +26,21 @@ object MusicDataCache {
 class SongAdapter(private val songList: List<ListMusicData.Song>) :
     RecyclerView.Adapter<SongAdapter.SongViewHolder>() {
 
-    // 只保留前30首歌曲（如果总数不足30则取全部）
-    private val limitedSongList = songList.take(30)
 
-    inner class SongViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var textView: TextView = itemView.findViewById(R.id.list_tv)
-        var textView1: TextView = itemView.findViewById(R.id.list_tv1)
-        val imgView: ImageView = itemView.findViewById(R.id.list_img)
-        val moreImg: ImageView = itemView.findViewById(R.id.md_more)
+    inner class SongViewHolder(private val binding:ItemSonglistBinding) : RecyclerView.ViewHolder(binding.root) {
+        var textView: TextView = binding.listTv
+        var textView1: TextView = binding.listTv1
+        val imgView: ImageView = binding.listImg
+        val moreImg: ImageView = binding.mdMore
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_songlist, parent, false)
+        val view = ItemSonglistBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return SongViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: SongViewHolder, position: Int) {
-        val item = limitedSongList[position]
+        val item = songList[position]
         holder.textView.text = item.name
         holder.textView1.text = item.ar[0].name
         Glide.with(holder.imgView.context).load(item.al.picUrl).into(holder.imgView)
@@ -53,7 +51,7 @@ class SongAdapter(private val songList: List<ListMusicData.Song>) :
         }
 
         holder.itemView.setOnClickListener {
-            MusicDataCache.currentSongList = limitedSongList
+            MusicDataCache.currentSongList = songList
             val router = TheRouter.build("/module_musicplayer/musicplayer")
                 .withLong("id", item.id)
                 .withString("cover", item.al.picUrl)
@@ -63,6 +61,7 @@ class SongAdapter(private val songList: List<ListMusicData.Song>) :
             Log.d("TAG", "onBindViewHolder: 跳转携带ID=${item.id}，位置=$position")
             router.navigation(holder.itemView.context)
         }
+
     }
 
     private fun dpToPx(context: Context, dp: Int): Int {
@@ -92,7 +91,7 @@ class SongAdapter(private val songList: List<ListMusicData.Song>) :
 
         popupView.findViewById<LinearLayout>(R.id.ll_download).setOnClickListener {
             Toast.makeText(context, "开始下载: ${song.name}", Toast.LENGTH_SHORT).show()
-            popupWindow.dismiss() // 关闭弹窗
+            popupWindow.dismiss()
         }
 
 
@@ -100,7 +99,7 @@ class SongAdapter(private val songList: List<ListMusicData.Song>) :
     }
 
     override fun getItemCount(): Int {
-        return limitedSongList.size
+        return songList.size
     }
 
 }

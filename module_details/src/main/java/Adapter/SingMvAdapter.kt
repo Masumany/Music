@@ -13,19 +13,20 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.module_details.R
+import com.example.module_details.databinding.ItemSingermvBinding
 import data.SingerMvData
 
 class SingMvAdapter (private val singMvList: List<SingerMvData.Mv>):
     RecyclerView.Adapter<SingMvAdapter.SingMvViewHolder>() {
 
-        inner class SingMvViewHolder(itemView: View):RecyclerView.ViewHolder(itemView) {
-            var textView: TextView =itemView.findViewById(R.id.singer_mv_text)
-            val imgView: ImageView =itemView.findViewById(R.id.singer_mv_img)
-            val moreImg: ImageView =itemView.findViewById(R.id.singer_mv_more)
+        inner class SingMvViewHolder(private val binding: ItemSingermvBinding):RecyclerView.ViewHolder(binding.root) {
+            var textView: TextView =binding.singerMvText
+            val imgView: ImageView =binding.singerMvImg
+            val moreImg: ImageView =binding.singerMvMore
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SingMvViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_singermv,parent,false)
+        val view = ItemSingermvBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return SingMvViewHolder(view)
     }
 
@@ -61,7 +62,7 @@ class SingMvAdapter (private val singMvList: List<SingerMvData.Mv>):
             popupWindow.dismiss()
         }
         popupView.findViewById<LinearLayout>(R.id.ll_download).setOnClickListener {
-            Toast.makeText(context, "开始下载《${item.name}》", Toast.LENGTH_SHORT)
+            Toast.makeText(context, "开始下载《${item.name}》", Toast.LENGTH_SHORT).show()
             popupWindow.dismiss()
 
         }

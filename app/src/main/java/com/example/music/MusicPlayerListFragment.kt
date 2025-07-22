@@ -22,10 +22,9 @@ import com.example.yourproject.converter.DataConverter
 class MusicPlayerListFragment : Fragment() {
 
     private lateinit var binding: FragmentMusicplayerlistBinding
-    private val songAdapter = LiAdapter()  // 复用RecommendFragment的适配器
-    private lateinit var listViewModel: ListViewModel  // 复用RecommendFragment的ViewModel
+    private val songAdapter = LiAdapter()
+    private lateinit var listViewModel: ListViewModel
 
-    // 分页参数（与RecommendFragment一致）
     private var currentPage = 1
     private val pageSize = 5
     private var hasMoreData = true
@@ -50,24 +49,21 @@ class MusicPlayerListFragment : Fragment() {
         loadFirstPage()  // 加载第一页数据
     }
 
-    // 初始化ViewModel（与RecommendFragment使用同一个）
     private fun initViewModel() {
         listViewModel = ViewModelProvider(this)[ListViewModel::class.java]
     }
 
-    // 初始化RecyclerView）
     private fun initRecyclerView() {
-        // 设置布局管理器（与RecommendFragment一致）
         binding.rvlist.adapter = songAdapter
         val layoutManager = LinearLayoutManager(requireContext())
         binding.rvlist.layoutManager = layoutManager
 
-        // 滚动监听（实现分页加载，与RecommendFragment逻辑相同）
+        // 滚动监听（实现分页加载）
         binding.rvlist.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
 
-                // 计算最后可见项位置
+                // 计算最后一项的位置
                 val lastVisiblePosition = layoutManager.findLastVisibleItemPosition()
                 val totalItemCount = layoutManager.itemCount
 
@@ -79,7 +75,7 @@ class MusicPlayerListFragment : Fragment() {
         })
     }
 
-    // 加载第一页数据（重置分页参数）
+    // 加载第一页数据（重置）
     private fun loadFirstPage() {
         currentPage = 1
         fetchListData(currentPage)
@@ -87,7 +83,7 @@ class MusicPlayerListFragment : Fragment() {
 
     // 加载下一页数据
     private fun loadNextPage() {
-        if (isLoading) return  // 防止重复加载
+        if (isLoading) return
         isLoading = true
         currentPage++
         fetchListData(currentPage)

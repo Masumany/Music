@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.module_details.R
+import com.example.module_details.databinding.ItemTopBinding
 import com.example.yourproject.converter.DataConverter
 import com.therouter.TheRouter
 import data.TopData
@@ -32,10 +33,10 @@ class TopAdapter :ListAdapter<TopData.Song, TopAdapter.TopViewHolder>(TopDiffCal
         }
     }
 
-        inner class TopViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-            val textView: TextView =itemView.findViewById(R.id.top_tv)
-            val img:ImageView=itemView.findViewById(R.id.top_img)
-            val moreImg:ImageView=itemView.findViewById(R.id.singer_song_more)
+        inner class TopViewHolder(private val binding: ItemTopBinding): RecyclerView.ViewHolder(binding.root) {
+            val textView: TextView =binding.topTv
+            val img:ImageView=binding.topImg
+            val moreImg:ImageView=binding.singerSongMore
             fun bind(song: TopData.Song){
                 textView.text = song.name
                 val cover=song.al.picUrl
@@ -47,8 +48,7 @@ class TopAdapter :ListAdapter<TopData.Song, TopAdapter.TopViewHolder>(TopDiffCal
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TopViewHolder {
-        val view=LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_top,parent,false)
+        val view=ItemTopBinding.inflate(LayoutInflater.from(parent.context),parent,false)
         return TopViewHolder(view)
     }
 
@@ -72,7 +72,7 @@ class TopAdapter :ListAdapter<TopData.Song, TopAdapter.TopViewHolder>(TopDiffCal
             val convertedList = DataConverter.convertTopSongList(currentList)
             MusicDataCache.currentSongList = convertedList // 存入缓存
 
-            // 2. 传递必要参数（包含当前索引）
+
             TheRouter.build("/module_musicplayer/musicplayer")
                 .withLong("id", currentSong.id)
                 .withString("songListName", currentSong.name)
@@ -81,7 +81,7 @@ class TopAdapter :ListAdapter<TopData.Song, TopAdapter.TopViewHolder>(TopDiffCal
                 .withInt("currentPosition", currentPosition) // 传递当前索引
                 .navigation(holder.itemView.context)
 
-            // 3. 回调点击事件（可选）
+            // 回调点击事件（可选）
             onItemClickListener?.invoke(currentPosition, currentSong)
         }
 
@@ -101,7 +101,7 @@ class TopAdapter :ListAdapter<TopData.Song, TopAdapter.TopViewHolder>(TopDiffCal
         popupWindow.setBackgroundDrawable(context.getDrawable(R.color.white))
 
         popUpView.findViewById<LinearLayout>(R.id.ll_share).setOnClickListener {
-            Toast.makeText(context, "分享", Toast.LENGTH_SHORT)
+            Toast.makeText(context, "分享《${currentSong?.name}》", Toast.LENGTH_SHORT).show()
             val intent = Intent(Intent.ACTION_SEND)
             intent.type = "text/plain"
             intent.putExtra(Intent.EXTRA_TEXT, "推荐歌曲：${currentSong?.name}")

@@ -21,10 +21,10 @@ import com.example.yourproject.converter.DataConverter
 class ListFragment : Fragment() {
 
     private lateinit var binding: FragmentListBinding
-    private val songAdapter = LiAdapter()  // 复用RecommendFragment的适配器
-    private lateinit var listViewModel: ListViewModel  // 复用RecommendFragment的ViewModel
+    private val songAdapter = LiAdapter()
+    private lateinit var listViewModel: ListViewModel
 
-    // 分页参数（与RecommendFragment保持一致）
+    // 分页参数
     private var currentPage = 1
     private val pageSize = 5
     private var hasMoreData = true
@@ -52,19 +52,19 @@ class ListFragment : Fragment() {
         listViewModel = ViewModelProvider(this)[ListViewModel::class.java]
     }
 
-    // 初始化RecyclerView（完全复制RecommendFragment的配置）
+    // 初始化RecyclerView
     private fun initRecyclerView() {
-        // 设置布局管理器（与RecommendFragment一致）
+
         val layoutManager = LinearLayoutManager(requireContext())
         binding.rvlist.layoutManager = layoutManager
         binding.rvlist.adapter = songAdapter
 
-        // 滚动监听（实现分页加载，与RecommendFragment逻辑相同）
+        // 滚动监听（分页加载）
         binding.rvlist.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
 
-                // 计算最后可见项位置
+                // 计算最后一项的位置
                 val lastVisiblePosition = layoutManager.findLastVisibleItemPosition()
                 val totalItemCount = layoutManager.itemCount
 
@@ -90,11 +90,10 @@ class ListFragment : Fragment() {
         fetchListData(currentPage)
     }
 
-    // 请求列表数据（与RecommendFragment完全相同的逻辑）
+    // 请求列表数据
     private fun fetchListData(page: Int) {
         lifecycleScope.launch {
             try {
-                // 调用与RecommendFragment相同的ViewModel方法获取数据
                 val result = listViewModel.getListData(page, pageSize)
                 Log.d("CommentFragment", "数据响应: code=${result.code}")
 
@@ -105,11 +104,11 @@ class ListFragment : Fragment() {
 
                     // 第一页替换数据，后续页追加数据
                     if (page == 1) {
-                        songAdapter.submitList(convertedSongs)  // 假设适配器有submitList方法
+                        songAdapter.submitList(convertedSongs)
                     } else {
                         if (convertedSongs != null) {
                             songAdapter.addMoreData(convertedSongs)
-                        }  // 假设适配器有addMoreData方法
+                        }
                     }
                     songAdapter.notifyDataSetChanged()  // 刷新列表
                 } else {

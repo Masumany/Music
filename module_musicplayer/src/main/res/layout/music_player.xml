@@ -108,6 +108,7 @@
         <ImageView
             android:id="@+id/mp_center"
             android:layout_width="250dp"
+            android:scaleType="centerCrop"
             android:layout_height="250dp"
             android:src="@drawable/mp_music" />
     </androidx.cardview.widget.CardView>

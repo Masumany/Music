@@ -180,7 +180,10 @@ class SongActivity : AppCompatActivity() {
                 return@observe
             }
 
-            val limitedList = listMusicData.songs.take(30)
+            val count= songViewModel.listMusicData.value?.songs?.size
+            binding.count.setText("(${count})")
+
+            val limitedList = listMusicData.songs
             MusicDataCache.currentSongList = limitedList
             binding.mdRv.adapter = SongAdapter(limitedList)
         }

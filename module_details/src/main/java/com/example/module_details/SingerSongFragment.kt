@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import Adapter.TopAdapter
 import com.example.module_details.databinding.FragmentSingersongBinding
+import com.therouter.TheRouter
 import kotlinx.coroutines.launch
 import viewmodel.TopViewModel
 
@@ -81,6 +82,18 @@ class SingerSongFragment : Fragment() {
         } else {
             Log.d("SingerSong", "onViewCreated中未获取到ID，等待setSingerId调用")
         }
+
+        binding.topAllstart.setOnClickListener{
+            val first=topAdapter.currentList.firstOrNull()?.id
+            val router=TheRouter.build("/module_musicplayer/musicplayer")
+                .withString("id",first.toString())
+                .withString("cover",topAdapter.currentList.firstOrNull()?.al?.picUrl)
+                .withString("songListName",topAdapter.currentList.firstOrNull()?.name)
+                .withString("athour",topAdapter.currentList.firstOrNull()?.ar?.firstOrNull()?.name)
+                .navigation(requireActivity())
+        }
+
+
     }
 
     // 数据请求方法

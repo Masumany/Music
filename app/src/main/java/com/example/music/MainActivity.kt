@@ -104,6 +104,7 @@ class MainActivity : AppCompatActivity() {
                     val originalSongs: List<Song> = result.data?.dailySongs ?: emptyList()
                     val convertedSongs = DataConverter.convertBaseSongList(originalSongs)
                     songAdapter.submitList(convertedSongs) // 提交数据
+                    bottomMusicController.setLoadedSongList(convertedSongs)
                 } else {
                     Toast.makeText(this@MainActivity, "数据错误: ${result.code}", Toast.LENGTH_SHORT).show()
                 }

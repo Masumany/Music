@@ -11,17 +11,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.module_recommened.R
 import com.example.lib.base.BannerData
+import com.example.module_recommened.databinding.ItemImageBinding
 
 class BannerAdapter(private val BannnerUrls: List<BannerData.Banner>):
     RecyclerView.Adapter<BannerAdapter.BannerViewHolder>() {
 
-        inner class BannerViewHolder(itemView: ImageView):RecyclerView.ViewHolder(itemView) {
-            val imageView: ImageView = itemView
+        inner class BannerViewHolder(private val binding:ItemImageBinding):RecyclerView.ViewHolder(binding.root) {
+            val imageView: ImageView = binding.img
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BannerViewHolder {
-        val imageView=LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_image,parent,false) as ImageView
+        val imageView=ItemImageBinding.inflate(LayoutInflater.from(parent.context),parent,false)
         return BannerViewHolder(imageView)
     }
 

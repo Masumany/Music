@@ -40,6 +40,7 @@ android {
 }
 
 dependencies {
+    implementation ("pl.droidsonroids.gif:android-gif-drawable:1.2.19")
     implementation ("org.greenrobot:eventbus:3.3.1")
     implementation ("com.google.android.material:material:1.0.0")
     implementation(project(":lib_base"))

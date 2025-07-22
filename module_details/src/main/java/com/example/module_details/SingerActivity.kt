@@ -39,9 +39,6 @@ class SingerActivity : AppCompatActivity() {
         initFragment(savedInstanceState)
 
 
-
-
-        // 返回按钮点击事件
         binding.mdSingerback.setOnClickListener {
             finish()
         }
@@ -94,14 +91,13 @@ class SingerActivity : AppCompatActivity() {
         }
     }
 
-    // 数据请求逻辑保持不变
     private fun fetchSingerHomeData() {
         singerHomeViewModel.viewModelScope.launch {
             singerHomeViewModel.getSingerHomeData(id)
         }
     }
 
-    // 初始Fragment加载逻辑保持不变
+    // 初始Fragment
     private fun initFragment(savedInstanceState: Bundle?) {
         if (savedInstanceState == null) {
             val singerHomeFragment = SingerHomeFragment()

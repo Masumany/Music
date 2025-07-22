@@ -41,9 +41,11 @@ android {
 }
 
 dependencies {
+    implementation ("org.greenrobot:eventbus:3.3.1")
     implementation ("androidx.fragment:fragment-ktx:1.6.2")
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.runtime.saved.instance.state)
+    implementation(libs.google.firebase.crashlytics.buildtools)
     kapt("cn.therouter:apt:1.2.2")
     implementation("cn.therouter:router:1.2.2")
     implementation(libs.androidx.core.ktx)

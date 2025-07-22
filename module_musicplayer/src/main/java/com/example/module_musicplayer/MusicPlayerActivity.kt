@@ -1,6 +1,9 @@
 package com.example.module_musicplayer
 
+import SongChangeEvent
 import android.animation.Animator
+
+
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
@@ -23,14 +26,17 @@ import com.bumptech.glide.Glide
 import com.example.lib.base.NetWorkClient
 import com.example.lib.base.Song
 import Adapter.MusicDataCache
+import PlayProgressEvent
 import com.example.module_musicplayer.databinding.MusicPlayerBinding
 import com.therouter.TheRouter
 import com.therouter.router.Autowired
 import com.therouter.router.Route
+import data.ListMusicData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.greenrobot.eventbus.EventBus
 import kotlin.random.Random
 
 @Route(path = "/module_musicplayer/musicplayer")
@@ -70,7 +76,7 @@ class MusicPlayerActivity : AppCompatActivity() {
 
     @JvmField
     @Autowired
-    var singerId:Long?=0
+    var singerId: Long? = 0
 
     // 是否需要应用传递的进度
     private var needApplyPlayProgress = false
@@ -85,7 +91,7 @@ class MusicPlayerActivity : AppCompatActivity() {
     private var isLiked = false
     private val handler = Handler(Looper.getMainLooper())
     private var currentMusic: String? = null
-    var musicList: List<data.ListMusicData.Song>? = null
+    var musicList: List<ListMusicData.Song>? = null
     var currentIndex = -1
 
     private val MODE_SEQUENTIAL = 0
@@ -124,16 +130,12 @@ class MusicPlayerActivity : AppCompatActivity() {
             }
 
             binding.mpSinger.setOnClickListener {
-                // 修复1：重命名局部变量，避免与外部变量冲突
                 val targetSingerId = if (currentIndex in musicList?.indices ?: emptyList()) {
-                    // 直接获取歌手ID（Long类型）
                     musicList!![currentIndex].ar.firstOrNull()?.id ?: 0L
                 } else {
-                    // 修复2：确保返回Long类型（使用 Elvis 表达式提供默认值0L）
                     singerId?.toLong() ?: 0L
                 }
 
-                // 修复3：统一ID有效性检查（包含null和<=0的情况）
                 if (targetSingerId <= 0) {
                     val errorMsg = "无法获取有效歌手ID（当前值：$targetSingerId）"
                     Toast.makeText(this@MusicPlayerActivity, errorMsg, Toast.LENGTH_SHORT).show()
@@ -141,10 +143,9 @@ class MusicPlayerActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
 
-                // 修复4：直接使用验证后的ID转发，无需再次判空
                 Log.d("MusicPlayerActivity", "转发的歌手ID: $targetSingerId")
                 TheRouter.build("/singer/SingerActivity")
-                    .withLong("id", targetSingerId) // 传递有效Long类型ID
+                    .withLong("id", targetSingerId)
                     .navigation()
             }
 
@@ -170,7 +171,7 @@ class MusicPlayerActivity : AppCompatActivity() {
                     .navigation()
             }
 
-            binding.mpCenter.setOnClickListener{
+            binding.mpCenter.setOnClickListener {
                 val currentSongId = if (currentIndex in musicList?.indices ?: emptyList()) {
                     musicList!![currentIndex].id.toString()
                 } else {
@@ -184,8 +185,14 @@ class MusicPlayerActivity : AppCompatActivity() {
                     ).show()
                     return@setOnClickListener
                 }
-                val route=TheRouter.build("/song/SongWord")
-                    .withString("id",currentSongId)
+                val currentPos = musicService?.getCurrentPosition() ?: 0
+                val duration = musicService?.getDuration() ?: 0
+                val route = TheRouter.build("/song/SongWord")
+                    .withString("id", currentSongId)
+                    .withInt("currentSongDuration", duration)
+                    .withInt("currentPos", currentPos)
+
+
                 route.navigation()
             }
 
@@ -205,10 +212,30 @@ class MusicPlayerActivity : AppCompatActivity() {
         override fun run() {
             if (isServiceReady && musicService?.isPlaying == true) {
                 val currentPosition = musicService?.getCurrentPosition() ?: 0
+                val duration = musicService?.getDuration() ?: 0
+                val currentSongId = if (currentIndex in musicList?.indices ?: emptyList()) {
+                    musicList!![currentIndex].id.toString()
+                } else {
+                    id ?: ""
+                }
                 binding.mpSeekBar.progress = currentPosition
                 binding.mpTimestart.text = formatTime(currentPosition)
+
+                EventBus.getDefault().post(
+                    PlayProgressEvent(
+                        position = currentPosition,
+                        duration = duration,
+                        songId = id ?: ""
+                    )
+                )
+
+                progressListener?.onProgressChanged(
+                    songId = currentSongId,
+                    duration = musicService?.getDuration() ?: 0,
+                    position = currentPosition
+                )
             }
-            handler.postDelayed(this, 500)  // 每500ms更新一次
+            handler.postDelayed(this, 100)  // 每100ms更新一次
         }
     }
 
@@ -221,9 +248,12 @@ class MusicPlayerActivity : AppCompatActivity() {
         // 注入路由参数
         TheRouter.inject(this)
         Log.d("MusicPlayerActivity", "接收的歌手ID: $singerId")
-        // 初始化标记位：是否需要应用底部栏传递的进度
+        // 是否需要应用底部栏传递的进度
         needApplyPlayProgress = playProgress > 0
-        Log.d("MusicPlayer", "初始化参数: 进度=$playProgress，是否应用=$needApplyPlayProgress，索引=$currentPosition")
+        Log.d(
+            "MusicPlayer",
+            "初始化参数: 进度=$playProgress，是否应用=$needApplyPlayProgress，索引=$currentPosition"
+        )
 
         // 初始化播放模式
         restorePlayMode()
@@ -248,6 +278,8 @@ class MusicPlayerActivity : AppCompatActivity() {
         initMusicInfo()
         initFragment()
         fetchMusic()
+
+        initLikeStatus()
 
         // 启动进度更新
         handler.post(updateSeekBarRunnable)
@@ -330,7 +362,8 @@ class MusicPlayerActivity : AppCompatActivity() {
             val serviceIsPlaying = musicService?.isPlaying == true
             val serviceDuration = musicService?.getDuration() ?: 0
             // 优先使用未应用的进度，否则使用服务当前进度
-            val servicePosition = if (needApplyPlayProgress) playProgress else musicService?.getCurrentPosition() ?: 0
+            val servicePosition =
+                if (needApplyPlayProgress) playProgress else musicService?.getCurrentPosition() ?: 0
 
             // 更新播放状态
             isPlaying = serviceIsPlaying
@@ -390,6 +423,7 @@ class MusicPlayerActivity : AppCompatActivity() {
             isLiked = !isLiked
             binding.mpLike.setImageResource(if (isLiked) R.drawable.like_last else R.drawable.like)
             Toast.makeText(this, if (isLiked) "已收藏" else "已取消", Toast.LENGTH_SHORT).show()
+            saveLikeState(isLiked)
         }
 
         // 播放模式按钮
@@ -415,6 +449,27 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
+    private fun saveLikeState(isLiked: Boolean) {
+        val currentSongId=if(musicList?.indices?.contains(currentIndex) == true) {
+            musicList!![currentIndex].id
+        }else {
+            id
+        }
+        val prefs = getSharedPreferences("like_state", MODE_PRIVATE)
+        prefs.edit().putBoolean(currentSongId.toString(), isLiked).apply()
+        Log.d("LikeStatus", "歌曲 $currentSongId 收藏状态：$isLiked")
+    }
+    private fun initLikeStatus() {
+        val currentSongId = if (currentIndex in musicList?.indices ?: emptyList()) {
+            musicList!![currentIndex].id.toString()
+        } else {
+            id ?: return
+        }
+
+        val prefs = getSharedPreferences("like_state", MODE_PRIVATE)
+        isLiked = prefs.getBoolean(currentSongId, false)
+        binding.mpLike.setImageResource(if (isLiked) R.drawable.like_last else R.drawable.like)
+    }
     // 根据歌曲ID查找索引
     private fun findSongIndexById(targetId: String): Int {
         if (targetId.isBlank() || musicList.isNullOrEmpty()) return -1
@@ -472,7 +527,11 @@ class MusicPlayerActivity : AppCompatActivity() {
                                         binding.mpStart.setImageResource(if (success) R.drawable.mp_stop else R.drawable.mp_start)
                                     }
                                 }
-                                Toast.makeText(this@MusicPlayerActivity, "服务初始化中，请稍候...", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    this@MusicPlayerActivity,
+                                    "服务初始化中，请稍候...",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         } else {
                             handleSongError(songName)
@@ -513,9 +572,11 @@ class MusicPlayerActivity : AppCompatActivity() {
             MODE_SEQUENTIAL -> {
                 currentIndex = (currentIndex - 1 + musicList!!.size) % musicList!!.size
             }
+
             MODE_SINGLE -> {
                 musicService?.seekTo(0)
             }
+
             MODE_RANDOM -> {
                 if (musicList!!.size <= 1) {
                     currentIndex = 0
@@ -528,8 +589,19 @@ class MusicPlayerActivity : AppCompatActivity() {
                 }
             }
         }
+        if (musicList?.indices?.contains(currentIndex) == true) {
+            val newSong = musicList!![currentIndex]
+            // 发送歌曲切换事件
+            EventBus.getDefault().post(
+                SongChangeEvent(
+                    newSongId = newSong.id.toString(),
+                    initialPosition = 0
+                )
+            )
 
-        playCurrentMusicWithCheck()
+            playCurrentMusicWithCheck()
+            initLikeStatus()
+        }
     }
 
     // 播放下一首
@@ -543,9 +615,11 @@ class MusicPlayerActivity : AppCompatActivity() {
             MODE_SEQUENTIAL -> {
                 currentIndex = (currentIndex + 1) % musicList!!.size
             }
+
             MODE_SINGLE -> {
                 playCurrentMusicWithCheck()
             }
+
             MODE_RANDOM -> {
                 if (musicList!!.size <= 1) {
                     currentIndex = 0
@@ -558,9 +632,23 @@ class MusicPlayerActivity : AppCompatActivity() {
                 }
             }
         }
-
-        playCurrentMusicWithCheck()
+        if (musicList?.indices?.contains(currentIndex) == true) {
+            val newSong = musicList!![currentIndex]
+            // 发送歌曲切换事件
+            EventBus.getDefault().post(
+                SongChangeEvent(
+                    newSongId = newSong.id.toString(),
+                    initialPosition = 0 // 新歌曲从0开始播放
+                )
+            )
+            // 继续原有播放逻辑
+            playCurrentMusicWithCheck()
+            initLikeStatus()
+        }
     }
+
+
+
 
     // 获取歌曲列表并初始化播放
     private fun fetchMusic() {
@@ -576,7 +664,6 @@ class MusicPlayerActivity : AppCompatActivity() {
             currentIndex = currentPosition ?: 0
             Log.d("MusicPlayer", "列表大小: ${songList.size}, 当前索引: $currentIndex")
 
-            // 核心优化：如果需要应用进度，仅同步UI，不重新加载歌曲
             if (needApplyPlayProgress && musicList?.indices?.contains(currentIndex) == true) {
                 val currentSong = musicList!![currentIndex]
                 // 更新歌曲信息UI
@@ -604,7 +691,7 @@ class MusicPlayerActivity : AppCompatActivity() {
                 try {
                     val dailySongsResponse = NetWorkClient.apiService2.getListData()
                     if (dailySongsResponse.code == 200 && !dailySongsResponse.data?.dailySongs.isNullOrEmpty()) {
-                        musicList = dailySongsResponse.data?.dailySongs as? List<data.ListMusicData.Song>?
+                        musicList = dailySongsResponse.data?.dailySongs as? List<ListMusicData.Song>?
                         withContext(Dispatchers.Main) {
                             currentIndex = findSongIndexById(id ?: "")
                             if (currentIndex == -1) currentIndex = 0
@@ -873,7 +960,17 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
+
+    interface onPlayProgressListener {
+        fun onProgressChanged(position:Int,duration: Int,songId: String)
+    }
+
+    private var progressListener:onPlayProgressListener? = null
     // 销毁时清理资源
+
+    fun setOnPLayProgressListener(listener:onPlayProgressListener){
+        progressListener = listener
+    }
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)

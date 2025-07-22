@@ -1,6 +1,7 @@
 package com.example.module_mvplayer.bean.player
 
-import androidx.media3.common.C
+
+import com.google.android.exoplayer2.C
 
 data class PlayerState (
     //播放状态(空闲，缓冲，就绪)

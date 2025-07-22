@@ -38,11 +38,10 @@ class CommentActivity : AppCompatActivity() {
     }
 
     private fun initRecyclerView() {
-        // 初始化时创建一次适配器
         commentAdapter = CommentAdapter(emptyList())
         binding.rvComment.apply {
             layoutManager = LinearLayoutManager(this@CommentActivity)
-            adapter = commentAdapter  // 设置给RecyclerView
+            adapter = commentAdapter
         }
     }
 
@@ -56,7 +55,7 @@ class CommentActivity : AppCompatActivity() {
 
     private fun observeCommentData() {
         commentViewModel.hotComments.observe(this) { hotComments ->
-            Log.d("CommentData", "评论数量: ${hotComments.size}")  // 调试用，确认数据不为空
+            Log.d("CommentData", "评论数量: ${hotComments.size}")
 
             if (hotComments.isNotEmpty()) {
                 commentAdapter.updateComments(hotComments)

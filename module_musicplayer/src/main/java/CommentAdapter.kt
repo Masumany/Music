@@ -9,21 +9,21 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.request.RequestOptions
+import com.example.module_musicplayer.databinding.ItemCommentBinding
 import data.CommentData
 
 class CommentAdapter(
     private var commentText: List<CommentData.HotComment> = emptyList()
 ) : RecyclerView.Adapter<CommentAdapter.CommentViewHolder>() {
 
-    inner class CommentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val tvNickname: TextView = itemView.findViewById(R.id.comment_tv)
-        val tvContent: TextView = itemView.findViewById(R.id.comment_tv1)
-        val ivAvatar: ImageView = itemView.findViewById(R.id.comment_img)
+    inner class CommentViewHolder(private val binding: ItemCommentBinding) : RecyclerView.ViewHolder(binding.root) {
+        val tvNickname: TextView = binding.commentTv
+        val tvContent: TextView = binding.commentTv1
+        val ivAvatar: ImageView = binding.commentImg
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_comment, parent, false)
+        val view = ItemCommentBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return CommentViewHolder(view)
     }
 

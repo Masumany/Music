@@ -23,7 +23,6 @@ import com.example.module_recommened.viewmodel.BannerViewModel
 import com.example.module_recommened.viewmodel.ListViewModel
 import com.example.module_recommened.viewmodel.RecommenedViewModel
 import com.example.yourproject.converter.DataConverter
-import data.ListMusicData
 import kotlinx.coroutines.launch
 
 class RecommendFragment : Fragment() {
@@ -32,7 +31,7 @@ class RecommendFragment : Fragment() {
 
     private lateinit var viewPager: ViewPager2
     private lateinit var recyclerView: RecyclerView
-    private lateinit var rvlist: RecyclerView
+    private lateinit var rv_list: RecyclerView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
     private lateinit var bannerViewModel: BannerViewModel
@@ -60,15 +59,15 @@ class RecommendFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         swipeRefreshLayout = binding.swipeRefresh
-        rvlist = binding.rvlist
+        rv_list = binding.rvlist
         viewPager = binding.viewPager
         recyclerView = binding.recyclerView
 
-        rvlist.adapter = songAdapter
+        rv_list.adapter = songAdapter
         val layoutManager = LinearLayoutManager(requireContext())
-        rvlist.layoutManager = layoutManager
+        rv_list.layoutManager = layoutManager
 
-        rvlist.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        rv_list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (dy <= 0) return // 只处理向下滚动

@@ -63,10 +63,7 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-common-java8:2.7.0")
     // 内存泄漏检测
     debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.8.1")
-    // 兼容库
-    implementation(libs.androidx.legacy.support.v4)
-    implementation(libs.androidx.fragment.ktx)
-    // 导航组件
+
     val nav_version = "2.7.7"
     implementation("androidx.navigation:navigation-fragment-ktx:$nav_version")
     implementation("androidx.navigation:navigation-ui-ktx:$nav_version")

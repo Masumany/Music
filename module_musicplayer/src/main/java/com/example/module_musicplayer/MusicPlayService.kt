@@ -28,7 +28,7 @@ class MusicPlayService : Service() {
     private var mediaPlayer: MediaPlayer? = null
     var currentUrl: String? = null
     var currentSong: ListMusicData.Song? = null
-    var isPlaying = false // 公开变量便于Activity直接访问
+    var isPlaying = false
 
     // 播放完成回调（用于自动播放下一首）
     private var onCompletionListener: (() -> Unit)? = null

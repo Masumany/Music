@@ -63,8 +63,8 @@ dependencies {
     implementation ("androidx.viewpager2:viewpager2:1.1.0")
     implementation ("com.google.android.material:material:1.8.0")
     // ExoPlayer
-    implementation 'com.google.android.exoplayer:exoplayer-core:2.18.7'
-    implementation 'com.google.android.exoplayer:exoplayer-ui:2.18.7'
+    implementation ("com.google.android.exoplayer:exoplayer-core:2.18.7")
+    implementation ("com.google.android.exoplayer:exoplayer-ui:2.18.7")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

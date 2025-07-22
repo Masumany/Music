@@ -110,6 +110,14 @@
                 android:textColor="#8496F3"
                 android:textSize="15sp"
                 android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/count"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="(count)"
+                android:textColor="#8496F3"/>
         </LinearLayout>
 
         <!-- 歌曲列表 -->
