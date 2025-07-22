@@ -34,7 +34,14 @@ class ListSongsActivity : AppCompatActivity() {
         binding.rvSongsList.adapter = adapter
         binding.rvSongsList.layoutManager = LinearLayoutManager(this)
 
+        initClick ()
         loadListSongsData()
+    }
+
+    private fun initClick() {
+        binding.songsListBack.setOnClickListener {
+            finish()
+        }
     }
     private fun loadListSongsData() {
         val id = intent.getIntExtra("id", 0)

@@ -30,7 +30,7 @@ object NetRepository {
         ): Response<ListData>
 
         @GET("/toplist/artist")
-        suspend fun getArtistList(
+        suspend fun getSingerList(
         ): Response<SingerData>
 
         @GET("/playlist/track/all")
