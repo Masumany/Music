@@ -52,7 +52,7 @@ class SingerFragment : Fragment() {
     }
 
     private fun loadSingerData() {
-        viewModel.singerData
+        viewModel.getSingerData()
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.singerData.collect { list ->
                 adapter.submitList(list.list.artists)
