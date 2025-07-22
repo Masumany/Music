@@ -1,5 +1,6 @@
 plugins {
-    alias(libs.plugins.android.application)
+    id("com.android.library")
+    //alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("kotlin-kapt")
 }
@@ -9,11 +10,11 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.module_mvplayer"
+//        applicationId = "com.example.module_mvplayer"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+//        versionCode = 1
+//        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -47,7 +48,7 @@ dependencies {
 //    implementation("cn.therouter:router:1.2.2")
 //    // 注解处理器（用于生成路由表）
 //    kapt("cn.therouter:compiler:1.2.2")
-    implementation (files("libs/apt-1.2.2.jar"))
+//    implementation (files("libs/apt-1.2.2.jar"))
     // 协程库
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     // Retrofit
@@ -68,9 +69,10 @@ dependencies {
     debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.8.1")
     implementation ("androidx.viewpager2:viewpager2:1.1.0")
     implementation ("com.google.android.material:material:1.8.0")
-    // ExoPlayer
-    implementation ("com.google.android.exoplayer:exoplayer-core:2.18.7")
-    implementation ("com.google.android.exoplayer:exoplayer-ui:2.18.7")
+    // Jetpack Media3 ExoPlayer
+    implementation("androidx.media3:media3-ui:1.1.0")
+    implementation("androidx.media3:media3-session:1.1.0")
+    implementation("androidx.media3:media3-exoplayer:1.1.0")
     // 替换 legacy.support.v4
     implementation("androidx.legacy:legacy-support-v4:1.0.0")  // 或使用更具体的 androidx 组件
 

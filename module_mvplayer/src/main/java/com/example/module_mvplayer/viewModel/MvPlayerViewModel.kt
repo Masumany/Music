@@ -3,20 +3,16 @@ package com.example.module_mvplayer.viewModel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.exoplayer.ExoPlayer
 import com.example.module_mvplayer.repositorty.NetRepository
 import com.example.module_mvplayer.bean.mvData.MvData
 import com.example.module_mvplayer.bean.mvInfo.MvInfoData
 import com.example.module_mvplayer.bean.mvPlayUrl.MvPlayUrl
-import com.example.module_mvplayer.bean.player.PlayBackState
-import com.example.module_mvplayer.bean.player.PlayerState
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.PlaybackException
-import com.google.android.exoplayer2.Player
+import com.example.module_mvplayer.viewModel.player.PlayBackState
+import com.example.module_mvplayer.viewModel.player.PlayerState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class MvPlayerViewModel : ViewModel() {
@@ -95,82 +91,6 @@ class MvPlayerViewModel : ViewModel() {
                 _loadState.value = LoadState.Error("网络错误: ${e.localizedMessage}")
             }
         }
-    }
-
-    // 创建ExoPlayer实例
-    fun createPlayer(context: Context): ExoPlayer {
-        return ExoPlayer.Builder(context)
-            .setSeekBackIncrementMs(seekBackIncrementMs)
-            .setSeekForwardIncrementMs(seekForwardIncrementMs)
-            .build()
-    }
-
-    fun preparePlayer(player: ExoPlayer, mvId: String) {
-        val mediaItem = MediaItem.fromUri(mvId)
-        player.setMediaItem(mediaItem)
-        player.prepare()
-    }
-
-    // 绑定播放器监听器
-    fun attachPlayerListeners(player: ExoPlayer) {
-        player.addListener(object : Player.Listener {
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                val state = when (playbackState) {
-                    Player.STATE_IDLE -> PlayBackState.IDLE
-                    Player.STATE_BUFFERING -> PlayBackState.BUFFERING
-                    Player.STATE_READY -> PlayBackState.READY
-                    Player.STATE_ENDED -> PlayBackState.ENDED
-                    else -> PlayBackState.ERROR
-                }
-                _playState.update {
-                    it.copy(
-                        playBackState = state,
-                        isPlaying = playbackState == Player.STATE_READY && player.playWhenReady
-                    )
-                }
-            }
-
-            override fun onPlayerError(error: PlaybackException) {
-                _playState.update {
-                    it.copy(
-                        playBackState = PlayBackState.ERROR,
-                        errorMessage = error.message
-                    )
-                }
-            }
-
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                _playState.update { it.copy(isPlaying = isPlaying) }
-            }
-
-            override fun onPositionDiscontinuity(
-                oldPosition: Player.PositionInfo,
-                newPosition: Player.PositionInfo,
-                reason: Int
-            ) {
-                _playState.update { it.copy(currentPosition = newPosition.positionMs) }
-            }
-        })
-    }
-
-    // 切换播放状态
-    fun togglePlayback(player: ExoPlayer) {
-        player.playWhenReady = !player.playWhenReady
-    }
-
-    fun seekForward(player: ExoPlayer) {
-        val newPosition = player.currentPosition + seekForwardIncrementMs
-        player.seekTo(newPosition)
-    }
-
-    fun seekBack(player: ExoPlayer) {
-        val newPosition = player.currentPosition - seekBackIncrementMs
-        player.seekTo(newPosition.coerceAtLeast(0))// 防止负数
-    }
-
-    // 跳转到指定位置
-    fun seekTo(player: ExoPlayer, position: Long) {
-        player.seekTo(position)
     }
 
     //清理资源

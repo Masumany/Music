@@ -9,9 +9,8 @@ import com.example.module_login_register.R
 import com.example.module_login_register.databinding.ActivityPersonageBinding
 import com.example.module_personage.adapter.ViewPagerAdapter
 import com.example.module_personage.viewModel.PersonageViewModel
-import com.therouter.router.Route
 
-@Route(path = "/module_personage")
+//@Route(path = "/module_personage")
 class PersonageActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPersonageBinding
     private val viewModel: PersonageViewModel by viewModels()

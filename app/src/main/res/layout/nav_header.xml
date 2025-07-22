@@ -61,7 +61,6 @@
         <ImageView
             android:layout_width="45dp"
             android:layout_height="match_parent"
-            android:src="@drawable/more"
             />
         <TextView
             android:layout_width="match_parent"

@@ -1,4 +1,4 @@
-package com.example.module_mvplayer.bean.player
+package com.example.module_mvplayer.viewModel.player
 
 enum class PlayBackState {
     IDLE,

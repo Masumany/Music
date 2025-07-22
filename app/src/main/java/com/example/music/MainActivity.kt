@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.example.module_recommened.RecommendFragment
+//import com.example.module_recommened.RecommendFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -22,8 +22,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         try {
             val fragmentTransactionTooLargeException=supportFragmentManager.beginTransaction()
-            fragmentTransactionTooLargeException.replace(R.id.mainContent,RecommendFragment())
-            fragmentTransactionTooLargeException.commit()
+//            fragmentTransactionTooLargeException.replace(R.id.mainContent,RecommendFragment())
+//            fragmentTransactionTooLargeException.commit()
         }catch (e: Exception){
             Log.e("MainActivity", "Error loading fragment: ${e.message}", e)
         }

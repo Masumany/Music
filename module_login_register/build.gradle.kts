@@ -1,5 +1,6 @@
 plugins {
-    alias(libs.plugins.android.application)
+    id("com.android.library")
+    //alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("kotlin-kapt")
 }
@@ -9,11 +10,11 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.module_login_register"
+//        applicationId = "com.example.module_login_register"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+//        versionCode = 1
+//        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -44,7 +45,7 @@ dependencies {
 //    implementation("cn.therouter:api:1.2.2" )
 //    // 注解处理器（用于生成路由表）
 //    kapt("cn.therouter:compiler:1.2.2")
-    implementation (files("libs/apt-1.2.2.jar"))
+//    implementation (files("libs/apt-1.2.2.jar"))
     // OkHttp 核心库，用于进行网络请求
     implementation ("com.squareup.okhttp3:okhttp:4.11.0")
     // 日志拦截器，用于在开发过程中打印请求和响应的详细信息，方便调试，可选添加
@@ -76,13 +77,6 @@ dependencies {
 
     // Fragment
     implementation("androidx.fragment:fragment-ktx:1.6.1")
-    // 导航组件
-    val nav_version = "2.7.7"
-    implementation("androidx.navigation:navigation-fragment-ktx:$nav_version")
-    implementation("androidx.navigation:navigation-ui-ktx:$nav_version")
-    // 动态特性模块支持
-    implementation("androidx.navigation:navigation-dynamic-features-fragment:$nav_version")
-    implementation("com.google.android.play:feature-delivery:2.1.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity)

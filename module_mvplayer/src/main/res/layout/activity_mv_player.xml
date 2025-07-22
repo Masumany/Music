@@ -20,42 +20,17 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.023" />
 
-    <com.google.android.exoplayer2.ui.StyledPlayerView
+    <androidx.media3.ui.PlayerView
         android:id="@+id/player_view"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_marginHorizontal="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/mv_back"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_height="200dp"
+        app:resize_mode="fill"
+        app:show_buffering="always"
+        app:use_controller="false"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:resize_mode="zoom"
-        app:use_controller="true"
-        app:controller_show_timeout="2000"
-        app:show_buffering="when_playing"
-        app:controller_layout_id="@layout/exo_player_control_view"
-        app:controller_hide_on_touch="true"
-        app:controller_forward_increment="5000"
-        app:controller_rewind_increment="5000">
-
-
-        <ProgressBar
-            android:id="@+id/pb_mv"
-            android:indeterminateTint="#FFFFFF"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center"
-            android:visibility="gone"/>
-
-        <android.widget.Button
-            android:id="@+id/fullscreenButton"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_margin="16dp"
-            android:contentDescription="全屏"
-            android:layout_gravity="end|bottom"
-            android:background= "@drawable/full"/>
-
-    </com.google.android.exoplayer2.ui.StyledPlayerView>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
