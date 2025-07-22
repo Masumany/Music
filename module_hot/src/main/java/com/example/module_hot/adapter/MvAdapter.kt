@@ -5,6 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestOptions
 import com.example.module_hot.R
 import com.example.module_hot.bean.mv.Data
 import com.example.module_hot.databinding.MvRankItemBinding
@@ -30,16 +32,15 @@ class MvAdapter (
         fun bind(data : Data){
             Glide.with(binding.mvImg.context)
                 .load(data.cover)
-                .circleCrop()
-                .centerCrop()
                 .placeholder(R.drawable.loading)
                 .error(R.drawable.error)
+                .centerCrop() // 与布局的scaleType一致，避免拉伸
+                .apply(RequestOptions.bitmapTransform(RoundedCorners(16))) // 设置圆角半径
                 .into(binding.mvImg)
 
             binding.mvName.text = data.name
             binding.mvArtistName.text = data.artistName
             binding.mvRank.text = data.lastRank.toString()
-            binding.mvScore.text = data.score.toString()
 
             binding.root.setOnClickListener {
                 onItemClick(data)

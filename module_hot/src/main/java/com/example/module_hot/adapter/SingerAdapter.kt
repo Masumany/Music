@@ -5,6 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestOptions
 import com.example.module_hot.R
 import com.example.module_hot.bean.singer.Artist
 import com.example.module_hot.databinding.SingerItemBinding
@@ -30,16 +32,14 @@ class SingerAdapter (
         fun bind(singer : Artist){
             Glide.with(binding.singerImg.context)
                 .load(singer.picUrl)
-                .circleCrop()
-                .centerCrop()
                 .placeholder(R.drawable.loading)
                 .error(R.drawable.error)
+                .centerCrop() // 与布局的scaleType一致，避免拉伸
+                .circleCrop() // 圆形
                 .into(binding.singerImg)
 
             binding.singerName.text = singer.name
-            binding.singerBriefDesc.text = singer.briefDesc
-            binding.singerRank.text = singer.lastRank.toString()
-            binding.singerScore.text = singer.score.toString()
+            binding.singerRank.text = (singer.lastRank + 1).toString()
 
             binding.root.setOnClickListener {
                 onItemClick(singer)
