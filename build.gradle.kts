@@ -11,3 +11,13 @@ plugins {
 //        classpath (libs.gradle)
 //    }
 //}
+// build.gradle.kts（项目级）
+allprojects {
+    configurations.all {
+        resolutionStrategy {
+            // 强制统一版本
+            force("org.jetbrains.kotlin:kotlin-stdlib:1.9.20")
+            force("androidx.core:core-ktx:1.12.0")
+        }
+    }
+}

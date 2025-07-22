@@ -28,11 +28,12 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17  // 升级到 Java 17
+        targetCompatibility = JavaVersion.VERSION_17
     }
+
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"  // 升级到 Java 17
     }
 }
 
@@ -69,6 +70,7 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-common-java8:2.7.0")
     // 内存泄漏检测
     debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.8.1")
+    implementation ("com.google.android.material:material:1.8.0")
     // 替换 legacy.support.v4
     implementation("androidx.legacy:legacy-support-v4:1.0.0")  // 或使用更具体的 androidx 组件
 
@@ -83,7 +85,6 @@ dependencies {
     implementation("com.google.android.play:feature-delivery:2.1.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
-    implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     // 测试依赖

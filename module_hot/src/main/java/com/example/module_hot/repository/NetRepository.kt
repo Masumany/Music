@@ -2,6 +2,7 @@ package com.example.module_hot.repository
 
 import com.example.module_hot.bean.list.ListData
 import com.example.module_hot.bean.listDetail.ListDetailData
+import com.example.module_hot.bean.list_songs.ListSongsData
 import com.example.module_hot.bean.mv.MvRankData
 import com.example.module_hot.bean.singer.SingerData
 import retrofit2.Response
@@ -35,7 +36,7 @@ object NetRepository {
         @GET("/playlist/track/all")
         suspend fun getListSongs(
             @Query("id") id: String,
-        ): Response<ListData>
+        ): Response<ListSongsData>
 
         @GET("/playlist/detail/dynamic")
         suspend fun getListDetail(
