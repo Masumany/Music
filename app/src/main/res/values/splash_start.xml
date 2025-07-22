@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 启动页渐变色 -->
+    <color name="splash_start">#4A148C</color> <!-- 深紫色 -->
+    <color name="splash_end">#E91E63</color>   <!-- 粉红色 -->
+</resources>
