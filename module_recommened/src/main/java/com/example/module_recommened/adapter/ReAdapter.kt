@@ -54,4 +54,3 @@ class ReAdapter (private val ReText:List<RecommenedData.Result>):
         }
     }
     }
-

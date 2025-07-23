@@ -30,6 +30,7 @@ class BottomMusicController(
             handler.postDelayed(this, 1000)
         }
     }
+
     // LiveData观察者
     private val songObserver = Observer<ListMusicData.Song?> { song ->
         (context as? AppCompatActivity)?.runOnUiThread {
@@ -58,61 +59,65 @@ class BottomMusicController(
     }
 
     private fun initClickEvents() {
-        // 播放/暂停按钮点击事件（添加未选择歌曲提示）
+        // 播放/暂停按钮点击事件
         val playButton = view.findViewById<ImageView>(R.id.stop)
         playButton.setOnClickListener {
-            // 检查是否有歌曲列表和当前歌曲
-            val hasNoSongs = MusicDataCache.currentSongList.isNullOrEmpty()
-            val service = musicPlayService
-            val hasNoCurrentSong = service?.currentSong == null
+            val service = musicPlayService ?: return@setOnClickListener
 
-            if (hasNoSongs || hasNoCurrentSong) {
-                Toast.makeText(context, "还没有歌曲哟，快去选择一首吧！", Toast.LENGTH_SHORT).show()
+            // 检查是否有歌曲列表
+            val hasSongs = !(MusicDataCache.currentSongList.isNullOrEmpty())
+
+            if (!hasSongs) {
+                // 没有歌曲时显示提示
+                Toast.makeText(context, "还没有歌曲哟", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            if (service != null) {
-                if (service.isPlaying) {
-                    service.pause()
-                    playButton.setImageResource(com.example.module_recommened.R.drawable.list_start)
-                } else {
-                    val currentUrl = service.currentUrl
-                    if (currentUrl.isNullOrBlank()) {
-                        val firstSong = MusicDataCache.currentSongList?.firstOrNull()
-                        if (firstSong != null) {
-                            service.play(firstSong.al.picUrl, firstSong)
-                        }
-                        return@setOnClickListener
-                    }
-
-                    if (service.getCurrentPosition() > 0) {
-                        service.resume()
+            if (service.isPlaying) {
+                service.pause()
+                playButton.setImageResource(com.example.module_recommened.R.drawable.list_start)
+            } else {
+                val currentUrl = service.currentUrl
+                if (currentUrl.isNullOrBlank()) {
+                    val firstSong = MusicDataCache.currentSongList?.firstOrNull()
+                    if (firstSong != null) {
+                        service.play(firstSong.al.picUrl, firstSong)
                     } else {
-                        service.play(currentUrl, service.currentSong)
+                        // 双重保险检查
+                        Toast.makeText(context, "还没有歌曲哟", Toast.LENGTH_SHORT).show()
                     }
-                    playButton.setImageResource(R.drawable.now_play)
+                    return@setOnClickListener
                 }
+
+                if (service.getCurrentPosition() > 0) {
+                    service.resume()
+                } else {
+                    service.play(currentUrl, service.currentSong)
+                }
+                playButton.setImageResource(R.drawable.now_play)
             }
         }
 
-        // 底部栏封面点击事件（添加未选择歌曲提示）
+        // 底部栏封面点击事件
         view.findViewById<ImageView>(R.id.music).setOnClickListener {
-            // 检查是否有歌曲列表和当前歌曲
-            val hasNoSongs = MusicDataCache.currentSongList.isNullOrEmpty()
-            val service = musicPlayService ?: run {
-                Toast.makeText(context, "还没有歌曲哟，快去选择一首吧！", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            val currentSong = service.currentSong ?: run {
-                Toast.makeText(context, "还没有歌曲哟，快去选择一首吧！", Toast.LENGTH_SHORT).show()
+            // 检查是否有歌曲
+            val currentSongList = MusicDataCache.currentSongList ?: emptyList()
+            if (currentSongList.isEmpty()) {
+                Toast.makeText(context, "还没有歌曲哟!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            val currentSongList = MusicDataCache.currentSongList ?: emptyList()
+            val service = musicPlayService ?: return@setOnClickListener
+            val currentSong = service.currentSong ?: return@setOnClickListener
+
+            // 获取当前歌曲在列表中的索引
             val currentIndex = currentSongList.indexOfFirst { it.id == currentSong.id }
             val safeIndex = if (currentIndex in currentSongList.indices) currentIndex else 0
+
+            // 获取当前播放进度（毫秒）
             val playProgress = service.getCurrentPosition()
 
+            // 构建路由参数
             TheRouter.build("/module_musicplayer/musicplayer")
                 .withString("id", currentSong.id.toString())
                 .withString("cover", currentSong.al?.picUrl)
@@ -130,6 +135,10 @@ class BottomMusicController(
         (context as? AppCompatActivity)?.runOnUiThread {
             updatePlayState(service.isPlaying)
             updateSongInfo(service.currentSong)
+
+            // 服务连接时检查是否有歌曲
+            val hasSongs = !(MusicDataCache.currentSongList.isNullOrEmpty())
+
         }
         service.currentSongLiveData.observeForever(songObserver)
         service.isPlayingLiveData.observeForever(playStateObserver)
@@ -137,17 +146,23 @@ class BottomMusicController(
     }
 
     private fun updateSongInfo(song: ListMusicData.Song?) {
-        if (song == null) return
+
         val tvSong = view.findViewById<TextView>(R.id.tv_song)
         val tvArtist = view.findViewById<TextView>(R.id.tv_artist)
         val ivCover = view.findViewById<ImageView>(R.id.music)
 
-        tvSong.text = song.name
-        tvArtist.text = song.ar.joinToString { it.name }
-        Glide.with(context)
-            .load(song.al.picUrl)
-            .error(R.drawable.drawerimg)
-            .into(ivCover)
+        if (song != null) {
+            tvSong.text = song.name
+        }
+        if (song != null) {
+            tvArtist.text = song.ar.joinToString { it.name }
+        }
+        if (song != null) {
+            Glide.with(context)
+                .load(song.al.picUrl)
+                .error(R.drawable.drawerimg)
+                .into(ivCover)
+        }
     }
 
     private fun updatePlayState(isPlaying: Boolean) {

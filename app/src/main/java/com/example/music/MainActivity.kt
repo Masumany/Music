@@ -33,11 +33,16 @@ import kotlinx.coroutines.launch
 import android.content.res.Resources
 import androidx.cardview.widget.CardView
 import com.example.lib.base.Song
+import com.example.music.databinding.ActivityHeaderBinding
+import com.example.music.databinding.ActivityMainBinding
+import com.example.music.databinding.NavHeaderBinding
 import com.example.yourproject.converter.DataConverter
 
 @Route(path = "/main/main")
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var headerBinding: NavHeaderBinding
     private lateinit var topButton: ImageView
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var bottomNavigationView: BottomNavigationView
@@ -49,9 +54,21 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
+        binding=ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
+        headerBinding = NavHeaderBinding.inflate(layoutInflater)
+        binding.navigationView.addView(headerBinding.root)
+
+        val more=headerBinding.more
+        more.setOnClickListener {
+            val intent = Intent(this, HeaderActivity::class.java)
+            startActivity(intent)
+        }
+
+        headerBinding.backlogin.setOnClickListener{
+            Toast.makeText(this,"已经退出登录",Toast.LENGTH_SHORT).show()
+        }
 
         initViews()
         initMainFragment()

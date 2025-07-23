@@ -21,6 +21,7 @@ android {
     buildFeatures{
         viewBinding=true
     }
+    
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -40,13 +41,16 @@ android {
 }
 
 dependencies {
+    // Glide 核心库
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+
+    // 注解处理器（用于 Glide 的注解功能，如 @GlideModule）
+    kapt("com.github.bumptech.glide:compiler:4.16.0")
     implementation ("pl.droidsonroids.gif:android-gif-drawable:1.2.19")
     implementation ("org.greenrobot:eventbus:3.3.1")
     implementation ("com.google.android.material:material:1.0.0")
     implementation(project(":lib_base"))
     implementation(project(":lib_base"))
-    implementation(libs.glide)
-    implementation(libs.firebase.crashlytics.buildtools)
     implementation(project(":module_details"))
     kapt("cn.therouter:apt:1.2.2")
     implementation("cn.therouter:router:1.2.2")
@@ -60,4 +64,5 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
 }

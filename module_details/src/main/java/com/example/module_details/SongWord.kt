@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.DiffUtil
 import com.example.module_details.databinding.ActivitySongwordBinding
+import com.example.music.event.CloseLyricEvent
 import com.therouter.TheRouter
 import com.therouter.router.Autowired
 import com.therouter.router.Route
@@ -41,19 +42,14 @@ object LyricTimeParser {
         return try {
             val timeStr = timeTag.replace(Regex("\\s+"), "").removeSurrounding("[", "]")
             val minSec = timeStr.split(":")
-            if (minSec.size < 2) return 0L
-
-            val minutes = minSec[0].toLongOrNull() ?: 0L
+            val minutes = minSec[0].toLong()
             val secMs = minSec[1].split(".")
-            if (secMs.isEmpty()) return 0L
-
-            val seconds = secMs[0].toLongOrNull() ?: 0L
+            val seconds = secMs[0].toLong()
             val milliseconds = if (secMs.size > 1) {
-                secMs[1].padEnd(3, '0').take(3).toLongOrNull() ?: 0L
+                secMs[1].padEnd(3, '0').take(3).toLong()
             } else {
-                0L
+                0
             }
-
             minutes * 60 * 1000 + seconds * 1000 + milliseconds
         } catch (e: Exception) {
             Log.e("TimeParseError", "解析失败: $timeTag", e)
@@ -65,7 +61,7 @@ object LyricTimeParser {
 // 歌词适配器
 class LyricAdapter : ListAdapter<LyricLine, LyricAdapter.LyricViewHolder>(LyricDiffCallback()) {
 
-    private var currentLinePosition = -1  // 当前行高亮
+    private var currentLinePosition = -1  // 仅保留当前行高亮
 
     inner class LyricViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val lyricText: TextView = itemView.findViewById(R.id.tv_lyric_content)
@@ -78,6 +74,7 @@ class LyricAdapter : ListAdapter<LyricLine, LyricAdapter.LyricViewHolder>(LyricD
                 lyricText.textSize = 18f
                 lyricText.alpha = 1.0f
             } else {
+                // 未演唱或已演唱的歌词
                 lyricText.setTextColor(itemView.context.getColor(R.color.commom))
                 lyricText.textSize = 14f
                 lyricText.alpha = 0.7f
@@ -104,14 +101,6 @@ class LyricAdapter : ListAdapter<LyricLine, LyricAdapter.LyricViewHolder>(LyricD
                 notifyItemChanged(oldPosition)
             }
             notifyItemChanged(position)
-        }
-    }
-
-    fun clearCurrentLine() {
-        val oldPosition = currentLinePosition
-        currentLinePosition = -1
-        if (oldPosition != -1) {
-            notifyItemChanged(oldPosition)
         }
     }
 
@@ -147,36 +136,26 @@ class SongWord : AppCompatActivity() {
     private var lyricLines = listOf<LyricLine>()
     private var currentPlayTime = currentPos.toLong()
     private val handler = Handler(Looper.getMainLooper())
-    private var lastUpdatedLine = -1
-    private val SCROLL_DELAY = 100L
 
-    // 新增状态追踪变量
-    private var isLyricLoaded = false  // 歌词是否加载完成
-    private var initialSyncDone = false  // 初始同步是否完成
-    private var pendingPosition = -1  // 等待歌词加载的进度位置
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySongwordBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 初始化ViewModel和适配器
         songWordViewModel = ViewModelProvider(this)[SongWordViewModel::class.java]
         initLyricRecyclerView()
         TheRouter.inject(this)
 
         // 初始化当前播放时间
         currentPlayTime = currentPos.toLong()
-        Log.d("LyricDebug", "初始化 - 歌曲ID: $id, 初始进度: $currentPlayTime")
 
-        // 处理系统栏
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
-        // 验证歌曲ID
         if (id.isBlank()) {
             Toast.makeText(this, "歌曲ID不能为空", Toast.LENGTH_SHORT).show()
             finish()
@@ -187,34 +166,20 @@ class SongWord : AppCompatActivity() {
         fetchSongWordData()
     }
 
-    override fun onResume() {
-        super.onResume()
-        Log.d("LyricDebug", "页面可见 - 触发同步")
-        // 页面可见时强制同步一次
-        if (isLyricLoaded) {
-            updateLyricPosition()
-        } else if (pendingPosition != -1) {
-            // 如果有等待的进度，用它来同步
-            currentPlayTime = pendingPosition.toLong()
-        }
-    }
-
+    // 注册EventBus
     override fun onStart() {
         super.onStart()
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this)
-            Log.d("LyricDebug", "EventBus注册")
         }
-        startProgressChecker()
     }
 
+    // 解注册EventBus
     override fun onStop() {
         super.onStop()
         if (EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().unregister(this)
-            Log.d("LyricDebug", "EventBus解注册")
         }
-        handler.removeCallbacksAndMessages(null)
     }
 
     private fun initLyricRecyclerView() {
@@ -223,134 +188,57 @@ class SongWord : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@SongWord)
             adapter = lyricAdapter
             setHasFixedSize(true)
-            itemAnimator = null
-            isNestedScrollingEnabled = false
-            setItemViewCacheSize(20)
+            itemAnimator = null  // 关闭动画，避免延迟
         }
     }
 
-    private fun startProgressChecker() {
-        handler.postDelayed(object : Runnable {
-            override fun run() {
-                if (isLyricLoaded) {
-                    updateLyricPosition()
-                }
-                handler.postDelayed(this, SCROLL_DELAY)
-            }
-        }, SCROLL_DELAY)
-    }
-
-    // 接收进度事件 - 重点修复
+    // 接收播放器发送的进度事件
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onPlayProgressEvent(event: PlayProgressEvent) {
-        // 严格验证歌曲ID匹配
-        if (event.songId != id) {
-            Log.d("LyricDebug", "忽略事件 - 歌曲ID不匹配: ${event.songId} vs $id")
-            return
-        }
-
-        // 无论歌词是否加载完成，都更新当前播放时间
         currentPlayTime = event.position.toLong()
-        Log.d("LyricDebug", "收到进度事件 - 位置: ${event.position}, 歌词加载状态: $isLyricLoaded")
-
-        // 如果歌词未加载完成，保存进度等待加载
-        if (!isLyricLoaded) {
-            pendingPosition = event.position
-            return
-        }
-
-        // 歌词已加载，立即更新位置
         updateLyricPosition()
+
+    }
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onSongChangeEvent(event: SongChangeEvent){
+        overridePendingTransition(0, R.anim.back_anim) // 第二个参数为退出动画
+        finish()
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onSongChangeEvent(event: SongChangeEvent) {
-        Log.d("LyricDebug", "收到歌曲切换事件 - 新ID: ${event.newSongId}, 当前ID: $id")
-        if (event.newSongId != id) {
-            // 重置所有状态
-            id = event.newSongId
-            currentPlayTime = event.initialPosition.toLong()
-            pendingPosition = event.initialPosition
-            isLyricLoaded = false
-            initialSyncDone = false
-            lyricLines = emptyList()
-            lyricAdapter.clearCurrentLine()
-            lyricAdapter.submitList(lyricLines)
-
-            // 加载新歌词
-            fetchSongWordData()
-        }
+    fun onCloseLyricEvent(event: CloseLyricEvent) {
+        Log.d("LyricClose", "收到强制关闭事件，返回播放页")
+        overridePendingTransition(0, R.anim.back_anim)
+        finish()
     }
 
     private fun fetchSongWordData() {
-        Log.d("LyricDebug", "开始加载歌词 - 歌曲ID: $id")
         songWordViewModel.fetchSongWordData(id.toLong())
         songWordViewModel.songWordData.observe(this) { songWordData ->
             songWordData?.let {
                 parseLyrics(it)
-                isLyricLoaded = true
-                Log.d("LyricDebug", "歌词加载完成 - 共${lyricLines.size}行")
-
-                // 歌词加载后立即同步位置
-                if (pendingPosition != -1) {
-                    currentPlayTime = pendingPosition.toLong()
-                    pendingPosition = -1
-                }
-
-                // 强制初始同步
-                forceInitialSync()
+                updateLyricPosition()
             }
         }
 
         songWordViewModel.loadingState.observe(this) { state ->
             when (state) {
-                is SongWordViewModel.LoadingState.Loading -> {
-                    binding.lyricRecyclerView.visibility = View.GONE
-                    Log.d("LyricDebug", "正在加载歌词...")
-                }
-                is SongWordViewModel.LoadingState.Success -> {
-                    binding.lyricRecyclerView.visibility = View.VISIBLE
-                }
+                is SongWordViewModel.LoadingState.Loading -> binding.lyricRecyclerView.visibility = View.GONE
+                is SongWordViewModel.LoadingState.Success -> binding.lyricRecyclerView.visibility = View.VISIBLE
                 is SongWordViewModel.LoadingState.Error -> {
-                    Log.e("LyricDebug", "加载错误: ${state.message}")
+                    Log.d("LyricDebug", "加载错误: ${state.message}")
                     binding.lyricRecyclerView.visibility = View.GONE
-                    // 显示错误信息但保持事件监听
-                    binding.lyricRecyclerView.visibility = View.VISIBLE
-                    lyricLines = listOf(LyricLine(0, "歌词加载失败: ${state.message}"))
-                    lyricAdapter.submitList(lyricLines)
-                    isLyricLoaded = true
                 }
             }
         }
-    }
-
-    // 强制初始同步逻辑 - 解决首页进入不同步问题
-    private fun forceInitialSync() {
-        if (initialSyncDone || lyricLines.isEmpty()) return
-
-        Log.d("LyricDebug", "执行强制初始同步 - 位置: $currentPlayTime")
-        // 手动触发三次更新，确保 RecyclerView已布局完成
-        val syncRunnable = object : Runnable {
-            var attempts = 0
-            override fun run() {
-                if (attempts < 3) {
-                    updateLyricPosition()
-                    attempts++
-                    handler.postDelayed(this, 200)
-                } else {
-                    initialSyncDone = true
-                }
-            }
-        }
-        handler.post(syncRunnable)
     }
 
     private fun parseLyrics(songWordData: SongWordData) {
         val rawLyric = songWordData.lrc.lyric
-        Log.d("LyricDebug", "解析歌词: ${rawLyric.take(100)}...")
+        Log.d("LyricDebug", "原始歌词: $rawLyric")
 
         if (rawLyric.isBlank()) {
-            lyricLines = listOf(LyricLine(0, "暂无歌词"))
+            lyricLines = emptyList()
             lyricAdapter.submitList(lyricLines)
             return
         }
@@ -369,55 +257,39 @@ class SongWord : AppCompatActivity() {
                 val content = trimmedLine.replace(timeTagPattern, "").trim()
                 if (content.isNotBlank()) {
                     lyricList.add(LyricLine(timeMs, content))
+                    Log.d("LyricDebug", "解析到歌词: $content (时间: $timeMs)")
                 }
             }
         }
 
-        lyricLines = if (lyricList.isNotEmpty()) {
-            lyricList.sortedBy { it.timeMs }
-        } else {
-            listOf(LyricLine(0, "暂无有效歌词"))
-        }
-
+        lyricLines = lyricList.sortedBy { it.timeMs }
+        Log.d("LyricDebug", "解析完成，共${lyricLines.size}行歌词")
         lyricAdapter.submitList(lyricLines)
     }
 
+    // 核心修正：精准匹配当前播放时间与歌词时间戳
     private fun updateLyricPosition() {
         if (lyricLines.isEmpty()) return
 
-        // 查找当前应该显示的歌词行
+        // 找到最后一句时间戳 <= 当前播放时间的歌词（已演唱的最后一句）
         var currentIndex = -1
         for (i in lyricLines.indices.reversed()) {
-            // 扩大容错范围到300ms，解决时间差问题
-            if (lyricLines[i].timeMs <= currentPlayTime + 300) {
+            if (lyricLines[i].timeMs <= currentPlayTime) {
                 currentIndex = i
                 break
             }
         }
 
-        // 处理歌曲结束情况
-        if (currentPlayTime >= currentSongDuration - 1000) {
-            currentIndex = lyricLines.lastIndex
-        }
-
-        // 处理未找到匹配行的情况
-        if (currentIndex == -1 && lyricLines.isNotEmpty()) {
-            currentIndex = 0
-        }
-
-        // 更新当前行并滚动
-        if (currentIndex != -1 && currentIndex != lastUpdatedLine) {
+        // 只有当索引变化时才更新，避免无效刷新
+        if (currentIndex != -1) {
             lyricAdapter.updateCurrentLine(currentIndex)
-            lastUpdatedLine = currentIndex
 
-            // 确保在UI线程执行滚动
-            binding.lyricRecyclerView.post {
-                val layoutManager = binding.lyricRecyclerView.layoutManager as LinearLayoutManager
-                // 计算居中位置
-                val targetY = binding.lyricRecyclerView.height / 2 - dpToPx(30)
-                layoutManager.scrollToPositionWithOffset(currentIndex, targetY)
-                Log.d("LyricDebug", "滚动到行: $currentIndex, 位置: $targetY")
-            }
+            // 滚动到当前行（保持在屏幕中间）
+            val layoutManager = binding.lyricRecyclerView.layoutManager as LinearLayoutManager
+            layoutManager.scrollToPositionWithOffset(
+                currentIndex,
+                binding.lyricRecyclerView.height / 2 - dpToPx(30)
+            )
         }
     }
 

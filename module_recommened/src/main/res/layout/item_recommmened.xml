@@ -38,7 +38,7 @@
         android:layout_width="80dp"
         android:layout_height="20dp"
         android:layout_marginTop="80dp"
-        android:maxLines="3"
+        android:maxLines="1"
         android:text="Recommened"
         android:textAlignment="center"
         android:textColor="#BCA8E3"

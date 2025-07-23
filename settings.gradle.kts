@@ -34,11 +34,9 @@ dependencyResolutionManagement {
         rootProject.name = "Music"
         include(":app")
         include(":lib_base")
-        include(":module_mvplayer")
         include(":module_musicplayer")
         include(":module_recommened")
         include(":module_details")
-        include(":module_login_register")
     }
 }
 
