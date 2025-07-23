@@ -1,26 +1,23 @@
 plugins {
-    id("com.android.library")
-//    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("kotlin-kapt")
 }
 
 android {
-    namespace = "com.example.module_mvplayer"
-    compileSdk = 35
-
-    defaultConfig {
-//        applicationId = "com.example.module_mvplayer"
-        minSdk = 24
-        targetSdk = 34
-//        versionCode = 1
-//        versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
+    namespace = "com.example.moudle_search"
+    compileSdk = 34
     buildFeatures {
         viewBinding = true
+    }
+
+    defaultConfig {
+        applicationId = "com.example.moudle_search"
+        minSdk = 24
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -33,22 +30,16 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17  // 升级到 Java 17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
-
     kotlinOptions {
-        jvmTarget = "17"  // 升级到 Java 17
+        jvmTarget = "1.8"
     }
 }
 
 dependencies {
 
-//    // TheRouter 核心库
-//    implementation("cn.therouter:router:1.2.2")
-//    // 注解处理器（用于生成路由表）
-//    annotationProcessor("cn.therouter:compiler:1.2.2")
-//    implementation (files("libs/apt-1.2.2.jar"))
     // 协程库
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     // Retrofit
@@ -84,6 +75,7 @@ dependencies {
     implementation("androidx.fragment:fragment-ktx:1.6.1")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     testImplementation(libs.junit)
