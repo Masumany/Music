@@ -30,6 +30,9 @@ class MusicPlayService : Service() {
     var currentSong: ListMusicData.Song? = null
     var isPlaying = false
 
+    // 保存当前歌曲的播放进度
+    var lastSavedProgress = 0
+
     // 播放完成回调（用于自动播放下一首）
     private var onCompletionListener: (() -> Unit)? = null
     fun setOnCompletionListener(listener: (() -> Unit)?) {
@@ -61,8 +64,10 @@ class MusicPlayService : Service() {
                 )
 
                 setOnCompletionListener {
+                    lastSavedProgress = 0 // 播放完成重置进度
                     this@MusicPlayService.isPlaying = false
                     onPlayStateChanged?.invoke(false, it.duration)
+                    isPlayingLiveData.postValue(false)
                     onCompletionListener?.invoke()
                 }
 
@@ -70,18 +75,28 @@ class MusicPlayService : Service() {
                     Log.e("MusicService", "播放错误: $what, $extra")
                     this@MusicPlayService.isPlaying = false
                     onPlayStateChanged?.invoke(false, 0)
+                    isPlayingLiveData.postValue(false)
                     true
                 }
             }
         }
     }
 
+    // 核心修改：新增歌曲ID判断，不同歌曲则重置进度
     fun play(url: String, song: ListMusicData.Song?) {
+        // 判断是否切换了歌曲
+        val isNewSong = song?.id != currentSong?.id
+
+        // 切换歌曲时强制重置进度
+        if (isNewSong) {
+            lastSavedProgress = 0
+            Log.d("SongChange", "切换到新歌曲 ${song?.name}，重置进度为0")
+        }
+
         currentUrl = url
         currentSong = song
         isPlaying = true
         currentSongLiveData.postValue(song)
-        Log.d("ServiceData", "发送歌曲更新: ${song?.name}")
         isPlayingLiveData.postValue(true)
 
         if (url.isBlank()) {
@@ -96,34 +111,43 @@ class MusicPlayService : Service() {
             mediaPlayer?.prepareAsync()
             mediaPlayer?.setOnPreparedListener { mp ->
                 try {
+                    // 只有同一首歌才恢复进度，新歌曲从0开始
+                    if (!isNewSong && lastSavedProgress > 0 && lastSavedProgress < mp.duration) {
+                        mp.seekTo(lastSavedProgress)
+                    } else {
+                        mp.seekTo(0) // 新歌曲强制从0开始
+                    }
                     mp.start()
-                    currentUrl = url
-                    isPlaying = true
                     onPlayStateChanged?.invoke(true, mp.duration)
                     startForegroundWithNotification()
                 } catch (e: Exception) {
                     Log.e("ServicePlay", "播放失败: ${e.message}")
                     isPlaying = false
                     onPlayStateChanged?.invoke(false, 0)
+                    isPlayingLiveData.postValue(false)
                 }
             }
         } catch (e: Exception) {
             Log.e("ServiceError", "播放初始化失败: ${e.message}")
             isPlaying = false
             onPlayStateChanged?.invoke(false, 0)
+            isPlayingLiveData.postValue(false)
         }
     }
 
     fun pause() {
         if (mediaPlayer?.isPlaying == true) {
+            lastSavedProgress = mediaPlayer?.currentPosition ?: 0
             mediaPlayer?.pause()
             isPlaying = false
             onPlayStateChanged?.invoke(false, mediaPlayer!!.duration)
             isPlayingLiveData.postValue(false)
+            updateNotification()
         }
     }
 
     fun stop() {
+        lastSavedProgress = 0
         mediaPlayer?.let {
             if (it.isPlaying) {
                 it.stop()
@@ -132,28 +156,36 @@ class MusicPlayService : Service() {
         }
         isPlaying = false
         onPlayStateChanged?.invoke(false, 0)
+        isPlayingLiveData.postValue(false)
     }
 
     fun resume() {
         if (currentUrl != null && !isPlaying) {
             try {
+                // 恢复播放时使用当前歌曲的进度
+                if (lastSavedProgress > 0) {
+                    mediaPlayer?.seekTo(lastSavedProgress)
+                }
                 mediaPlayer?.start()
                 isPlaying = true
                 onPlayStateChanged?.invoke(true, mediaPlayer?.duration ?: 0)
+                isPlayingLiveData.postValue(true)
                 startForegroundWithNotification()
             } catch (e: Exception) {
                 Log.e("ServiceResume", "恢复播放失败: ${e.message}")
                 isPlaying = false
                 onPlayStateChanged?.invoke(false, 0)
+                isPlayingLiveData.postValue(false)
             }
         }
     }
 
     fun getCurrentPosition(): Int {
-        return mediaPlayer?.currentPosition ?: 0
+        return mediaPlayer?.currentPosition ?: lastSavedProgress
     }
 
     fun seekTo(position: Int) {
+        lastSavedProgress = position
         mediaPlayer?.seekTo(position)
     }
 
@@ -165,9 +197,17 @@ class MusicPlayService : Service() {
         this.onPlayStateChanged = listener
     }
 
+    private fun updateNotification() {
+        val notification = createNotification()
+        val manager = getSystemService(NotificationManager::class.java)
+        manager.notify(NOTIFICATION_ID, notification)
+    }
+
     private fun createNotification(): Notification {
         val intent = Intent(this, MusicPlayerActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            putExtra("currentProgress", lastSavedProgress)
+            putExtra("songId", currentSong?.id?.toString() ?: "")
         }
         val pendingIntent = PendingIntent.getActivity(
             this, 0, intent,
@@ -175,9 +215,12 @@ class MusicPlayService : Service() {
         )
 
         val songName = currentSong?.name ?: "未知歌曲"
+        val artistName = currentSong?.ar?.joinToString { it.name } ?: "未知艺术家"
+        val playStateText = if (isPlaying) "正在播放" else "已暂停"
+
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("正在播放")
-            .setContentText(songName)
+            .setContentTitle(songName)
+            .setContentText("$playStateText · $artistName")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(pendingIntent)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -216,9 +259,20 @@ class MusicPlayService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        lastSavedProgress = mediaPlayer?.currentPosition ?: lastSavedProgress
         mediaPlayer?.release()
         mediaPlayer = null
         currentUrl = null
-        currentSong = null // 清理资源
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        intent?.let {
+            val savedProgress = it.getIntExtra("restoreProgress", -1)
+            val songId = it.getStringExtra("restoreSongId")
+            if (savedProgress != -1 && songId != null && currentSong?.id.toString() == songId) {
+                lastSavedProgress = savedProgress
+            }
+        }
+        return START_STICKY
     }
 }

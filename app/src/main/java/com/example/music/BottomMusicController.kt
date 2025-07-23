@@ -30,36 +30,21 @@ class BottomMusicController(
             handler.postDelayed(this, 1000)
         }
     }
-
-    // 列表加载完成的回调接口
-    interface OnSongListLoadListener {
-        fun onSongListLoaded(songList: List<ListMusicData.Song>)
+    // LiveData观察者
+    private val songObserver = Observer<ListMusicData.Song?> { song ->
+        (context as? AppCompatActivity)?.runOnUiThread {
+            updateSongInfo(song)
+        }
     }
-
-    // 保存加载好的列表（核心数据）
-    private var loadedSongList: List<ListMusicData.Song> = emptyList()
+    private val playStateObserver = Observer<Boolean> { isPlaying ->
+        (context as? AppCompatActivity)?.runOnUiThread {
+            updatePlayState(isPlaying)
+        }
+    }
 
     init {
         initService()
         initClickEvents()
-    }
-
-    // 供外部（MainActivity）调用，传递加载好的列表
-    fun setLoadedSongList(songList: List<ListMusicData.Song>) {
-        loadedSongList = songList
-        // 列表加载完成后自动播放第一首（仅当无当前播放歌曲时）
-        if (songList.isNotEmpty() && musicPlayService?.currentUrl.isNullOrBlank()) {
-            loadFirstSong(songList.first())
-        }
-    }
-
-    // 加载并播放第一首歌
-    private fun loadFirstSong(firstSong: ListMusicData.Song) {
-        if (isServiceBound) {
-            musicPlayService?.play(firstSong.al.picUrl, firstSong)
-            updateSongInfo(firstSong)
-            updatePlayState(true)
-        }
     }
 
     private fun initService() {
@@ -73,48 +58,61 @@ class BottomMusicController(
     }
 
     private fun initClickEvents() {
-        // 播放/暂停按钮点击事件（使用loadedSongList）
+        // 播放/暂停按钮点击事件（添加未选择歌曲提示）
         val playButton = view.findViewById<ImageView>(R.id.stop)
         playButton.setOnClickListener {
-            val service = musicPlayService ?: return@setOnClickListener
-            if (service.isPlaying) {
-                service.pause()
-                playButton.setImageResource(com.example.module_recommened.R.drawable.list_start)
-            } else {
-                if (loadedSongList.isEmpty()) {
-                    Toast.makeText(context, "列表加载中，请稍后", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-                // 从已加载列表中取歌曲播放
-                val currentUrl = service.currentUrl
-                if (currentUrl.isNullOrBlank() || service.getCurrentPosition() == 0) {
-                    // 无播放记录时，直接播放列表第一首
-                    val firstSong = loadedSongList.first()
-                    service.play(firstSong.al.picUrl, firstSong)
+            // 检查是否有歌曲列表和当前歌曲
+            val hasNoSongs = MusicDataCache.currentSongList.isNullOrEmpty()
+            val service = musicPlayService
+            val hasNoCurrentSong = service?.currentSong == null
+
+            if (hasNoSongs || hasNoCurrentSong) {
+                Toast.makeText(context, "还没有歌曲哟，快去选择一首吧！", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (service != null) {
+                if (service.isPlaying) {
+                    service.pause()
+                    playButton.setImageResource(com.example.module_recommened.R.drawable.list_start)
                 } else {
-                    // 有播放记录时恢复播放
-                    service.resume()
+                    val currentUrl = service.currentUrl
+                    if (currentUrl.isNullOrBlank()) {
+                        val firstSong = MusicDataCache.currentSongList?.firstOrNull()
+                        if (firstSong != null) {
+                            service.play(firstSong.al.picUrl, firstSong)
+                        }
+                        return@setOnClickListener
+                    }
+
+                    if (service.getCurrentPosition() > 0) {
+                        service.resume()
+                    } else {
+                        service.play(currentUrl, service.currentSong)
+                    }
+                    playButton.setImageResource(R.drawable.now_play)
                 }
-                playButton.setImageResource(R.drawable.now_play)
             }
         }
 
-        // 底部栏封面点击事件（使用loadedSongList）
+        // 底部栏封面点击事件（添加未选择歌曲提示）
         view.findViewById<ImageView>(R.id.music).setOnClickListener {
-            if (loadedSongList.isEmpty()) {
-                Toast.makeText(context, "列表加载中，请稍后", Toast.LENGTH_SHORT).show()
+            // 检查是否有歌曲列表和当前歌曲
+            val hasNoSongs = MusicDataCache.currentSongList.isNullOrEmpty()
+            val service = musicPlayService ?: run {
+                Toast.makeText(context, "还没有歌曲哟，快去选择一首吧！", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            val service = musicPlayService ?: return@setOnClickListener
-            // 从已加载列表中获取当前歌曲
-            val currentSong = service.currentSong ?: loadedSongList.first()
-            // 获取当前歌曲在列表中的索引
-            val currentIndex = loadedSongList.indexOfFirst { it.id == currentSong.id }
-            val safeIndex = if (currentIndex in loadedSongList.indices) currentIndex else 0
-            // 获取播放进度
+            val currentSong = service.currentSong ?: run {
+                Toast.makeText(context, "还没有歌曲哟，快去选择一首吧！", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val currentSongList = MusicDataCache.currentSongList ?: emptyList()
+            val currentIndex = currentSongList.indexOfFirst { it.id == currentSong.id }
+            val safeIndex = if (currentIndex in currentSongList.indices) currentIndex else 0
             val playProgress = service.getCurrentPosition()
 
-            // 跳转详情页
             TheRouter.build("/module_musicplayer/musicplayer")
                 .withString("id", currentSong.id.toString())
                 .withString("cover", currentSong.al?.picUrl)
@@ -175,17 +173,5 @@ class BottomMusicController(
             isServiceBound = false
         }
         musicPlayService = null
-    }
-
-    // LiveData观察者
-    private val songObserver = Observer<ListMusicData.Song?> { song ->
-        (context as? AppCompatActivity)?.runOnUiThread {
-            updateSongInfo(song)
-        }
-    }
-    private val playStateObserver = Observer<Boolean> { isPlaying ->
-        (context as? AppCompatActivity)?.runOnUiThread {
-            updatePlayState(isPlaying)
-        }
     }
 }
