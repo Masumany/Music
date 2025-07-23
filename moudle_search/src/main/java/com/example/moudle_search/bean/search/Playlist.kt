@@ -1,51 +1,13 @@
 package com.example.moudle_search.bean.search
 
 data class Playlist(
-    val adType: Int,
-    val alg: String,
-    val algType: Any,
-    val anonimous: Boolean,
-    val backgroundText: Any,
-    val cloudTrackCount: Int,
-    val commentThreadId: String,
-    val coverImgId: Long,
-    val coverImgId_str: String,
-    val coverImgUrl: String,
-    val coverStatus: Int,
-    val coverText: Any,
-    val createTime: Long,
-    val creator: Creator,
-    val description: String,
-    val highQuality: Boolean,
-    val iconImgUrl: Any,
-    val id: Long,
-    val name: String,
-    val newImported: Boolean,
-    val ordered: Boolean,
-    val originalCoverId: Int,
-    val playCount: Int,
-    val playlistType: String,
-    val privacy: Int,
-    val recommendInfo: Any,
-    val recommendText: Any,
-    val relateResId: Any,
-    val relateResType: Any,
-    val socialPlaylistCover: Any,
-    val specialType: Int,
-    val status: Int,
-    val subTitle: Any,
-    val subscribed: Boolean,
-    val subscribedCount: Int,
-    val subscribers: List<Any>,
-    val tags: List<String>,
-    val title: Any,
-    val topTrackIds: Any,
-    val totalDuration: Int,
-    val trackCount: Int,
-    val trackNumberUpdateTime: Long,
-    val trackUpdateTime: Long,
-    val tracks: Any,
-    val tsSongCount: Int,
-    val updateTime: Long,
-    val userId: Int
+    val id: Long, // 歌单ID
+    val name: String, // 歌单名称
+    val coverImgUrl: String?, // 歌单封面
+    val trackCount: Int, // 歌曲数量
+    val creator: SimpleUser? // 创建者
+)
+
+data class SimpleUser(
+    val nickname: String // 用户名
 )

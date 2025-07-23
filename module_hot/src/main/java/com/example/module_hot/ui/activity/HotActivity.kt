@@ -12,13 +12,9 @@ import androidx.viewpager2.widget.ViewPager2
 import com.example.module_hot.R
 import com.example.module_hot.adapter.HotAdapter
 import com.example.module_hot.databinding.ActivityHotBinding
-import com.example.module_hot.viewModel.HotViewModel
 
 class HotActivity : AppCompatActivity() {
     private lateinit var binding: ActivityHotBinding
-    private val viewModel: HotViewModel by lazy {
-        ViewModelProvider(this)[HotViewModel::class.java]
-    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHotBinding.inflate(layoutInflater)

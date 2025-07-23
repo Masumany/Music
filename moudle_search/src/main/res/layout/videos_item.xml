@@ -5,22 +5,10 @@
     android:layout_marginTop="10dp"
     android:layout_marginRight="20dp"
     android:layout_marginLeft="20dp"
-    android:padding="5dp"
-    android:background="@drawable/list_shape">
-
-    <TextView
-        android:id="@+id/mv_rank"
-        android:gravity="center"
-        android:text="1"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        android:layout_gravity="center"
-        android:layout_width="50dp"
-        android:layout_height="50dp"/>
+    android:padding="5dp">
 
     <ImageView
-        android:id="@+id/mv_img"
+        android:id="@+id/videos_item_img"
         android:layout_marginTop="10dp"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
@@ -34,7 +22,7 @@
         android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/mv_name"
+            android:id="@+id/videos_item_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
@@ -44,7 +32,7 @@
             android:textStyle="bold"/>
 
         <TextView
-            android:id="@+id/mv_artistName"
+            android:id="@+id/videos_item_artistName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"

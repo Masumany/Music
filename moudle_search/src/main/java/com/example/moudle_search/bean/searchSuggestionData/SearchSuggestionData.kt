@@ -2,5 +2,5 @@ package com.example.moudle_search.bean.searchSuggestionData
 
 data class SearchSuggestionData(
     val code: Int,
-    val result: Result
+    val result: Result1
 )

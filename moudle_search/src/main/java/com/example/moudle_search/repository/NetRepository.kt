@@ -22,7 +22,7 @@ object NetRepository {
 
     interface ApiService {
         @GET("/search/multimatch")
-        suspend fun search(
+        suspend fun getSearchData(
             @Query("keywords") keywords: String,
         ): Response<SearchData>
 

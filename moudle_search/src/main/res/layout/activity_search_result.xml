@@ -5,10 +5,10 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.activity.HotActivity">
+    tools:context=".ui.activity.SearchResultActivity">
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/hot_bottomNavigationView"
+        android:id="@+id/search_bottomNavigationView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:itemTextColor="#000000"
@@ -22,7 +22,7 @@
         app:menu="@menu/menu" />
 
     <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/hot_viewPager"
+        android:id="@+id/search_viewPager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1.0"
@@ -30,7 +30,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/hot_bottomNavigationView"
+        app:layout_constraintTop_toBottomOf="@id/search_bottomNavigationView"
         app:layout_constraintVertical_bias="1.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
