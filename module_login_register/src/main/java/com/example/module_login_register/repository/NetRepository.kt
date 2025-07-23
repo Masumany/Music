@@ -79,6 +79,7 @@ object NetRepository {
         @GET("/login/qr/check")
         suspend fun checkQR(
             @Query("key") key: String
+            @Query("noCookie") noCookie: String
         ): Response<QrCheckData>
 
         @GET("/login/refresh")
