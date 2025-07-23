@@ -1,5 +1,6 @@
 package com.example.module_mvplayer.viewModel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.module_mvplayer.repositorty.NetRepository
@@ -35,6 +36,7 @@ class MvCommentViewModel: ViewModel() {
             try {
                 _loadState.value = LoadState.Loading
                 val response = NetRepository.apiService.getMvComment(mvId, offset, pageSize)
+                Log.d("MvCommentViewModel", "code=${response.code()}, message=${response.message()}")
                 if (response.isSuccessful) {
                     val comments = response.body()?.comments ?: emptyList()
                     _commentList.value = comments
@@ -44,6 +46,8 @@ class MvCommentViewModel: ViewModel() {
                     _loadState.value = LoadState.Error("请求失败${response.code()}")
                 }
             }catch (e: Exception){
+                e.printStackTrace()
+                Log.d("MvCommentViewModel", "loadComments: ${e.message}")
                 _loadState.value = LoadState.Error("请求失败")
             }
         }

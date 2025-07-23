@@ -64,7 +64,7 @@ dependencies {
     // Glide核心库
     implementation ("com.github.bumptech.glide:glide:4.12.0")
     // Glide注解处理器
-    kapt ("com.github.bumptech.glide:compiler:4.12.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
     // 内存泄漏检测
     debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.8.1")
     implementation ("androidx.viewpager2:viewpager2:1.1.0")

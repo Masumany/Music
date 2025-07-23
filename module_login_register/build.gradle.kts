@@ -65,7 +65,7 @@ dependencies {
     // Glide核心库
     implementation ("com.github.bumptech.glide:glide:4.12.0")
     // Glide注解处理器
-    kapt ("com.github.bumptech.glide:compiler:4.12.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
     implementation ("androidx.lifecycle:lifecycle-common-java8:2.7.0")

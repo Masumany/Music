@@ -1,6 +1,7 @@
 package com.example.module_mvplayer.viewModel
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.exoplayer.ExoPlayer
@@ -31,24 +32,13 @@ class MvPlayerViewModel : ViewModel() {
     private val _loadState = MutableStateFlow<LoadState>(LoadState.Init)
     val loadState: StateFlow<LoadState> = _loadState.asStateFlow()
 
-    var seekBackIncrementMs: Long = 5000
-    var seekForwardIncrementMs: Long = 5000
-
-    private var mvId: String? = null
-
-    fun setMvId(id: String?) {
-        mvId = id
-    }
-
-    fun getMvId(): String? {
-        return mvId
-    }
 
     fun loadMvData(mvId: String) {
         viewModelScope.launch {
             _loadState.value = LoadState.Loading
             try {
                 val mvDetail = NetRepository.apiService.getMvDetail(mvId!!)
+                Log.d("MvData", "code=${mvDetail.code()}, message=${mvDetail.message()}")
                 if (mvDetail.isSuccessful) {
                     _mvDetail.value = mvDetail.body()
                     _loadState.value = LoadState.Success
@@ -56,6 +46,8 @@ class MvPlayerViewModel : ViewModel() {
                     _loadState.value = LoadState.Error("获取MV详情失败")
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
+                Log.d("MvData", "loadMvData: ${e.localizedMessage}")
                 _loadState.value = LoadState.Error("网络错误: ${e.localizedMessage}")
             }
         }
@@ -65,6 +57,7 @@ class MvPlayerViewModel : ViewModel() {
             _loadState.value = LoadState.Loading
             try {
                 val response = NetRepository.apiService.getMvInfo(mvId)
+                Log.d("MvInfo", "code=${response.code()}, message=${response.message()}")
                 if (response.isSuccessful) {
                     _mvInfo.value = response.body()
                     _loadState.value = LoadState.Success
@@ -77,10 +70,13 @@ class MvPlayerViewModel : ViewModel() {
         }
     }
     fun loadMvPlayUrl(mvId: String) {
+        Log.d("MvPlayerViewModel", "loadMvPlayUrl called with mvId = $mvId")
         viewModelScope.launch {
             _loadState.value = LoadState.Loading
             try {
                 val response =NetRepository.apiService.getMvPlayUrl(mvId)
+                Log.d("MvPlayerViewModel", "code=${response.code()}, message=${response.message()}")
+                Log.d("MvPlayerViewModel", "loadMvPlayUrl: ${response.body()}")
                 if (response.isSuccessful) {
                     _mvPlayUrl.value = response.body()
                     _loadState.value = LoadState.Success
@@ -88,6 +84,8 @@ class MvPlayerViewModel : ViewModel() {
                     _loadState.value = LoadState.Error("获取播放地址失败")
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
+                Log.d("MvPlayerViewModel", "loadMvPlayUrl: ${e.localizedMessage}")
                 _loadState.value = LoadState.Error("网络错误: ${e.localizedMessage}")
             }
         }
@@ -101,7 +99,6 @@ class MvPlayerViewModel : ViewModel() {
     }
 
     fun clearState() {
-        mvId = null
         _playState.value = PlayerState(PlayBackState.IDLE)
     }
 }
