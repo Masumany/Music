@@ -37,6 +37,11 @@ dependencyResolutionManagement {
         include(":module_musicplayer")
         include(":module_recommened")
         include(":module_details")
+        include(":module_hot")
+        include(":module_login_register")
+        include(":module_mvplayer")
+        include(":module_personage")
+        include(":module_search")
     }
 }
 

@@ -41,6 +41,8 @@ android {
 }
 
 dependencies {
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
+    implementation(project(":module_mvplayer"))
     implementation ("org.greenrobot:eventbus:3.3.1")
     implementation ("androidx.fragment:fragment-ktx:1.6.2")
     implementation(libs.androidx.lifecycle.viewmodel.ktx)

@@ -30,14 +30,22 @@ import com.example.module_mvplayer.databinding.ActivityMvPlayerBinding
 import com.example.module_mvplayer.ui.fragment.CommentBottomSheetDialogFragment
 import com.example.module_mvplayer.viewModel.LoadState
 import com.example.module_mvplayer.viewModel.MvPlayerViewModel
+import com.therouter.TheRouter
+import com.therouter.router.Autowired
+import com.therouter.router.Route
 import kotlinx.coroutines.flow.collectLatest
 
-class MvPlayerActivity : AppCompatActivity() {
+//@JvmField
+//@Autowired
+//var mvId: String = ""
 
+
+@Route(path = "/module_mvplayer/mvplayer")
+class MvPlayerActivity : AppCompatActivity() {
+    private  var mvId: String =""// 声明变量
     private lateinit var binding: ActivityMvPlayerBinding
     private val viewModel: MvPlayerViewModel by viewModels()
     private var player: ExoPlayer? = null
-    private lateinit var mvId: String
     private var mvPlayUrl: String? = null
     private var currentPlaybackState = PlayBackState.IDLE
     private var isFullscreen = false //全屏状态标记
@@ -53,14 +61,13 @@ class MvPlayerActivity : AppCompatActivity() {
         binding = ActivityMvPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-//        // 获取 TheRouter 传过来的 mvId
-//        mvId = intent.getStringExtra("mvId") ?: run {
-//            Toast.makeText(this, "缺少 mvId", Toast.LENGTH_SHORT).show()
-//            finish()
-//            return
-//        }
+        TheRouter.inject( this)
 
-        mvId = "5501497" // 调试用 mvId
+        Log.d("MvPlayerActivity", "mvId: $mvId")
+
+        mvId = intent.getStringExtra("mvId") ?: ""
+        Log.d("MvPlayerActivity", "从Intent获取mvId: $mvId")
+
 
         // 初始化播放器
         initPlayer()

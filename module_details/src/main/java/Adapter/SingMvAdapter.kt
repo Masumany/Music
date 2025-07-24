@@ -2,6 +2,7 @@ package Adapter
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +15,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.module_details.R
 import com.example.module_details.databinding.ItemSingermvBinding
+import com.example.module_mvplayer.ui.activity.MvPlayerActivity
+import com.therouter.TheRouter
 import data.SingerMvData
 
 class SingMvAdapter (private val singMvList: List<SingerMvData.Mv>):
@@ -35,13 +38,23 @@ class SingMvAdapter (private val singMvList: List<SingerMvData.Mv>):
     }
 
     override fun onBindViewHolder(holder: SingMvViewHolder, position: Int) {
-        val item=singMvList[position]
-        holder.textView.text=item.name
+        val item = singMvList[position]
+        holder.textView.text = item.name
         Glide.with(holder.imgView.context).load(item.imgurl).into(holder.imgView)
-        holder.moreImg.setOnClickListener{
+
+        holder.moreImg.setOnClickListener {
             showPopupWindow(holder.moreImg, item)
         }
 
+        holder.itemView.setOnClickListener {
+            val context = holder.itemView.context
+            // 直接创建Intent，指定目标Activity
+            val intent = Intent(context, MvPlayerActivity::class.java)
+            // 传递mvId参数
+            intent.putExtra("mvId", item.id.toString())
+            context.startActivity(intent)
+            Log.d("MV", "点击跳转，mvId: ${item.id}")
+        }
     }
     private fun dpToPx(context: Context, dp: Int): Int {
         return (dp * context.resources.displayMetrics.density).toInt()

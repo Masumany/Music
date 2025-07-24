@@ -13,6 +13,9 @@ import com.example.module_login_register.databinding.FragmentHistoryBinding
 import com.example.module_personage.adapter.HistoryAdapter
 import com.example.module_personage.viewModel.HistoryViewModel
 import com.example.module_personage.viewModel.LoadState
+import com.therouter.router.Route
+
+
 
 class   HistoryFragment : Fragment() {
 

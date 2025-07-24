@@ -21,6 +21,9 @@
             android:exported="true"/>
         <activity android:name=".SingerActivity"
             android:exported="true"/>
+
+        <activity android:name="com.example.module_mvplayer.ui.activity.MvPlayerActivity"
+            android:exported="true"/>
     </application>
 
 </manifest>

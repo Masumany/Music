@@ -1,7 +1,6 @@
 package com.example.module_mvplayer.viewModel.player
 
-
-import com.google.android.exoplayer2.C
+import androidx.media3.common.C
 
 
 data class PlayerState (
