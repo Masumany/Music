@@ -42,7 +42,7 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Route(path = "/module_mvplayer/mvplayer")
 class MvPlayerActivity : AppCompatActivity() {
-    private  var mvId: String =""// 声明变量
+    private   var mvId: String="" // 声明变量
     private lateinit var binding: ActivityMvPlayerBinding
     private val viewModel: MvPlayerViewModel by viewModels()
     private var player: ExoPlayer? = null

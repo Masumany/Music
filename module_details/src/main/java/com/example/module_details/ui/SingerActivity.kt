@@ -1,6 +1,6 @@
 package com.example.module_details
 
-import SingerSongFragment
+
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -13,7 +13,6 @@ import com.example.module_details.databinding.ActivitySingerBinding
 import com.therouter.TheRouter
 import com.therouter.router.Autowired
 import com.therouter.router.Route
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 import viewmodel.SingerHomeViewModel
 

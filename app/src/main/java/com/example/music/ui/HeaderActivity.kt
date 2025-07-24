@@ -1,8 +1,9 @@
-package com.example.music
+package com.example.music.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
+import com.example.music.R
 import com.example.music.databinding.ActivityHeaderBinding
 
 class HeaderActivity : AppCompatActivity(){

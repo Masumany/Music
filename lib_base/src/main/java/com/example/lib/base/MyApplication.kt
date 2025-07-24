@@ -9,5 +9,6 @@ class MyApplication : Application() {
         super.onCreate()
         // 初始化 NetRepository，传入 Application 上下文
         RetrofitClient.init(this)
+
     }
 }

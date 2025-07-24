@@ -1,4 +1,4 @@
-package com.example.music
+package com.example.music.ui
 
 import Adapter.Vp2Adapter
 import android.content.ComponentName
@@ -25,7 +25,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.example.lib.base.Song
 import com.example.module_musicplayer.MusicPlayService
-import com.example.module_recommened.RecommendFragment
 import com.example.module_recommened.adapter.LiAdapter
 import com.example.module_recommened.viewmodel.ListViewModel
 import com.example.music.databinding.ActivityHeaderBinding
@@ -38,6 +37,8 @@ import com.therouter.router.Route
 import kotlinx.coroutines.launch
 import android.content.res.Resources
 import androidx.cardview.widget.CardView
+import com.example.music.R
+import com.therouter.TheRouter
 
 @Route(path = "/main/main")
 class MainActivity : AppCompatActivity() {
@@ -57,9 +58,19 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if(savedInstanceState!=null){
+            return  //不重复初始化
+        }
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         enableEdgeToEdge() // 启用边缘到边缘显示
+
+        binding.searchView.setOnClickListener{
+            TheRouter.build("/module_search/SearchActivity")
+                .navigation( this)
+
+        }
 
         initViews()
         initViewPager() // 优先初始化ViewPager2
@@ -89,8 +100,7 @@ class MainActivity : AppCompatActivity() {
         viewPager = binding.mainContent // 绑定布局中的ViewPager2
         vpAdapter = Vp2Adapter(this)
         viewPager.adapter = vpAdapter
-        // 禁用预加载（可选，根据需求设置）
-        viewPager.offscreenPageLimit = 2
+        viewPager.setUserInputEnabled(false);
     }
 
     private fun initViews() {
@@ -224,15 +234,23 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // 解绑服务
-        try {
-            unbindService(serviceConnection)
-        } catch (e: Exception) {
-            Log.e("MainActivity", "服务解绑失败: ${e.message}", e)
+        // 解绑服务：先检查serviceConnection是否已初始化
+        if (::serviceConnection.isInitialized) {
+            try {
+                unbindService(serviceConnection)
+            } catch (e: Exception) {
+                Log.e("MainActivity", "服务解绑失败: ${e.message}", e)
+            }
         }
-        bottomMusicController.onDestroy()
+
+        // 清理控制器：检查bottomMusicController是否已初始化
+        if (::bottomMusicController.isInitialized) {
+            bottomMusicController.onDestroy()
+        }
+
+        // 其他清理逻辑
         musicIv.clearAnimation()
-        if (bottomSheetDialog.isShowing) {
+        if (::bottomSheetDialog.isInitialized && bottomSheetDialog.isShowing) {
             bottomSheetDialog.dismiss()
         }
     }

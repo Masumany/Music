@@ -1,3 +1,5 @@
+package com.example.module_details
+
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,8 +14,8 @@ import com.example.module_details.databinding.FragmentSingersongBinding
 import com.therouter.TheRouter
 import kotlinx.coroutines.launch
 import Adapter.TopAdapter
+import TopViewModel
 import androidx.recyclerview.widget.RecyclerView
-import viewmodel.TopViewModel
 
 class SingerSongFragment : Fragment() {
     private lateinit var binding: FragmentSingersongBinding

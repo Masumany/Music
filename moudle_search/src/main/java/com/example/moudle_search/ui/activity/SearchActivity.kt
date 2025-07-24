@@ -19,7 +19,10 @@ import com.example.moudle_search.bean.searchSuggestionData.AllMatch
 import com.example.moudle_search.databinding.ActivitySearchBinding
 import com.example.moudle_search.viewModel.LoadState
 import com.example.moudle_search.viewModel.SearchViewModel
+import com.therouter.router.Route
 
+
+@Route(path = "/module_search/SearchActivity")
 class SearchActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySearchBinding
     private lateinit var viewModel: SearchViewModel

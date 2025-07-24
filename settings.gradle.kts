@@ -41,7 +41,7 @@ dependencyResolutionManagement {
         include(":module_login_register")
         include(":module_mvplayer")
         include(":module_personage")
-        include(":module_search")
+        include(":moudle_search")
     }
 }
 

@@ -1,7 +1,8 @@
 package com.example.module_details
 
-import PlayProgressEvent
-import SongChangeEvent
+import Event.CloseLyricEvent
+import Event.PlayProgressEvent
+import Event.SongChangeEvent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -20,7 +21,6 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.DiffUtil
 import com.example.module_details.databinding.ActivitySongwordBinding
-import com.example.music.event.CloseLyricEvent
 import com.therouter.TheRouter
 import com.therouter.router.Autowired
 import com.therouter.router.Route

@@ -111,7 +111,10 @@ class QrCodeLoginViewModel(private  val sharedPreferences : SharedPreferences) :
         checkQrJob = viewModelScope.launch {
             try {
                 while (true){
-                    val response = NetRepository.apiService.checkQR(key)
+                    val response = NetRepository.apiService.checkQR(
+                        key,
+                        noCookie = ""
+                    )
                     if (response.isSuccessful){
                         val qrData = response.body()
                         if (qrData != null ){

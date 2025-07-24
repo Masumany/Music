@@ -45,6 +45,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="60dp"
         android:text="歌手名称"
+        android:maxLines="2"
         android:textColor="@android:color/darker_gray"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"

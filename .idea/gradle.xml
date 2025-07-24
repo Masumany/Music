@@ -19,7 +19,7 @@
             <option value="$PROJECT_DIR$/module_mvplayer" />
             <option value="$PROJECT_DIR$/module_personage" />
             <option value="$PROJECT_DIR$/module_recommened" />
-            <option value="$PROJECT_DIR$/module_search" />
+            <option value="$PROJECT_DIR$/moudle_search" />
           </set>
         </option>
         <option name="resolveExternalAnnotations" value="false" />

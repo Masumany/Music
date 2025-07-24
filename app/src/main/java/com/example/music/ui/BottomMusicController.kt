@@ -1,4 +1,4 @@
-package com.example.music
+package com.example.music.ui
 
 import android.content.Context
 import android.content.Intent
@@ -14,6 +14,7 @@ import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import Adapter.MusicDataCache
 import com.example.module_musicplayer.MusicPlayService
+import com.example.music.R
 import com.therouter.TheRouter
 import data.ListMusicData
 
@@ -27,7 +28,6 @@ class BottomMusicController(
     private val handler = Handler(Looper.getMainLooper())
     private val updateRunnable = object : Runnable {
         override fun run() {
-            // 可以在这里添加进度更新等周期性任务
             handler.postDelayed(this, 1000)
         }
     }
@@ -37,7 +37,7 @@ class BottomMusicController(
     private val ROTATION_PLAYING = 360f // 完整旋转一周
     private var isAnimationRunning = false
     private var currentRotation = 0f
-    private val animationDuration = 10000L // 20秒旋转一周
+    private val animationDuration = 15000L
 
     // LiveData观察者
     private val songObserver = Observer<ListMusicData.Song?> { song ->
