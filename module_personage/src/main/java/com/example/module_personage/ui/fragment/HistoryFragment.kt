@@ -6,17 +6,15 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.module_login_register.R
 import com.example.module_login_register.databinding.FragmentHistoryBinding
 import com.example.module_personage.adapter.HistoryAdapter
 import com.example.module_personage.viewModel.HistoryViewModel
 import com.example.module_personage.viewModel.LoadState
 
-class HistoryFragment : Fragment() {
+class   HistoryFragment : Fragment() {
 
     companion object {
         fun newInstance() = HistoryFragment()

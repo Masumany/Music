@@ -6,9 +6,13 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.module_personage.ui.fragment.HistoryFragment
 import com.example.module_personage.ui.fragment.SongListFragment
 
-class ViewPagerAdapter (
-    activity: FragmentActivity
-) : FragmentStateAdapter(activity) {
+class ViewPagerAdapter(
+    private val parentFragment: Fragment // 接收 Fragment 作为父容器
+) : FragmentStateAdapter(
+    parentFragment.childFragmentManager, // 使用父 Fragment 的子 FragmentManager
+    parentFragment.lifecycle // 使用父 Fragment 的生命周期
+) {
+
     private val fragments = listOf(
         SongListFragment.newInstance(),
         HistoryFragment.newInstance()

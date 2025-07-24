@@ -1,0 +1,32 @@
+package com.example.module_hot.bean.list
+
+data class Album(
+    val alias: List<Any?>,
+    val artist: ArtistXXX,
+    val artists: List<ArtistXXX>,
+    val blurPicUrl: String,
+    val briefDesc: String,
+    val commentThreadId: String,
+    val company: String,
+    val companyId: Int,
+    val copyrightId: Int,
+    val description: String,
+    val dolbyMark: Int,
+    val gapless: Int,
+    val id: Int,
+    val mark: Int,
+    val name: String,
+    val onSale: Boolean,
+    val pic: Long,
+    val picId: Long,
+    val picId_str: String,
+    val picUrl: String,
+    val publishTime: Long,
+    val size: Int,
+    val songs: List<Any?>,
+    val status: Int,
+    val subType: String,
+    val tags: String,
+    val transName: Any,
+    val type: String
+)

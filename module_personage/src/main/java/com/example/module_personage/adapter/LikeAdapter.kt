@@ -32,6 +32,7 @@ class LikeAdapter (
                  .load(follow.avatarUrl)
                  .circleCrop()
                  .placeholder(R.drawable.loading)
+                 .error(R.drawable.error)
                  .into(binding.likeItemImage)
 
             binding.likeItemText.text = follow.nickname
@@ -51,13 +52,5 @@ class LikeAdapter (
     }
     override fun onBindViewHolder(holder: LikeViewHolder, position: Int) {
         holder.bind(getItem(position))
-    }
-    class LikeDiffCallback : DiffUtil.ItemCallback<Follow>() {
-        override fun areItemsTheSame(oldItem: Follow, newItem: Follow): Boolean {
-            return oldItem.userId == newItem.userId
-        }
-        override fun areContentsTheSame(oldItem: Follow, newItem: Follow): Boolean {
-            return oldItem == newItem
-        }
     }
 }

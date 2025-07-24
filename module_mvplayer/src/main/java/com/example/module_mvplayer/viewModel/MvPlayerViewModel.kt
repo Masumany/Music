@@ -1,107 +1,104 @@
 package com.example.module_mvplayer.viewModel
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.media3.common.MediaItem
-import androidx.media3.common.PlaybackException
-import androidx.media3.common.Player
+import androidx.lifecycle.viewModelScope
 import androidx.media3.exoplayer.ExoPlayer
-import com.example.module_mvplayer.bean.player.PlayBackState
-import com.example.module_mvplayer.bean.player.PlayerState
+import com.example.module_mvplayer.repositorty.NetRepository
+import com.example.module_mvplayer.bean.mvData.MvData
+import com.example.module_mvplayer.bean.mvInfo.MvInfoData
+import com.example.module_mvplayer.bean.mvPlayUrl.MvPlayUrl
+import com.example.module_mvplayer.viewModel.player.PlayBackState
+import com.example.module_mvplayer.viewModel.player.PlayerState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class MvPlayerViewModel : ViewModel() {
     private val _playState = MutableStateFlow(PlayerState())
     val playState: StateFlow<PlayerState> = _playState.asStateFlow()
 
-    var seekBackIncrementMs: Long = 5000
-    var seekForwardIncrementMs: Long = 5000
+    private val _mvDetail = MutableStateFlow<MvData?>(null)
+    val mvDetail: StateFlow<MvData?> = _mvDetail.asStateFlow()
 
-    private var mvId: String? = null
+    private val _mvInfo = MutableStateFlow<MvInfoData?>(null)
+    val mvInfo: StateFlow<MvInfoData?> = _mvInfo.asStateFlow()
 
-    fun setMvId(id: String?) {
-        mvId = id
-    }
+    private val _mvPlayUrl = MutableStateFlow<MvPlayUrl?>(null)
+    val mvPlayUrl: StateFlow<MvPlayUrl?> = _mvPlayUrl.asStateFlow()
 
-    //  ExoPlayer 构造
-    fun createPlayer(context: Context): ExoPlayer {
-        return ExoPlayer.Builder(context)
-            .setSeekBackIncrementMs(seekBackIncrementMs)
-            .setSeekForwardIncrementMs(seekForwardIncrementMs)
-            .build()
-    }
+    private val _loadState = MutableStateFlow<LoadState>(LoadState.Init)
+    val loadState: StateFlow<LoadState> = _loadState.asStateFlow()
 
-    fun preparePlayer(player: ExoPlayer, mvId: String) {
-        val mediaItem = MediaItem.fromUri(mvId)
-        player.setMediaItem(mediaItem)
-        player.prepare()
-    }
 
-    // 监听
-    fun attachPlayerListeners(player: ExoPlayer) {
-        player.addListener(object : Player.Listener {
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                val state = when (playbackState) {
-                    Player.STATE_IDLE -> PlayBackState.IDLE
-                    Player.STATE_BUFFERING -> PlayBackState.BUFFERING
-                    Player.STATE_READY -> PlayBackState.READY
-                    Player.STATE_ENDED -> PlayBackState.ENDED
-                    else -> PlayBackState.ERROR
+    fun loadMvData(mvId: String) {
+        viewModelScope.launch {
+            _loadState.value = LoadState.Loading
+            try {
+                val mvDetail = NetRepository.apiService.getMvDetail(mvId!!)
+                Log.d("MvData", "code=${mvDetail.code()}, message=${mvDetail.message()}")
+                if (mvDetail.isSuccessful) {
+                    _mvDetail.value = mvDetail.body()
+                    _loadState.value = LoadState.Success
+                } else {
+                    _loadState.value = LoadState.Error("获取MV详情失败")
                 }
-                _playState.update {
-                    it.copy(
-                        playBackState = state,
-                        isPlaying = playbackState == Player.STATE_READY && player.playWhenReady
-                    )
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Log.d("MvData", "loadMvData: ${e.localizedMessage}")
+                _loadState.value = LoadState.Error("网络错误: ${e.localizedMessage}")
+            }
+        }
+    }
+    fun loadMvInfo(mvId: String) {
+        viewModelScope.launch {
+            _loadState.value = LoadState.Loading
+            try {
+                val response = NetRepository.apiService.getMvInfo(mvId)
+                Log.d("MvInfo", "code=${response.code()}, message=${response.message()}")
+                if (response.isSuccessful) {
+                    _mvInfo.value = response.body()
+                    _loadState.value = LoadState.Success
+                } else {
+                    _loadState.value = LoadState.Error("获取信息失败")
                 }
+            } catch (e: Exception) {
+                _loadState.value = LoadState.Error("网络错误: ${e.localizedMessage}")
             }
-
-            override fun onPlayerError(error: PlaybackException) {
-                _playState.update {
-                    it.copy(
-                        playBackState = PlayBackState.ERROR,
-                        errorMessage = error.message
-                    )
+        }
+    }
+    fun loadMvPlayUrl(mvId: String) {
+        Log.d("MvPlayerViewModel", "loadMvPlayUrl called with mvId = $mvId")
+        viewModelScope.launch {
+            _loadState.value = LoadState.Loading
+            try {
+                val response =NetRepository.apiService.getMvPlayUrl(mvId)
+                Log.d("MvPlayerViewModel", "code=${response.code()}, message=${response.message()}")
+                Log.d("MvPlayerViewModel", "loadMvPlayUrl: ${response.body()}")
+                if (response.isSuccessful) {
+                    _mvPlayUrl.value = response.body()
+                    _loadState.value = LoadState.Success
+                } else {
+                    _loadState.value = LoadState.Error("获取播放地址失败")
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Log.d("MvPlayerViewModel", "loadMvPlayUrl: ${e.localizedMessage}")
+                _loadState.value = LoadState.Error("网络错误: ${e.localizedMessage}")
             }
-
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                _playState.update { it.copy(isPlaying = isPlaying) }
-            }
-
-            override fun onPositionDiscontinuity(
-                oldPosition: Player.PositionInfo,
-                newPosition: Player.PositionInfo,
-                reason: Int
-            ) {
-                _playState.update { it.copy(currentPosition = newPosition.positionMs) }
-            }
-        })
+        }
     }
 
-    fun togglePlayback(player: ExoPlayer) {
-        player.playWhenReady = !player.playWhenReady
-    }
-
-    fun seekForward(player: ExoPlayer) {
-        val newPosition = player.currentPosition + seekForwardIncrementMs
-        player.seekTo(newPosition)
-    }
-
-    fun seekBack(player: ExoPlayer) {
-        val newPosition = player.currentPosition - seekBackIncrementMs
-        player.seekTo(newPosition)
-    }
-
-    fun seekTo(player: ExoPlayer, position: Long) {
-        player.seekTo(position)
-    }
-
+    //清理资源
     override fun onCleared() {
         super.onCleared()
+        _playState.value = PlayerState(PlayBackState.IDLE)
+        clearState()
+    }
+
+    fun clearState() {
         _playState.value = PlayerState(PlayBackState.IDLE)
     }
 }
