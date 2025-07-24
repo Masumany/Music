@@ -1,5 +1,6 @@
 plugins {
-    alias(libs.plugins.android.application)
+    id("com.android.library")
+    //alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("kotlin-kapt")
 }
@@ -9,11 +10,11 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.module_login_register"
+//        applicationId = "com.example.module_login_register"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+//        versionCode = 1
+//        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -28,16 +29,23 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17  // 升级到 Java 17
+        targetCompatibility = JavaVersion.VERSION_17
     }
+
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"  // 升级到 Java 17
     }
 }
 
 dependencies {
 
+    implementation(project(":lib_base"))
+    // TheRouter 核心库
+//    implementation("cn.therouter:api:1.2.2" )
+//    // 注解处理器（用于生成路由表）
+//    kapt("cn.therouter:compiler:1.2.2")
+//    implementation (files("libs/apt-1.2.2.jar"))
     // OkHttp 核心库，用于进行网络请求
     implementation ("com.squareup.okhttp3:okhttp:4.11.0")
     // 日志拦截器，用于在开发过程中打印请求和响应的详细信息，方便调试，可选添加
@@ -57,23 +65,20 @@ dependencies {
     // Glide核心库
     implementation ("com.github.bumptech.glide:glide:4.12.0")
     // Glide注解处理器
-    kapt ("com.github.bumptech.glide:compiler:4.12.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
     implementation ("androidx.lifecycle:lifecycle-common-java8:2.7.0")
     // 内存泄漏检测
     debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.8.1")
+    implementation ("com.google.android.material:material:1.8.0")
+    // 替换 legacy.support.v4
+    implementation("androidx.legacy:legacy-support-v4:1.0.0")  // 或使用更具体的 androidx 组件
 
-    val nav_version = "2.7.7"
-    implementation("androidx.navigation:navigation-fragment-ktx:$nav_version")
-    implementation("androidx.navigation:navigation-ui-ktx:$nav_version")
-    // 动态特性模块支持
-    implementation("androidx.navigation:navigation-dynamic-features-fragment:$nav_version")
-    implementation("com.google.android.play:feature-delivery:2.1.0") // 替换有问题的 2.0.1 版本，避免 Play Console 拒绝
-    // 基础组件
+    // Fragment
+    implementation("androidx.fragment:fragment-ktx:1.6.1")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
-    implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     // 测试依赖

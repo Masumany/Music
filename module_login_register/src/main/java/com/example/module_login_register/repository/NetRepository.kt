@@ -2,15 +2,17 @@ package com.example.module_login_register.repository
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.example.lib.base.CookieInterceptor
 import com.example.module_login_register.bean.AuthVerifyData
+import com.example.module_login_register.bean.LoginStatus
 import com.example.module_login_register.bean.PassWordLoginData
 import com.example.module_login_register.bean.QrCheckData
 import com.example.module_login_register.bean.QrCreateData
 import com.example.module_login_register.bean.QrLoginData
 import com.example.module_login_register.bean.RefreshData
 import com.example.module_login_register.bean.SendData
+import com.example.module_login_register.bean.UserAccount
 import com.example.module_login_register.bean.VisitorLoginData
-import com.example.module_login_register.netWork.CookieInterceptor
 import okhttp3.OkHttpClient
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -24,23 +26,38 @@ object NetRepository {
     private lateinit var sharedPreferences: SharedPreferences
 
     fun init(context: Context) {
-        sharedPreferences = context.applicationContext
-            .getSharedPreferences("cookie", Context.MODE_PRIVATE)
+        if (!::sharedPreferences.isInitialized) {  // 避免重复初始化
+            sharedPreferences = context.applicationContext
+                .getSharedPreferences("cookie", Context.MODE_PRIVATE)
+        }
     }
 
-    val okHttpClient = OkHttpClient.Builder()
-        .addInterceptor(CookieInterceptor(sharedPreferences))
-        .build()
+    private val okHttpClient by lazy {
+        OkHttpClient.Builder()
+            .addInterceptor(CookieInterceptor(sharedPreferences))
+            .build()
+    }
 
-    private var retrofit = Retrofit.Builder()
-        .baseUrl("http://43.139.173.183:3000")
-        .client(okHttpClient)
-        .addConverterFactory(GsonConverterFactory.create())
-        .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
-        .build()
+
+    private val retrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl("http://43.139.173.183:3000")
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
+            .build()
+    }
 
     val apiService = retrofit.create(ApiService::class.java)
     interface ApiService {
+        @GET("/user/account")
+        suspend fun getUserAccount(
+        ): Response<UserAccount>
+
+        @GET("/login/status")
+        suspend fun checkLoginStatus(
+        ): Response<LoginStatus>
+
         @GET("/login/cellphone")
         suspend fun passwordsLogin(
             //将方法参数phone映射为 URL 查询参数

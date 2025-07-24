@@ -6,13 +6,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.module_login_register.databinding.ActivityLikeBinding
 import com.example.module_login_register.databinding.ActivityLikedBinding
-import com.example.module_personage.adapter.LikeAdapter
 import com.example.module_personage.adapter.LikedAdapter
-import com.example.module_personage.bean.like.Follow
 import com.example.module_personage.bean.liked.Followed
-import com.example.module_personage.viewModel.LikeViewModel
 import com.example.module_personage.viewModel.LikedViewModel
 import com.example.module_personage.viewModel.LoadState
 

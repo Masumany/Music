@@ -10,7 +10,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:networkSecurityConfig="@xml/xml"
-        android:name=".netWork.MyApplication"
         android:theme="@style/Theme.Music">
         <activity
             android:name=".ui.activity.QrCodeLoginActivity"
