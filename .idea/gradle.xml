@@ -4,6 +4,7 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
+        <option name="testRunner" value="CHOOSE_PER_TEST" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="gradleJvm" value="jbr-17" />
         <option name="modules">
@@ -11,12 +12,14 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/lib_base" />
-            <option value="$PROJECT_DIR$/libs" />
+            <option value="$PROJECT_DIR$/module_details" />
             <option value="$PROJECT_DIR$/module_hot" />
             <option value="$PROJECT_DIR$/module_login_register" />
+            <option value="$PROJECT_DIR$/module_musicplayer" />
             <option value="$PROJECT_DIR$/module_mvplayer" />
             <option value="$PROJECT_DIR$/module_personage" />
-            <option value="$PROJECT_DIR$/moudle_search" />
+            <option value="$PROJECT_DIR$/module_recommened" />
+            <option value="$PROJECT_DIR$/module_search" />
           </set>
         </option>
         <option name="resolveExternalAnnotations" value="false" />

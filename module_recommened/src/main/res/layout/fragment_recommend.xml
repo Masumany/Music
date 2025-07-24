@@ -11,7 +11,6 @@
         android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/player"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -95,65 +94,6 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/player"
-        android:layout_width="match_parent"
-        android:layout_height="35dp"
-        android:background="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
 
-        <ImageView
-            android:id="@+id/music"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_marginStart="16dp"
-            android:src="@drawable/music"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/tv_song"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="歌曲"
-            android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@id/music"
-            app:layout_constraintTop_toTopOf="@id/music"
-            app:layout_constraintVertical_bias="0.2" />
-
-        <TextView
-            android:id="@+id/tv_artist"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="歌手"
-            android:textColor="#A6A6A6"
-            app:layout_constraintStart_toEndOf="@id/music"
-            app:layout_constraintTop_toBottomOf="@id/tv_song" />
-
-        <ImageView
-            android:id="@+id/stop"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/list_start"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/iv_more"
-            app:layout_constraintHorizontal_bias="0.908"
-            app:layout_constraintStart_toEndOf="@id/tv_artist"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.4" />
-
-        <ImageView
-            android:id="@+id/iv_more"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_marginEnd="16dp"
-            android:src="@drawable/more"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

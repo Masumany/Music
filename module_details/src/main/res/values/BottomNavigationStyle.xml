@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="BottomNavigationStyle" parent="Widget.Design.BottomNavigationView">
+        <item name="itemTextAppearanceActive">@style/BottomNavigationTextStyle.Active</item>
+        <item name="itemTextAppearanceInactive">@style/BottomNavigationTextStyle.Inactive</item>
+    </style>
+
+    <style name="BottomNavigationTextStyle.Active" parent="TextAppearance.AppCompat.Caption">
+        <item name="android:textSize">15sp</item> <!-- 选中状态文字大小 -->
+        <item name="android:textStyle">bold</item> <!-- 选中状态文字加粗 -->
+    </style>
+
+    <style name="BottomNavigationTextStyle.Inactive" parent="TextAppearance.AppCompat.Caption">
+        <item name="android:textSize">15sp</item> <!-- 未选中状态文字大小 -->
+    </style>
+</resources>

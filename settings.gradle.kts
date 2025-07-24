@@ -9,19 +9,10 @@ pluginManagement {
         }
         mavenCentral()
         gradlePluginPortal()
+
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        // 正确的阿里云镜像地址（必须带协议和完整路径）
-//        maven { url = uri("https://maven.aliyun.com/repository/google/") } // 末尾带 /
-//        maven { url = uri("https://maven.aliyun.com/repository/central/") }
-//        maven { url = uri("https://maven.aliyun.com/repository/gradle-plugin/") }
-        google()
-        mavenCentral()
-        maven { url = uri("https://jitpack.io") } // Therouter需要的JitPack仓库
-    }
     versionCatalogs {
         create("libs") {
             version("agp", "8.6.1")  // 指定兼容的 AGP 版本
@@ -33,15 +24,24 @@ dependencyResolutionManagement {
                 .versionRef("agp")
             plugin("kotlin-android", "org.jetbrains.kotlin.android")
                 .versionRef("kotlin")
+            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+            repositories {
+                google()
+                mavenCentral()
+            }
         }
+
+        rootProject.name = "Music"
+        include(":app")
+        include(":lib_base")
+        include(":module_musicplayer")
+        include(":module_recommened")
+        include(":module_details")
+        include(":module_hot")
+        include(":module_login_register")
+        include(":module_mvplayer")
+        include(":module_personage")
+        include(":module_search")
     }
 }
-rootProject.name = "Music"
-include(":app")
-include(":libs")
-include(":lib_base")
-include(":module_login_register")
-include(":module_personage")
-include(":module_mvplayer")
-include(":module_hot")
-include(":moudle_search")
+

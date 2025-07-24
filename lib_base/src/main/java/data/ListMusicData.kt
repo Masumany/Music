@@ -150,7 +150,7 @@ data class ListMusicData(
         @SerializedName("m")
         val m: M,
         @SerializedName("mainTitle")
-        val mainTitle: String?, // Johnny Joestar Theme 
+        val mainTitle: String?, // Johnny Joestar Theme
         @SerializedName("mark")
         val mark: Long, // 17180139520
         @SerializedName("mst")
@@ -208,7 +208,7 @@ data class ListMusicData(
     ) {
         data class Al(
             @SerializedName("id")
-            val id: Int, // 2430770
+            val id: Long, // 2430770
             @SerializedName("name")
             val name: String, // Big Battle of Egos
             @SerializedName("pic")
@@ -225,7 +225,7 @@ data class ListMusicData(
             @SerializedName("alias")
             val alias: List<Any?>,
             @SerializedName("id")
-            val id: Int, // 85832
+            val id: Long, // 85832
             @SerializedName("name")
             val name: String, // Army of Lovers
             @SerializedName("tns")

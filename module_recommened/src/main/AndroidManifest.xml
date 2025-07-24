@@ -21,7 +21,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.example.module_musicplayer.MusicPlayerActivity"
+            android:name="com.example.module_details.SongActivity"
             android:exported="true"/>
     </application>
 

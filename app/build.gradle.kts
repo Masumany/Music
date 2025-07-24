@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)  // 使用版本目录中的定义
     alias(libs.plugins.kotlin.android)
-
+    id("kotlin-kapt")
 }
 apply (plugin= "therouter")
 
@@ -21,6 +21,7 @@ android {
     buildFeatures{
         viewBinding=true
     }
+    
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -31,27 +32,32 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17  // 升级到 Java 17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
-
     kotlinOptions {
-        jvmTarget = "17"  // 升级到 Java 17
+        jvmTarget = "11"
     }
 }
 
 dependencies {
+    debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.12")
+    // Glide 核心库
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 
+    // 注解处理器（用于 Glide 的注解功能，如 @GlideModule）
+    kapt("com.github.bumptech.glide:compiler:4.16.0")
+    implementation ("pl.droidsonroids.gif:android-gif-drawable:1.2.19")
+    implementation ("org.greenrobot:eventbus:3.3.1")
+    implementation ("com.google.android.material:material:1.0.0")
+    implementation (project(":module_hot"))
+    implementation (project(":module_personage"))
     implementation(project(":lib_base"))
-    implementation(project(":module_login_register"))
-    implementation(project(":module_personage"))
-    implementation(project(":module_mvplayer"))
-    // OkHttp 核心库，用于进行网络请求
-    implementation ("com.squareup.okhttp3:okhttp:4.11.0")
-    // 日志拦截器，用于在开发过程中打印请求和响应的详细信息，方便调试，可选添加
-    implementation ("com.squareup.okhttp3:logging-interceptor:4.11.0")
-    // 协程库
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation(project(":module_details"))
+    kapt("cn.therouter:apt:1.2.2")
+    implementation("cn.therouter:router:1.2.2")
+    implementation(project(":module_recommened"))
+    implementation(project(":module_musicplayer"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -60,4 +66,5 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
 }

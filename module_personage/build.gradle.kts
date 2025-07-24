@@ -49,6 +49,9 @@ dependencies {
 //    // 注解处理器（用于生成路由表）
 //    kapt("cn.therouter:compiler:1.2.2")
 //    implementation (files("libs/apt-1.2.2.jar"))
+    kapt("cn.therouter:apt:1.2.2")
+    implementation("cn.therouter:router:1.2.2")
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
     // 协程库
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     // Retrofit

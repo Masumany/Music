@@ -106,13 +106,12 @@ class QrCodeLoginViewModel(private  val sharedPreferences : SharedPreferences) :
         }
     }
 
-    fun checkQrCode(key: String,noCookie : String = "faulse") {
+    fun checkQrCode(key: String) {
         checkQrJob?.cancel()
         checkQrJob = viewModelScope.launch {
             try {
                 while (true){
                     val response = NetRepository.apiService.checkQR(key)
-                    delay(2000)
                     if (response.isSuccessful){
                         val qrData = response.body()
                         if (qrData != null ){
@@ -120,15 +119,12 @@ class QrCodeLoginViewModel(private  val sharedPreferences : SharedPreferences) :
                             when(qrData.code){
                                 800 ->{
                                     _loginState.value = LoginState.Error("二维码已过期")
-                                    break
                                 }
                                 801 ->{
                                     _qrState.value = QrLoadState.Success
-                                    delay(2000)
                                 }
                                 802 ->{
                                     _loginState.value = LoginState.Loading
-                                    delay(2000)
                                 }
                                 803 ->{
                                     _loginState.value = LoginState.Success
@@ -144,11 +140,6 @@ class QrCodeLoginViewModel(private  val sharedPreferences : SharedPreferences) :
                                             _loginState.value = LoginState.Error("登录状态校验失败,请重试")
                                         }
                                     }
-                                    break
-                                }
-                                502 -> {
-                                    // 加 noCookie 参数重新请求
-                                    val newResponse = NetRepository.apiService.checkQrState(key, noCookie = true)
                                     break
                                 }
                                 else ->{
@@ -170,10 +161,6 @@ class QrCodeLoginViewModel(private  val sharedPreferences : SharedPreferences) :
                 Log.e("QrCodeLoginViewModel", "请求异常 ${e.message}")
                 e.printStackTrace()
             }
-        }
-        override fun onCleared() {
-            super.onCleared()
-            checkQrJob?.cancel()
         }
     }
     fun checkLoginStatus(){

@@ -63,12 +63,12 @@ dependencies {
     implementation ("io.reactivex.rxjava3:rxandroid:3.0.2")
     // Glide核心库
     implementation ("com.github.bumptech.glide:glide:4.12.0")
-    implementation(libs.androidx.fragment.ktx)
     // Glide注解处理器
     annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
     implementation ("androidx.lifecycle:lifecycle-common-java8:2.7.0")
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
     // 内存泄漏检测
     debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.8.1")
     // 替换 legacy.support.v4

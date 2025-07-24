@@ -13,6 +13,9 @@ import com.example.module_login_register.databinding.FragmentHistoryBinding
 import com.example.module_personage.adapter.HistoryAdapter
 import com.example.module_personage.viewModel.HistoryViewModel
 import com.example.module_personage.viewModel.LoadState
+import com.therouter.router.Route
+
+
 
 class   HistoryFragment : Fragment() {
 
@@ -31,13 +34,6 @@ class   HistoryFragment : Fragment() {
             },
             onPlayClick = {
                 Toast.makeText(requireContext(), "播放《${it.name}》", Toast.LENGTH_SHORT).show()
-                TheRouter.build("/module_musicplayer/musicplayer")
-                    .withString("id", it.id.toString())
-                    .withString("cover", it.al.picUrl)
-                    .withString("songName", it.name)
-                    .withString("song", it.id.toString())
-                    .withString("athour", it.ar.name)
-                    .navigation()
             }
         )
     }

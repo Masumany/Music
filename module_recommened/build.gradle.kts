@@ -49,6 +49,7 @@ dependencies {
 
 // Kotlin 扩展（可选，Kotlin 项目推荐）
     implementation(project(":lib_base"))
+    implementation(project(":module_details"))
     implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")

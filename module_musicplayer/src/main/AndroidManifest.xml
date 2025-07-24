@@ -23,7 +23,8 @@
             </intent-filter>
         </activity>
         <service android:name=".MusicPlayService"
-                 android:exported="true"/>
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="true"/>
         <activity
             android:name="com.example.module_musicplayer.CommentActivity"
             android:exported="true"/>

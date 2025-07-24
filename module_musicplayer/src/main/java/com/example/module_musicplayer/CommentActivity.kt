@@ -20,7 +20,7 @@ class CommentActivity : AppCompatActivity() {
     var id: String? = null
 
     private lateinit var binding: FragmentCommentBinding
-    private lateinit var commentAdapter: CommentAdapter  // 保持一个适配器实例
+    private lateinit var commentAdapter: CommentAdapter
     private lateinit var commentViewModel: CommentViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,11 +38,10 @@ class CommentActivity : AppCompatActivity() {
     }
 
     private fun initRecyclerView() {
-        // 初始化时创建一次适配器
         commentAdapter = CommentAdapter(emptyList())
         binding.rvComment.apply {
             layoutManager = LinearLayoutManager(this@CommentActivity)
-            adapter = commentAdapter  // 设置给RecyclerView
+            adapter = commentAdapter
         }
     }
 
@@ -56,10 +55,9 @@ class CommentActivity : AppCompatActivity() {
 
     private fun observeCommentData() {
         commentViewModel.hotComments.observe(this) { hotComments ->
-            Log.d("CommentData", "评论数量: ${hotComments.size}")  // 调试用，确认数据不为空
+            Log.d("CommentData", "评论数量: ${hotComments.size}")
 
             if (hotComments.isNotEmpty()) {
-                // 关键修复：通过现有适配器更新数据，而非创建新实例
                 commentAdapter.updateComments(hotComments)
             } else {
                 Toast.makeText(this, "暂无评论", Toast.LENGTH_SHORT).show()

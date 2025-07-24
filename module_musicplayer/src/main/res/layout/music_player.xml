@@ -28,14 +28,14 @@
 
     <TextView
         android:id="@+id/mp_singer"
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="28dp"
-        android:layout_marginTop="564dp"
+        android:layout_marginTop="548dp"
         android:text="歌手"
         android:textColor="#EBE6EC"
         android:textSize="20sp"
-        android:textStyle="bold"
+        android:textStyle="italic"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -108,6 +108,7 @@
         <ImageView
             android:id="@+id/mp_center"
             android:layout_width="250dp"
+            android:scaleType="centerCrop"
             android:layout_height="250dp"
             android:src="@drawable/mp_music" />
     </androidx.cardview.widget.CardView>
@@ -118,7 +119,7 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_marginEnd="92dp"
-        android:layout_marginBottom="164dp"
+        android:layout_marginBottom="180dp"
         android:src="@drawable/like"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -128,7 +129,7 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_marginEnd="36dp"
-        android:layout_marginBottom="164dp"
+        android:layout_marginBottom="180dp"
         android:src="@drawable/talk"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -206,7 +207,7 @@
         android:layout_gravity="center"
         android:layout_marginBottom="488dp"
         android:elevation="40dp"
-        android:src="@drawable/img"
+        android:src="@drawable/mp_record_play"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.007"
