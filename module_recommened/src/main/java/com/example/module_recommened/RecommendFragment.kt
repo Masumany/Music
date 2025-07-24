@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
@@ -34,6 +35,7 @@ class RecommendFragment : Fragment() {
     private lateinit var rv_list: RecyclerView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
+    // 其他变量保持不变...
     private lateinit var bannerViewModel: BannerViewModel
     private lateinit var recommendedViewModel: RecommenedViewModel
     private lateinit var listViewModel: ListViewModel
@@ -45,6 +47,13 @@ class RecommendFragment : Fragment() {
     private val pageSize = 5
     private var hasMoreData = true
     private var isLoading = false
+
+    // 滑动冲突处理相关变量
+    private var lastX = 0f
+    private var lastY = 0f
+    private val SCROLL_THRESHOLD = 5  // 滑动方向判断阈值
+    private var isHorizontalScrolling = false  // 是否正在横向滚动
+    private var isBannerTouching = false  // 是否正在触摸Banner区域
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -63,50 +72,143 @@ class RecommendFragment : Fragment() {
         viewPager = binding.viewPager
         recyclerView = binding.recyclerView
 
+        // 初始化代码保持不变...
         rv_list.adapter = songAdapter
         val layoutManager = LinearLayoutManager(requireContext())
         rv_list.layoutManager = layoutManager
 
+        // 纵向RecyclerView滚动监听
         rv_list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (dy <= 0) return // 只处理向下滚动
+                if (dy <= 0 || isHorizontalScrolling) return
 
                 val lastPosition = layoutManager.findLastVisibleItemPosition()
                 val totalItem = layoutManager.itemCount
-
 
                 if (lastPosition >= totalItem - 1 && hasMoreData && !isLoading) {
                     loadNextPage()
                 }
             }
+
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                    recyclerView.requestDisallowInterceptTouchEvent(true)
+                    viewPager.requestDisallowInterceptTouchEvent(true)
+                }
+            }
         })
 
-
+        // 横向RecyclerView设置
         recyclerView.layoutManager = LinearLayoutManager(
             requireContext(),
             LinearLayoutManager.HORIZONTAL,
             false
         )
 
+        recyclerView.setOnTouchListener { _, event ->
+            handleHorizontalTouchEvent(event, recyclerView, false)
+            false
+        }
 
-        bannerViewModel = ViewModelProvider(this)[BannerViewModel::class.java]
-        recommendedViewModel = ViewModelProvider(this)[RecommenedViewModel::class.java]
-        listViewModel = ViewModelProvider(this)[ListViewModel::class.java]
+        // ViewPager2(Banner)触摸事件处理 - 重点修改
+        viewPager.setOnTouchListener { _, event ->
+            // 标记是否正在触摸Banner区域
+            isBannerTouching = when(event.action) {
+                MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> true
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> false
+                else -> isBannerTouching
+            }
 
-        // 加载数据
-        loadData()
+            // 处理Banner滑动时的下拉刷新控制
+            controlRefreshWhenBannerTouching()
 
-        // 下拉刷新
+            // 处理横向滑动事件
+            handleHorizontalTouchEvent(event, viewPager, true)
+            false
+        }
+
+        // 下拉刷新监听器 - 增加判断条件
         swipeRefreshLayout.setOnRefreshListener {
-            lifecycleScope.launch {
-                refreshData()
+            // 只有不在触摸Banner时才允许刷新
+            if (!isBannerTouching) {
+                lifecycleScope.launch {
+                    refreshData()
+                    swipeRefreshLayout.isRefreshing = false
+                }
+            } else {
+                // 如果正在触摸Banner，立即取消刷新
                 swipeRefreshLayout.isRefreshing = false
             }
         }
+
+        // 初始化ViewModel和加载数据
+        bannerViewModel = ViewModelProvider(this)[BannerViewModel::class.java]
+        recommendedViewModel = ViewModelProvider(this)[RecommenedViewModel::class.java]
+        listViewModel = ViewModelProvider(this)[ListViewModel::class.java]
+        loadData()
     }
 
-    // 刷新数据
+    // 控制Banner触摸时的下拉刷新状态
+    private fun controlRefreshWhenBannerTouching() {
+        // 如果正在触摸Banner区域，禁止下拉刷新
+        swipeRefreshLayout.isEnabled = !isBannerTouching
+    }
+
+    // 处理横向滑动组件的触摸事件
+    private fun handleHorizontalTouchEvent(event: MotionEvent, view: View, isBanner: Boolean): Boolean {
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                lastX = event.x
+                lastY = event.y
+                rv_list.requestDisallowInterceptTouchEvent(true)
+                isHorizontalScrolling = false
+
+                // 如果是Banner，标记触摸状态
+                if (isBanner) {
+                    isBannerTouching = true
+                    controlRefreshWhenBannerTouching()
+                }
+            }
+            MotionEvent.ACTION_MOVE -> {
+                val currentX = event.x
+                val currentY = event.y
+                val dx = currentX - lastX
+                val dy = currentY - lastY
+
+                if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > SCROLL_THRESHOLD) {
+                    isHorizontalScrolling = true
+                    rv_list.requestDisallowInterceptTouchEvent(true)
+                } else if (Math.abs(dy) > SCROLL_THRESHOLD) {
+                    isHorizontalScrolling = false
+                    val canScroll = when (view) {
+                        is ViewPager2 -> view.canScrollHorizontally(-dx.toInt())
+                        is RecyclerView -> view.canScrollHorizontally(-dx.toInt())
+                        else -> false
+                    }
+                    if (!canScroll) {
+                        rv_list.requestDisallowInterceptTouchEvent(false)
+                    }
+                }
+                lastX = currentX
+                lastY = currentY
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                isHorizontalScrolling = false
+                rv_list.requestDisallowInterceptTouchEvent(false)
+
+                // 触摸结束，恢复Banner触摸状态
+                if (isBanner) {
+                    isBannerTouching = false
+                    controlRefreshWhenBannerTouching()
+                }
+            }
+        }
+        return false
+    }
+
+    // 以下方法保持不变...
     private fun refreshData() {
         currentPage = 1
         lifecycleScope.launch {
@@ -114,13 +216,11 @@ class RecommendFragment : Fragment() {
         }
     }
 
-    // 加载第一页
     private fun loadFirstPage() {
         currentPage = 1
         fetchListData(currentPage)
     }
 
-    // 加载下一页
     private fun loadNextPage() {
         if (isLoading) return
         isLoading = true
@@ -128,11 +228,9 @@ class RecommendFragment : Fragment() {
         fetchListData(currentPage)
     }
 
-    // 加载所有数据
     private fun loadData() {
         lifecycleScope.launch {
             try {
-                // 并行加载不同数据
                 launch { fetchBannerData() }
                 launch { fetchRecommendedData() }
                 launch { loadFirstPage() }
@@ -142,14 +240,13 @@ class RecommendFragment : Fragment() {
         }
     }
 
-    // 获取轮播图数据
     private suspend fun fetchBannerData() {
         try {
             val result = bannerViewModel.getBannerData()
             if (result.isSuccess) {
                 result.getOrNull()?.banners?.let { banners ->
                     viewPager.adapter = BannerAdapter(banners)
-                    startPlay() // 启动轮播
+                    startPlay()
                 }
             }
         } catch (e: Exception) {
@@ -157,7 +254,6 @@ class RecommendFragment : Fragment() {
         }
     }
 
-    // 获取推荐数据
     private suspend fun fetchRecommendedData() {
         try {
             val result = recommendedViewModel.getRecommenedData().result
@@ -191,12 +287,11 @@ class RecommendFragment : Fragment() {
             } catch (e: Exception) {
                 Log.e("ListData", "加载失败: ${e.message}")
             } finally {
-                isLoading = false // 无论成功失败都标记为未加载
+                isLoading = false
             }
         }
     }
 
-    // 启动轮播
     private fun startPlay() {
         if (!isPlaying && viewPager.adapter != null) {
             isPlaying = true
@@ -219,10 +314,9 @@ class RecommendFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         stopPlay()
-        _binding = null // 清除绑定避免内存泄漏
+        _binding = null
     }
 
-    // 停止轮播
     private fun stopPlay() {
         isPlaying = false
         handler.removeCallbacksAndMessages(null)

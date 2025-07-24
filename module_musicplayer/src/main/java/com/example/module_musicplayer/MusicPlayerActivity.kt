@@ -9,10 +9,10 @@ import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
+import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.animation.LinearInterpolator
@@ -35,7 +35,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.greenrobot.eventbus.EventBus
-import kotlin.math.E
 import kotlin.random.Random
 
 @Route(path = "/module_musicplayer/musicplayer")
@@ -80,10 +79,10 @@ class MusicPlayerActivity : AppCompatActivity() {
     // 是否需要应用传递的进度
     private var needApplyPlayProgress = false
 
-    // 核心变量：保存暂停时的进度，用于同步
+    // 进度相关变量（使用Int类型与服务保持一致）
     private var lastPausedProgress = 0
+    private var totalDuration = 0
 
-    private var isPlaying = false
     private lateinit var binding: MusicPlayerBinding
     private var fragment: Fragment? = null
     private val ROTATION_PAUSED = 0f
@@ -91,7 +90,7 @@ class MusicPlayerActivity : AppCompatActivity() {
     private var currentRotation = ROTATION_PAUSED
     private var animation: Animation? = null
     private var isLiked = false
-    private val handler = Handler(Looper.getMainLooper())
+    private val handler = android.os.Handler(Looper.getMainLooper())
     private var currentMusic: String? = null
     var musicList: List<ListMusicData.Song>? = null
     var currentIndex = -1
@@ -106,6 +105,8 @@ class MusicPlayerActivity : AppCompatActivity() {
     private var isServiceReady = false
     private var pendingPlayTask: (() -> Unit)? = null
 
+    private val isPreparePlayNext = false
+
     // 服务连接的回调
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
@@ -114,40 +115,46 @@ class MusicPlayerActivity : AppCompatActivity() {
             isServiceBound = true
             isServiceReady = true
 
-            // 初始化最后暂停进度
+            syncServiceStateAfterConnection()
+
+
+            // 初始化进度
             lastPausedProgress = musicService?.lastSavedProgress ?: 0
+            totalDuration = musicService?.getDuration() ?: 0
+            updateProgressUI(lastPausedProgress, totalDuration)
 
-            // 应用传递的进度（优先级更高）
-            if (needApplyPlayProgress && playProgress > 0) {
-                Log.d("ProgressRestore", "应用传递的进度: $playProgress")
-                musicService?.seekTo(playProgress)
-                lastPausedProgress = playProgress
-                binding.mpSeekBar.progress = playProgress
-                binding.mpTimestart.text = formatTime(playProgress)
-                needApplyPlayProgress = false
-            } else {
-                // 恢复服务中保存的进度
-                binding.mpSeekBar.progress = lastPausedProgress
-                binding.mpTimestart.text = formatTime(lastPausedProgress)
-            }
+            // 同步播放状态到按钮
+            updatePlayButtonState(musicService?.isPlaying == true)
 
-            syncServiceState()
-
-            // 监听服务进度变化
-            musicService?.currentProgress?.observe(this@MusicPlayerActivity) { progress ->
-                if (musicService?.isPlaying == true) {
-                    lastPausedProgress = progress
-                    binding.mpSeekBar.progress = progress
-                    binding.mpTimestart.text = formatTime(progress)
+            // 监听播放状态变化（包含总时长）
+            musicService?.setOnPlayStateChanged { isPlaying, duration ->
+                runOnUiThread {
+                    totalDuration = duration
+                    updatePlayButtonState(isPlaying)
+                    updateProgressUI(lastPausedProgress, totalDuration)
+                    updateAnimationState(isPlaying)
                 }
             }
 
+            // 监听进度变化
+            musicService?.currentProgress?.observe(this@MusicPlayerActivity) { progress ->
+                // 只有在非拖动状态且播放中才更新UI
+                if (musicService?.isPlaying == true && !binding.mpSeekBar.isPressed) {
+                    lastPausedProgress = progress
+                    updateProgressUI(progress, totalDuration)
+                }
+            }
+
+            // 监听播放完成
             musicService?.setOnCompletionListener {
                 runOnUiThread {
-                    playNextSong()
+                    if (!isPreparePlayNext) {
+                        playNextSong()
+                    }
                 }
             }
 
+            // 歌手信息点击
             binding.mpSinger.setOnClickListener {
                 val targetSingerId = if (currentIndex in musicList?.indices ?: emptyList()) {
                     musicList!![currentIndex].ar.firstOrNull()?.id ?: 0L
@@ -167,6 +174,7 @@ class MusicPlayerActivity : AppCompatActivity() {
                     .navigation()
             }
 
+            // 评论点击
             binding.mpCommon.setOnClickListener {
                 val currentSongId = if (currentIndex in musicList?.indices ?: emptyList()) {
                     musicList!![currentIndex].id.toString()
@@ -188,6 +196,7 @@ class MusicPlayerActivity : AppCompatActivity() {
                     .navigation()
             }
 
+            // 歌词点击
             binding.mpCenter.setOnClickListener {
                 val currentSongId = if (currentIndex in musicList?.indices ?: emptyList()) {
                     musicList!![currentIndex].id.toString()
@@ -204,7 +213,7 @@ class MusicPlayerActivity : AppCompatActivity() {
                 }
                 TheRouter.build("/song/SongWord")
                     .withString("id", currentSongId)
-                    .withInt("currentPos", lastPausedProgress) // 传递暂停时的进度
+                    .withInt("currentPos", lastPausedProgress)
                     .navigation()
             }
 
@@ -213,26 +222,58 @@ class MusicPlayerActivity : AppCompatActivity() {
             pendingPlayTask = null
         }
 
+        private fun syncServiceStateAfterConnection() {
+            if (musicService == null) return
+
+            // 强制同步播放状态到按钮
+            val serviceIsPlaying = musicService?.isPlaying == true
+            Log.d("PlayButtonDebug", "服务连接后同步状态: $serviceIsPlaying")
+            updatePlayButtonState(serviceIsPlaying)
+
+            // 同步进度
+            lastPausedProgress = musicService?.lastSavedProgress ?: 0
+            totalDuration = musicService?.getDuration() ?: 0
+            updateProgressUI(lastPausedProgress, totalDuration)
+
+            // 同步动画状态
+            updateAnimationState(serviceIsPlaying)
+        }
+
+
         override fun onServiceDisconnected(arg0: ComponentName) {
             isServiceBound = false
             isServiceReady = false
         }
     }
 
+    // 更新进度UI
+    private fun updateProgressUI(currentProgress: Int, totalDuration: Int) {
+        binding.mpSeekBar.max = totalDuration
+        binding.mpSeekBar.progress = currentProgress
+        binding.mpTimestart.text = formatTime(currentProgress)
+        binding.mpTimend.text = formatTime(totalDuration)
+    }
+
+    // 格式化时间（毫秒转分:秒）
+    private fun formatTime(milliseconds: Int): String {
+        val totalSeconds = milliseconds / 1000
+        val minutes = totalSeconds / 60
+        val seconds = totalSeconds % 60
+        return String.format("%02d:%02d", minutes, seconds)
+    }
+
     // 进度条更新任务
     private val updateSeekBarRunnable = object : Runnable {
         override fun run() {
-            if (isServiceReady && musicService != null) {
-                // 无论播放状态，都更新最后进度记录
+            if (isServiceReady && musicService?.isPlaying == true && !binding.mpSeekBar.isPressed) {
                 lastPausedProgress = musicService?.getCurrentPosition() ?: lastPausedProgress
+                updateProgressUI(lastPausedProgress, totalDuration)
 
-                // 播放中才更新UI
-                if (musicService?.isPlaying == true) {
-                    binding.mpSeekBar.progress = lastPausedProgress
-                    binding.mpTimestart.text = formatTime(lastPausedProgress)
+                if(totalDuration>0&&lastPausedProgress>=(totalDuration-5000)&&!isPreparePlayNext){
+                    playNextSong()
                 }
             }
-            handler.postDelayed(this, 500)
+            handler.postDelayed(this, 300)
         }
     }
 
@@ -276,39 +317,28 @@ class MusicPlayerActivity : AppCompatActivity() {
         handler.post(updateSeekBarRunnable)
     }
 
+    // 进度事件发送器
     private fun initProgressEventSender() {
-        handler.postDelayed(object :Runnable{
+        handler.postDelayed(object : Runnable {
             override fun run() {
-                if(isServiceReady&&musicService!=null){
-                    val currentSong=musicList?.getOrNull(currentIndex)
-                    val currentSongId=currentSong?.id
-                    val currentProgress=musicService?.getCurrentPosition()?:0
+                if (isServiceReady && musicService != null) {
+                    val currentSong = musicList?.getOrNull(currentIndex)
+                    val currentSongId = currentSong?.id
+                    val currentProgress = musicService?.getCurrentPosition() ?: 0
 
                     EventBus.getDefault().post(
                         currentPosition?.let {
                             PlayProgressEvent(
                                 songId = currentSongId.toString(),
                                 position = currentProgress,
-                                duration = 0,
+                                duration = musicService?.getDuration() ?: 0,
                             )
                         }
                     )
                 }
-                handler.postDelayed( this,100)
+                handler.postDelayed(this, 100)
             }
-        },100)
-    }
-
-    // 获取音频文件URI（用于分享）
-    private fun getCurrentAudioUri(): Uri? {
-        return try {
-            currentMusic?.let { url ->
-                Uri.parse(url)
-            }
-        } catch (e: Exception) {
-            Log.e("AudioShare", "获取音频URI失败", e)
-            null
-        }
+        }, 100)
     }
 
     // 恢复播放模式
@@ -370,37 +400,6 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
-    // 同步服务状态到UI
-    private fun syncServiceState() {
-        if (isServiceReady && musicService != null) {
-            val serviceIsPlaying = musicService?.isPlaying == true
-            val serviceDuration = musicService?.getDuration() ?: 0
-
-            // 更新播放状态
-            isPlaying = serviceIsPlaying
-            binding.mpStart.setImageResource(if (serviceIsPlaying) R.drawable.mp_stop else R.drawable.mp_start)
-
-            // 更新进度条
-            binding.mpSeekBar.max = serviceDuration
-            binding.mpSeekBar.progress = lastPausedProgress
-            binding.mpTimestart.text = formatTime(lastPausedProgress)
-            binding.mpTimend.text = formatTime(serviceDuration)
-
-            // 更新动画状态
-            if (serviceIsPlaying) {
-                startCenterImg()
-                if (currentRotation != ROTATION_PLAYING) {
-                    rotateToPlaying()
-                }
-            } else {
-                stopCenterImg()
-                if (currentRotation != ROTATION_PAUSED) {
-                    rotateToPaused()
-                }
-            }
-        }
-    }
-
     // 上一首按钮监听
     private fun initLastSong() {
         binding.mpLast.setOnClickListener {
@@ -417,9 +416,8 @@ class MusicPlayerActivity : AppCompatActivity() {
 
     // 通用事件监听
     private fun initEventListeners() {
-        // 返回按钮 - 保存当前进度
+        // 返回按钮
         binding.mpMback.setOnClickListener {
-            // 返回前保存当前进度到服务
             musicService?.lastSavedProgress = lastPausedProgress
             TheRouter.build("/main/main").navigation()
             finish()
@@ -461,6 +459,18 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
+    // 获取音频文件URI
+    private fun getCurrentAudioUri(): Uri? {
+        return try {
+            currentMusic?.let { url ->
+                Uri.parse(url)
+            }
+        } catch (e: Exception) {
+            Log.e("AudioShare", "获取音频URI失败", e)
+            null
+        }
+    }
+
     // 根据歌曲ID查找索引
     private fun findSongIndexById(targetId: String): Int {
         if (targetId.isBlank() || musicList.isNullOrEmpty()) return -1
@@ -493,11 +503,11 @@ class MusicPlayerActivity : AppCompatActivity() {
             fetchAndPlayWithStateCheck(currentSong.id.toString(), currentSong.name)
         } else {
             Toast.makeText(this, "歌曲不存在", Toast.LENGTH_SHORT).show()
-            binding.mpStart.setImageResource(R.drawable.mp_start)
+            updatePlayButtonState(false)
         }
     }
 
-    // 获取播放地址并播放（带状态检查）
+    // 获取播放地址并播放
     private fun fetchAndPlayWithStateCheck(songId: String, songName: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -510,13 +520,13 @@ class MusicPlayerActivity : AppCompatActivity() {
                             if (isServiceReady) {
                                 playAudio(musicUrl) { success ->
                                     binding.mpStart.isEnabled = true
-                                    binding.mpStart.setImageResource(if (success) R.drawable.mp_stop else R.drawable.mp_start)
+                                    updatePlayButtonState(success)
                                 }
                             } else {
                                 pendingPlayTask = {
                                     playAudio(musicUrl) { success ->
                                         binding.mpStart.isEnabled = true
-                                        binding.mpStart.setImageResource(if (success) R.drawable.mp_stop else R.drawable.mp_start)
+                                        updatePlayButtonState(success)
                                     }
                                 }
                                 Toast.makeText(
@@ -544,10 +554,9 @@ class MusicPlayerActivity : AppCompatActivity() {
     // 处理歌曲播放错误
     private fun handleSongError(songName: String) {
         Toast.makeText(this, "歌曲《$songName》无法播放", Toast.LENGTH_SHORT).show()
-        binding.mpStart.setImageResource(R.drawable.mp_start)
+        updatePlayButtonState(false)
         musicService?.stop()
-        isPlaying = false
-        lastPausedProgress = 0 // 错误时重置进度
+        lastPausedProgress = 0
         stopCenterImg()
         if (currentRotation != ROTATION_PAUSED) {
             rotateToPaused()
@@ -568,7 +577,6 @@ class MusicPlayerActivity : AppCompatActivity() {
             }
 
             MODE_SINGLE -> {
-                // 单曲循环时重置进度到0
                 musicService?.seekTo(0)
                 lastPausedProgress = 0
                 binding.mpSeekBar.progress = 0
@@ -606,7 +614,6 @@ class MusicPlayerActivity : AppCompatActivity() {
             }
 
             MODE_SINGLE -> {
-                // 单曲循环时重置进度到0
                 musicService?.seekTo(0)
                 lastPausedProgress = 0
                 binding.mpSeekBar.progress = 0
@@ -731,96 +738,118 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
-    // 格式化时间（毫秒转分:秒）
-    private fun formatTime(milliseconds: Int): String {
-        val minutes = (milliseconds / 1000) / 60
-        val seconds = (milliseconds / 1000) % 60
-        return String.format("%02d:%02d", minutes, seconds)
-    }
-
-    // 初始化进度条监听
+    // 初始化进度条监听（修复拖动问题）
     private fun initSeekBarListener() {
         binding.mpSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser && isServiceReady) {
-                    musicService?.seekTo(progress)
-                    lastPausedProgress = progress // 用户拖动时更新进度记录
+                if (fromUser) {
+                    // 实时更新进度文本
                     binding.mpTimestart.text = formatTime(progress)
+                    // 立即同步到服务
+                    if (isServiceReady) {
+                        musicService?.seekTo(progress)
+                    }
+                    // 更新本地进度记录
+                    lastPausedProgress = progress
                 }
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                // 拖动时不停止更新
+                // 拖动开始时暂停自动更新
+                handler.removeCallbacks(updateSeekBarRunnable)
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                // 拖动结束后继续更新
+                // 拖动结束后恢复自动更新
+                if (isServiceReady && musicService?.isPlaying == true) {
+                    handler.post(updateSeekBarRunnable)
+                }
+                // 确保最终进度同步
+                seekBar?.progress?.let {
+                    if (isServiceReady) {
+                        musicService?.seekTo(it)
+                    }
+                }
             }
         })
     }
 
-    // 初始化播放按钮
+    // 初始化播放按钮（修复状态问题）
     private fun initPlayButton() {
-        binding.mpStart.setImageResource(R.drawable.mp_start)
+        // 确保按钮点击事件正确注册
         binding.mpStart.setOnClickListener {
-            if (!isServiceReady) {
-                Toast.makeText(this, "服务初始化中，请稍候...", Toast.LENGTH_SHORT).show()
-                pendingPlayTask = ::handlePlayClick
-                return@setOnClickListener
-            }
             handlePlayClick()
         }
+        // 初始状态设置为暂停图标
+        updatePlayButtonState(false)
     }
 
     // 处理播放/暂停点击
     private fun handlePlayClick() {
-        if (!isServiceBound || musicService == null) {
-            Toast.makeText(this, "服务连接失败", Toast.LENGTH_SHORT).show()
+        Log.d("PlayLogic", "进入handlePlayClick()")
+
+        if (!isServiceBound) {
+            Log.e("PlayLogic", "服务未绑定，尝试重新绑定")
+            val serviceIntent = Intent(this, MusicPlayService::class.java)
+            bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE)
+            Toast.makeText(this, "服务连接中...", Toast.LENGTH_SHORT).show()
             return
         }
 
-        if (isPlaying) {
-            // 暂停时保存当前进度
-            musicService?.pause()
-            lastPausedProgress = musicService?.getCurrentPosition() ?: lastPausedProgress
-            isPlaying = false
-            binding.mpStart.setImageResource(R.drawable.mp_start)
-            rotateToPaused()
-            stopCenterImg()
-        } else {
-            binding.mpStart.isEnabled = false
-            binding.mpStart.setImageResource(R.drawable.mp_stop)
+        if (musicService == null) {
+            Log.e("PlayLogic", "musicService为null，无法执行操作")
+            Toast.makeText(this, "播放器未就绪", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-            if (currentMusic.isNullOrBlank()) {
-                if (currentIndex in musicList?.indices ?: emptyList()) {
-                    val currentSong = musicList!![currentIndex]
-                    fetchAndPlayWithStateCheck(currentSong.id.toString(), currentSong.name)
-                } else {
-                    Toast.makeText(this, "无可用歌曲", Toast.LENGTH_SHORT).show()
-                    binding.mpStart.isEnabled = true
-                    binding.mpStart.setImageResource(R.drawable.mp_start)
-                }
+        try {
+            val isPlaying = musicService?.isPlaying == true
+            Log.d("PlayLogic", "当前播放状态: $isPlaying")
+
+            // 点击后立即更新按钮图标，提供即时反馈
+            val newState = !isPlaying
+            updatePlayButtonState(newState)
+
+            if (isPlaying) {
+                // 执行暂停
+                musicService?.pause()
+                Log.d("PlayLogic", "已调用pause()")
             } else {
-                try {
-                    // 恢复播放时使用最后保存的进度
-                    if (lastPausedProgress > 0) {
-                        musicService?.seekTo(lastPausedProgress)
+                // 执行播放
+                if (musicService?.currentUrl.isNullOrBlank()) {
+                    Log.d("PlayLogic", "无当前播放URL，执行首次播放")
+                    if (currentIndex in musicList?.indices ?: emptyList()) {
+                        val currentSong = musicList!![currentIndex]
+                        fetchAndPlayWithStateCheck(currentSong.id.toString(), currentSong.name)
+                    } else {
+                        Log.e("PlayLogic", "当前索引无效，无法播放")
+                        Toast.makeText(this, "无可用歌曲", Toast.LENGTH_SHORT).show()
+                        // 如果播放失败，恢复按钮状态
+                        updatePlayButtonState(false)
                     }
+                } else {
+                    Log.d("PlayLogic", "有当前播放URL，执行resume()")
                     musicService?.resume()
-                    isPlaying = true
-                    handler.post(updateSeekBarRunnable)
-                    binding.mpStart.isEnabled = true
-                    rotateToPlaying()
-                    startCenterImg()
-                } catch (e: Exception) {
-                    Log.e("PlayError", "播放失败: ${e.message}")
-                    Toast.makeText(this, "播放失败，请重试", Toast.LENGTH_SHORT).show()
-                    isPlaying = false
-                    binding.mpStart.isEnabled = true
-                    binding.mpStart.setImageResource(R.drawable.mp_start)
-                    rotateToPaused()
                 }
             }
+        } catch (e: Exception) {
+            Log.e("PlayLogic", "处理播放点击时发生异常", e)
+            Toast.makeText(this, "操作失败: ${e.message}", Toast.LENGTH_SHORT).show()
+            // 异常时恢复按钮状态
+            updatePlayButtonState(musicService?.isPlaying == true)
+        }
+    }
+
+    // 更新播放按钮状态
+    private fun updatePlayButtonState(isPlaying: Boolean) {
+        // 使用runOnUiThread确保在主线程执行UI更新
+        runOnUiThread {
+            val iconRes = if (isPlaying) R.drawable.mp_stop else R.drawable.mp_start
+            // 强制设置图标
+            binding.mpStart.setImageResource(iconRes)
+            // 强制视图刷新
+            binding.mpStart.invalidate()
+            Log.d("ButtonUpdate", "按钮状态已更新为: ${if (isPlaying) "暂停" else "播放"}")
         }
     }
 
@@ -872,6 +901,21 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
+    // 更新动画状态
+    private fun updateAnimationState(isPlaying: Boolean) {
+        if (isPlaying) {
+            startCenterImg()
+            if (currentRotation != ROTATION_PLAYING) {
+                rotateToPlaying()
+            }
+        } else {
+            stopCenterImg()
+            if (currentRotation != ROTATION_PAUSED) {
+                rotateToPaused()
+            }
+        }
+    }
+
     // 启动中心图片动画
     private fun startCenterImg() {
         animation?.let {
@@ -900,24 +944,13 @@ class MusicPlayerActivity : AppCompatActivity() {
             }
         }
 
-        musicService?.setOnPlayStateChanged { serviceIsPlaying, duration ->
+        musicService?.setOnPlayStateChanged { isPlaying, duration ->
             runOnUiThread {
-                isPlaying = serviceIsPlaying
-                binding.mpSeekBar.max = duration
-                binding.mpTimend.text = formatTime(duration)
-
-                // 更新进度记录
-                lastPausedProgress = musicService?.getCurrentPosition() ?: 0
-
-                if (serviceIsPlaying) {
-                    startCenterImg()
-                    rotateToPlaying()
-                    onPrepared(true)
-                } else {
-                    stopCenterImg()
-                    rotateToPaused()
-                    onPrepared(false)
-                }
+                totalDuration = duration
+                // 确保按钮状态与服务状态一致
+                updatePlayButtonState(isPlaying)
+                updateProgressUI(lastPausedProgress, totalDuration)
+                updateAnimationState(isPlaying)
             }
         }
 
@@ -929,24 +962,32 @@ class MusicPlayerActivity : AppCompatActivity() {
                 url,
                 song = currentSong
             )
-            Log.d("FixSuccess", "传递歌曲信息: ${currentSong.name}")
         } catch (e: Exception) {
             Log.e("AudioError", "播放异常: ${e.message}")
             onPrepared(false)
         }
     }
 
-    // 销毁时保存最后进度
+    // 销毁时清理资源
     override fun onDestroy() {
         super.onDestroy()
-        // 保存最后进度到服务
+        // 保存最后进度
         musicService?.lastSavedProgress = lastPausedProgress
         Log.d("ProgressSave", "Activity销毁时保存进度: $lastPausedProgress")
+
+        // 停止进度更新
         handler.removeCallbacksAndMessages(null)
+
+        // 清除监听器，避免内存泄漏
+        musicService?.setOnCompletionListener(null)
+        musicService?.setOnPlayStateChanged(null)
+
+        // 解除服务绑定
         if (isServiceBound) {
             unbindService(serviceConnection)
             isServiceBound = false
         }
+
         stopCenterImg()
     }
 }

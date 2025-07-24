@@ -27,9 +27,17 @@ class BottomMusicController(
     private val handler = Handler(Looper.getMainLooper())
     private val updateRunnable = object : Runnable {
         override fun run() {
+            // 可以在这里添加进度更新等周期性任务
             handler.postDelayed(this, 1000)
         }
     }
+
+    // 动画相关变量
+    private val ROTATION_PAUSED = 0f
+    private val ROTATION_PLAYING = 360f // 完整旋转一周
+    private var isAnimationRunning = false
+    private var currentRotation = 0f
+    private val animationDuration = 10000L // 20秒旋转一周
 
     // LiveData观察者
     private val songObserver = Observer<ListMusicData.Song?> { song ->
@@ -46,6 +54,14 @@ class BottomMusicController(
     init {
         initService()
         initClickEvents()
+        initAnimation()
+    }
+
+    private fun initAnimation() {
+        // 初始状态设置为暂停角度
+        val ivCover = view.findViewById<ImageView>(R.id.music)
+        ivCover.rotation = ROTATION_PAUSED
+        currentRotation = ROTATION_PAUSED
     }
 
     private fun initService() {
@@ -133,60 +149,122 @@ class BottomMusicController(
         musicPlayService = service
         isServiceBound = true
         (context as? AppCompatActivity)?.runOnUiThread {
+            // 同步服务状态到UI
             updatePlayState(service.isPlaying)
             updateSongInfo(service.currentSong)
-
-            // 服务连接时检查是否有歌曲
-            val hasSongs = !(MusicDataCache.currentSongList.isNullOrEmpty())
-
         }
+
+        // 注册观察者
         service.currentSongLiveData.observeForever(songObserver)
         service.isPlayingLiveData.observeForever(playStateObserver)
         handler.post(updateRunnable)
     }
 
     private fun updateSongInfo(song: ListMusicData.Song?) {
-
         val tvSong = view.findViewById<TextView>(R.id.tv_song)
         val tvArtist = view.findViewById<TextView>(R.id.tv_artist)
         val ivCover = view.findViewById<ImageView>(R.id.music)
 
         if (song != null) {
             tvSong.text = song.name
-        }
-        if (song != null) {
             tvArtist.text = song.ar.joinToString { it.name }
-        }
-        if (song != null) {
             Glide.with(context)
                 .load(song.al.picUrl)
                 .error(R.drawable.drawerimg)
                 .into(ivCover)
+
+            // 切换歌曲时重置动画状态
+            resetAnimationOnSongChange()
         }
     }
 
     private fun updatePlayState(isPlaying: Boolean) {
         val playButton = view.findViewById<ImageView>(R.id.stop)
+        val ivCover = view.findViewById<ImageView>(R.id.music)
+
+        // 更新按钮图标
         playButton.setImageResource(
             if (isPlaying) R.drawable.now_play
             else com.example.module_recommened.R.drawable.list_start
         )
+
+        // 控制封面旋转动画
+        if (isPlaying) {
+            startCoverRotation(ivCover)
+        } else {
+            pauseCoverRotation(ivCover)
+        }
+    }
+
+    private fun startCoverRotation(ivCover: ImageView) {
+        if (isAnimationRunning) return
+
+        isAnimationRunning = true
+        // 移除之前的动画
+        ivCover.animate().cancel()
+
+        // 计算剩余旋转角度
+        val remainingRotation = ROTATION_PLAYING - currentRotation % ROTATION_PLAYING
+
+        // 开始旋转动画
+        ivCover.animate()
+            .rotation(currentRotation + remainingRotation)
+            .setDuration((remainingRotation / ROTATION_PLAYING * animationDuration).toLong())
+            .withEndAction {
+                // 完成一次旋转后重新开始，形成无限循环
+                currentRotation = 0f
+                startCoverRotation(ivCover)
+            }
+            .start()
+    }
+
+    private fun pauseCoverRotation(ivCover: ImageView) {
+        if (!isAnimationRunning) return
+
+        // 记录当前旋转角度
+        currentRotation = ivCover.rotation
+        // 停止动画
+        ivCover.animate().cancel()
+        isAnimationRunning = false
+    }
+
+    private fun resetAnimationOnSongChange() {
+        val ivCover = view.findViewById<ImageView>(R.id.music)
+        // 重置旋转状态
+        currentRotation = 0f
+        ivCover.rotation = currentRotation
+
+        // 如果正在播放，重新开始动画
+        if (isAnimationRunning) {
+            startCoverRotation(ivCover)
+        }
     }
 
     fun onDestroy() {
+        // 移除观察者
         musicPlayService?.let {
             it.currentSongLiveData.removeObserver(songObserver)
             it.isPlayingLiveData.removeObserver(playStateObserver)
         }
+
+        // 停止 Handler 任务
         handler.removeCallbacksAndMessages(null)
+
+        // 停止动画
+        val ivCover = view.findViewById<ImageView>(R.id.music)
+        ivCover.animate().cancel()
+        isAnimationRunning = false
+
+        // 解除服务绑定
         if (isServiceBound) {
             try {
                 context.applicationContext.unbindService(serviceConnection)
             } catch (e: IllegalArgumentException) {
-                // 忽略异常
+                // 忽略已解除绑定的异常
             }
             isServiceBound = false
         }
+
         musicPlayService = null
     }
 }

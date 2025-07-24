@@ -208,7 +208,6 @@ class SongWord : AppCompatActivity() {
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onCloseLyricEvent(event: CloseLyricEvent) {
         Log.d("LyricClose", "收到强制关闭事件，返回播放页")
-        overridePendingTransition(0, R.anim.back_anim)
         finish()
     }
 

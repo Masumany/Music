@@ -41,6 +41,7 @@ android {
 }
 
 dependencies {
+    debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.12")
     // Glide 核心库
     implementation("com.github.bumptech.glide:glide:4.16.0")
 
@@ -49,7 +50,6 @@ dependencies {
     implementation ("pl.droidsonroids.gif:android-gif-drawable:1.2.19")
     implementation ("org.greenrobot:eventbus:3.3.1")
     implementation ("com.google.android.material:material:1.0.0")
-    implementation(project(":lib_base"))
     implementation(project(":lib_base"))
     implementation(project(":module_details"))
     kapt("cn.therouter:apt:1.2.2")
