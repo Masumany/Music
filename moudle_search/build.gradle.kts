@@ -1,5 +1,6 @@
 plugins {
-    alias(libs.plugins.android.application)
+    id("com.android.library")
+    //alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
 }
 
@@ -11,11 +12,11 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.moudle_search"
+//        applicationId = "com.example.moudle_search"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+//        versionCode = 1
+//        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

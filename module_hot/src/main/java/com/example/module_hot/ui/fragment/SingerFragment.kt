@@ -15,6 +15,7 @@ import com.example.module_hot.databinding.FragmentListBinding
 import com.example.module_hot.databinding.FragmentSingerBinding
 import com.example.module_hot.viewModel.LoadState
 import com.example.module_hot.viewModel.SingerViewModel
+import com.therouter.TheRouter
 
 class SingerFragment : Fragment() {
 
@@ -30,7 +31,9 @@ class SingerFragment : Fragment() {
         SingerAdapter (
             onItemClick = {
                 Toast.makeText(requireContext(), it.name, Toast.LENGTH_SHORT).show()
-                //  跳转到歌手详情页面
+                TheRouter.build("/singer/SingerActivity")
+                    .withLong("id", it.id)
+                    .navigation(requireActivity())
             }
         )
     }

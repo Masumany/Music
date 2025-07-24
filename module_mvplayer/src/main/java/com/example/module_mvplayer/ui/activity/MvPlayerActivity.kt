@@ -35,14 +35,14 @@ import com.therouter.router.Autowired
 import com.therouter.router.Route
 import kotlinx.coroutines.flow.collectLatest
 
-//@JvmField
-//@Autowired
-//var mvId: String = ""
+@JvmField
+@Autowired
+var mvId: String = ""
 
 
 @Route(path = "/module_mvplayer/mvplayer")
 class MvPlayerActivity : AppCompatActivity() {
-    private  var mvId: String =""// 声明变量
+//    private  var mvId: String =""// 声明变量
     private lateinit var binding: ActivityMvPlayerBinding
     private val viewModel: MvPlayerViewModel by viewModels()
     private var player: ExoPlayer? = null

@@ -5,7 +5,7 @@ data class Artist(
     val albumSize: Int,
     val alias: List<String>,
     val briefDesc: String,
-    val id: Int,
+    val id: Long,
     val img1v1Id: Long,
     val img1v1Id_str: String,
     val img1v1Url: String,

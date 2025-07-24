@@ -17,7 +17,7 @@ class ListSongsViewModel: ViewModel() {
     private val _loadState = MutableStateFlow<LoadState>(LoadState.Init)
     val loadState: StateFlow<LoadState> = _loadState.asStateFlow()
 
-    fun getListSongsData(id: Int) {
+    fun getListSongsData(id: Long) {
         if (_loadState.value is LoadState.Loading){
             return
         }

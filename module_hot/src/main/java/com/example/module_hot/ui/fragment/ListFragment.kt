@@ -1,6 +1,7 @@
 package com.example.module_hot.ui.fragment
 
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.module_hot.R
 import com.example.module_hot.adapter.ListAdapter
 import com.example.module_hot.databinding.FragmentListBinding
+import com.example.module_hot.ui.activity.ListSongsActivity
 import com.example.module_hot.viewModel.ListViewModel
 import com.example.module_hot.viewModel.LoadState
 
@@ -32,6 +34,9 @@ class ListFragment : Fragment() {
         ListAdapter (
             onListItemClick = {
                 Toast.makeText(requireContext(), it.listName, Toast.LENGTH_SHORT).show()
+                val intent = Intent(requireActivity(), ListSongsActivity::class.java)
+                intent.putExtra("id", it.id)
+                startActivity(intent)
             }
         )
     }

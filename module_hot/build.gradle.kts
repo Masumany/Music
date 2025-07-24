@@ -43,6 +43,8 @@ android {
 
 dependencies {
 
+    kapt("cn.therouter:apt:1.2.2")
+    implementation("cn.therouter:router:1.2.2")
     implementation ("androidx.viewpager2:viewpager2:1.1.0")
     implementation ("com.google.android.material:material:1.8.0")
     // OkHttp 核心库，用于进行网络请求
