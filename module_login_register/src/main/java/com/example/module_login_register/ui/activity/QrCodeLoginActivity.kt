@@ -74,7 +74,9 @@ class QrCodeLoginActivity : AppCompatActivity() {
                     }
                     is LoginState.Success -> {
                         Toast.makeText(this@QrCodeLoginActivity, "登录成功", Toast.LENGTH_SHORT).show()
-//                        navigateToPersonageActivity()
+                        TheRouter.build("/module_personage/personage")
+                        .withString("",)
+                        .navigation()
                     }
                     is LoginState.Error -> {
                         stateText.text = "登录失败,请刷新"
