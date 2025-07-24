@@ -9,10 +9,10 @@
     tools:ignore="ResourceName">
 
     <ImageView
-        android:id="@+id/mp_imageView"
+        android:id="@+id/mp_imgBack"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:src="@drawable/comment_back"
+        android:src="@drawable/mp_comment_back"
         android:layout_margin="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>

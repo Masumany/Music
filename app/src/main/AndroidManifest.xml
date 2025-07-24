@@ -18,7 +18,7 @@
         android:theme="@style/Theme.Music"
         tools:targetApi="31">
         <activity
-            android:name=".SplashActivity"
+            android:name=".ui.SplashActivity"
             android:theme="@style/SplashTheme"
             android:exported="true">
             <intent-filter>
@@ -27,8 +27,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity" />
-        <activity android:name=".HeaderActivity" />
+        <activity android:name=".ui.MainActivity" />
+        <activity android:name=".ui.HeaderActivity" />
+        <activity android:name="com.example.moudle_search.ui.activity.SearchActivity" />
     </application>
 
 </manifest>

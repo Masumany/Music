@@ -9,18 +9,18 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.module_musicplayer.databinding.FragmentListBinding
 import com.example.module_recommened.adapter.LiAdapter
 import com.example.module_recommened.viewmodel.ListViewModel
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.launch
 import androidx.lifecycle.lifecycleScope
 import com.example.lib.base.Song
+import com.example.module_musicplayer.databinding.FragmentPlaylistBinding
 import com.example.yourproject.converter.DataConverter
 
 class ListFragment : Fragment() {
 
-    private lateinit var binding: FragmentListBinding
+    private lateinit var binding: FragmentPlaylistBinding
     private val songAdapter = LiAdapter()
     private lateinit var listViewModel: ListViewModel
 
@@ -35,7 +35,7 @@ class ListFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentListBinding.inflate(inflater, container, false)
+        binding = FragmentPlaylistBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -126,7 +126,7 @@ class ListFragment : Fragment() {
 
     // 关闭按钮逻辑
     private fun initCloseButton() {
-        binding.mpImageView.setOnClickListener {
+        binding.mpImgBack.setOnClickListener{
             (activity as? MusicPlayerActivity)?.hideFragment()
         }
     }

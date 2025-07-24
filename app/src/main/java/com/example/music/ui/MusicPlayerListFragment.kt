@@ -9,7 +9,6 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.module_musicplayer.databinding.FragmentListBinding
 import com.example.module_recommened.adapter.LiAdapter
 import com.example.module_recommened.viewmodel.ListViewModel
 import androidx.lifecycle.ViewModelProvider

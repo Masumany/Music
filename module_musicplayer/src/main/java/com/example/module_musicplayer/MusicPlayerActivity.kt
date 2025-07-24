@@ -1,7 +1,8 @@
 package com.example.module_musicplayer
 
 import Adapter.MusicDataCache
-import PlayProgressEvent
+import Event.CloseLyricEvent
+import Event.PlayProgressEvent
 import android.animation.Animator
 import android.content.ComponentName
 import android.content.Intent
@@ -25,7 +26,6 @@ import com.bumptech.glide.Glide
 import com.example.lib.base.NetWorkClient
 import com.example.lib.base.Song
 import com.example.module_musicplayer.databinding.MusicPlayerBinding
-import com.example.music.event.CloseLyricEvent
 import com.therouter.TheRouter
 import com.therouter.router.Autowired
 import com.therouter.router.Route
@@ -419,7 +419,6 @@ class MusicPlayerActivity : AppCompatActivity() {
         // 返回按钮
         binding.mpMback.setOnClickListener {
             musicService?.lastSavedProgress = lastPausedProgress
-            TheRouter.build("/main/main").navigation()
             finish()
         }
 

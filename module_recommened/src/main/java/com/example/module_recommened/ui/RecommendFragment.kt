@@ -1,5 +1,6 @@
-package com.example.module_recommened
+package com.example.module_recommened.ui
 
+import android.graphics.Rect
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -35,7 +36,6 @@ class RecommendFragment : Fragment() {
     private lateinit var rv_list: RecyclerView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
-    // 其他变量保持不变...
     private lateinit var bannerViewModel: BannerViewModel
     private lateinit var recommendedViewModel: RecommenedViewModel
     private lateinit var listViewModel: ListViewModel
@@ -51,9 +51,12 @@ class RecommendFragment : Fragment() {
     // 滑动冲突处理相关变量
     private var lastX = 0f
     private var lastY = 0f
-    private val SCROLL_THRESHOLD = 5  // 滑动方向判断阈值
+    private val SCROLL_THRESHOLD = 5  // 滑动方向判断阈值（px）
     private var isHorizontalScrolling = false  // 是否正在横向滚动
-    private var isBannerTouching = false  // 是否正在触摸Banner区域
+    private var isInHorizontalArea = false  // 是否在横向组件区域内
+
+    private var bannerRect = Rect()
+    private var horizontalRvRect = Rect()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -72,10 +75,16 @@ class RecommendFragment : Fragment() {
         viewPager = binding.viewPager
         recyclerView = binding.recyclerView
 
-        // 初始化代码保持不变...
+        // 初始化列表
         rv_list.adapter = songAdapter
         val layoutManager = LinearLayoutManager(requireContext())
         rv_list.layoutManager = layoutManager
+
+        // 获取横向组件的区域范围
+        view.post {
+            viewPager.getGlobalVisibleRect(bannerRect)
+            recyclerView.getGlobalVisibleRect(horizontalRvRect)
+        }
 
         // 纵向RecyclerView滚动监听
         rv_list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -94,8 +103,9 @@ class RecommendFragment : Fragment() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-                    recyclerView.requestDisallowInterceptTouchEvent(true)
-                    viewPager.requestDisallowInterceptTouchEvent(true)
+                    // 纵向滑动时允许刷新，但需判断是否在横向区域
+                    recyclerView.requestDisallowInterceptTouchEvent(!isInHorizontalArea)
+                    viewPager.requestDisallowInterceptTouchEvent(isInHorizontalArea)
                 }
             }
         })
@@ -108,37 +118,44 @@ class RecommendFragment : Fragment() {
         )
 
         recyclerView.setOnTouchListener { _, event ->
-            handleHorizontalTouchEvent(event, recyclerView, false)
+            handleHorizontalTouchEvent(event, recyclerView)
             false
         }
 
-        // ViewPager2(Banner)触摸事件处理 - 重点修改
+        // ViewPager2(Banner)触摸事件处理
         viewPager.setOnTouchListener { _, event ->
-            // 标记是否正在触摸Banner区域
-            isBannerTouching = when(event.action) {
-                MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> true
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> false
-                else -> isBannerTouching
-            }
-
-            // 处理Banner滑动时的下拉刷新控制
-            controlRefreshWhenBannerTouching()
-
-            // 处理横向滑动事件
-            handleHorizontalTouchEvent(event, viewPager, true)
+            handleHorizontalTouchEvent(event, viewPager)
             false
         }
 
-        // 下拉刷新监听器 - 增加判断条件
+        // 根布局触摸事件，判断是否在横向组件区域内
+        binding.root.setOnTouchListener { _, event ->
+            val x = event.rawX.toInt()
+            val y = event.rawY.toInt()
+
+            // 判断触摸点是否在Banner或横向RecyclerView内
+            isInHorizontalArea = bannerRect.contains(x, y) || horizontalRvRect.contains(x, y)
+
+            // 在横向区域内，禁用下拉刷新
+            if (isInHorizontalArea) {
+                swipeRefreshLayout.isEnabled = false
+            } else if (event.action == MotionEvent.ACTION_UP) {
+                // 离开横向区域，恢复下拉刷新
+                swipeRefreshLayout.isEnabled = true
+                isHorizontalScrolling = false
+            }
+            false
+        }
+
+        // 下拉刷新监听器
         swipeRefreshLayout.setOnRefreshListener {
-            // 只有不在触摸Banner时才允许刷新
-            if (!isBannerTouching) {
+            // 只有不在横向区域且非横向滑动时才执行刷新
+            if (!isHorizontalScrolling && !isInHorizontalArea) {
                 lifecycleScope.launch {
                     refreshData()
                     swipeRefreshLayout.isRefreshing = false
                 }
             } else {
-                // 如果正在触摸Banner，立即取消刷新
                 swipeRefreshLayout.isRefreshing = false
             }
         }
@@ -148,67 +165,64 @@ class RecommendFragment : Fragment() {
         recommendedViewModel = ViewModelProvider(this)[RecommenedViewModel::class.java]
         listViewModel = ViewModelProvider(this)[ListViewModel::class.java]
         loadData()
-    }
 
-    // 控制Banner触摸时的下拉刷新状态
-    private fun controlRefreshWhenBannerTouching() {
-        // 如果正在触摸Banner区域，禁止下拉刷新
-        swipeRefreshLayout.isEnabled = !isBannerTouching
+        // 初始状态允许刷新
+        swipeRefreshLayout.isEnabled = true
     }
 
     // 处理横向滑动组件的触摸事件
-    private fun handleHorizontalTouchEvent(event: MotionEvent, view: View, isBanner: Boolean): Boolean {
+    private fun handleHorizontalTouchEvent(event: MotionEvent, view: View): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 lastX = event.x
                 lastY = event.y
                 rv_list.requestDisallowInterceptTouchEvent(true)
                 isHorizontalScrolling = false
-
-                // 如果是Banner，标记触摸状态
-                if (isBanner) {
-                    isBannerTouching = true
-                    controlRefreshWhenBannerTouching()
-                }
+                swipeRefreshLayout.isEnabled = false  // 触摸横向组件时禁用刷新
             }
             MotionEvent.ACTION_MOVE -> {
                 val currentX = event.x
                 val currentY = event.y
-                val dx = currentX - lastX
-                val dy = currentY - lastY
+                val dx = currentX - lastX  // 横向位移
+                val dy = currentY - lastY  // 纵向位移
 
-                if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > SCROLL_THRESHOLD) {
+                // 只要有横向滑动就判定为横向滚动
+                if (Math.abs(dx) > SCROLL_THRESHOLD) {
                     isHorizontalScrolling = true
+                    swipeRefreshLayout.isEnabled = false  // 禁用刷新
                     rv_list.requestDisallowInterceptTouchEvent(true)
                 } else if (Math.abs(dy) > SCROLL_THRESHOLD) {
-                    isHorizontalScrolling = false
+                    // 纵向滑动时，只有当横向组件无法横向滚动时才允许纵向滚动
                     val canScroll = when (view) {
                         is ViewPager2 -> view.canScrollHorizontally(-dx.toInt())
                         is RecyclerView -> view.canScrollHorizontally(-dx.toInt())
                         else -> false
                     }
                     if (!canScroll) {
+                        isHorizontalScrolling = false
                         rv_list.requestDisallowInterceptTouchEvent(false)
+                    } else {
+                        swipeRefreshLayout.isEnabled = false
                     }
                 }
+
                 lastX = currentX
                 lastY = currentY
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                // 触摸结束，延迟恢复刷新状态，防止误触发
                 isHorizontalScrolling = false
+                handler.postDelayed({
+                    if (!isInHorizontalArea) {
+                        swipeRefreshLayout.isEnabled = true
+                    }
+                }, 100)
                 rv_list.requestDisallowInterceptTouchEvent(false)
-
-                // 触摸结束，恢复Banner触摸状态
-                if (isBanner) {
-                    isBannerTouching = false
-                    controlRefreshWhenBannerTouching()
-                }
             }
         }
         return false
     }
 
-    // 以下方法保持不变...
     private fun refreshData() {
         currentPage = 1
         lifecycleScope.launch {

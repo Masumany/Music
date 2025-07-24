@@ -5,8 +5,7 @@ import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.module_hot.ui.fragment.HotFragment
 import com.example.module_personage.ui.fragment.PersonageFragment
-import com.example.module_recommened.RecommendFragment
-import com.example.music.MainActivity
+import com.example.module_recommened.ui.RecommendFragment
 
 class Vp2Adapter(activity: AppCompatActivity):FragmentStateAdapter( activity) {
 

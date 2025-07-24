@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.module_musicplayer.Adapter.CommentAdapter
 import com.example.module_musicplayer.databinding.FragmentCommentBinding
 import com.example.module_musicplayer.viewmodel.CommentViewModel
 import com.therouter.TheRouter

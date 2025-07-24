@@ -1,7 +1,8 @@
-package com.example.module_recommened
+package com.example.module_recommened.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.example.module_recommened.R
 import com.example.module_recommened.databinding.ActivityRecommendBinding
 import com.therouter.router.Route
 

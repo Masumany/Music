@@ -1,5 +1,3 @@
-package viewmodel
-
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.lib.base.NetWorkClient
