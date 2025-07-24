@@ -21,7 +21,7 @@ class PersonageFragment : Fragment() {
     private var _binding: FragmentPersonageBinding? = null
     private val binding get() = _binding!!
 
-    // ViewModel（使用 Fragment 作用域）
+    // ViewModel
     private lateinit var viewModel: PersonageViewModel
 
     override fun onCreateView(

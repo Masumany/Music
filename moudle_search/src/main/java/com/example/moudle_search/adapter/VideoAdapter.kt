@@ -36,7 +36,7 @@ class VideoAdapter (
                 .into(binding.videosItemImg)
 
             binding.videosItemName.text = video.title
-//            binding.videosItemArtistName
+            binding.videosItemArtistName.text = video.playCount.toString()
 
             binding.root.setOnClickListener {
                 onItemClick(video)

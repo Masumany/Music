@@ -7,30 +7,69 @@
     android:layout_height="match_parent"
     tools:context=".ui.activity.SearchResultActivity">
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/search_bottomNavigationView"
+    <LinearLayout
+        android:id="@+id/search_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:itemTextColor="#000000"
-        app:labelVisibilityMode="labeled"
+        android:layout_height="60dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
-        app:menu="@menu/menu" />
+        app:layout_constraintVertical_bias="0.023"
+        android:transitionName="search_box" >
 
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/search_viewPager"
+        <android.widget.Button
+            android:id="@+id/search_back"
+            android:background="@drawable/back"
+            android:layout_marginLeft="15dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"/>
+
+        <EditText
+            android:id="@+id/search_et"
+            android:background="@drawable/background_shape"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textSize="15sp"
+            android:hint="搜索关键词" />
+
+        <android.widget.Button
+            android:id="@+id/search_button"
+            android:layout_marginRight="15dp"
+            android:background="@drawable/search"
+            android:layout_width="30dp"
+            android:layout_height="30dp"/>
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1.0"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginTop="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/search_bottomNavigationView"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintTop_toBottomOf="@+id/search_layout">
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/search_bottomNavigationView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:itemTextColor="#000000"
+            app:labelVisibilityMode="labeled"
+            app:menu="@menu/menu" />
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/search_viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.0" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
