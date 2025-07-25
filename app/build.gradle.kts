@@ -54,7 +54,7 @@ dependencies {
     implementation (project(":module_personage"))
     implementation(project(":lib_base"))
     implementation(project(":module_details"))
-    implementation(project(":moudle_search"))
+    implementation(project(":module_search"))
     kapt("cn.therouter:apt:1.2.2")
     implementation("cn.therouter:router:1.2.2")
     implementation(project(":module_recommened"))
