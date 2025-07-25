@@ -7,12 +7,13 @@
         android:title="歌手" />
 
     <item
+        android:id="@+id/menu_item_mv"
+        android:icon="@drawable/mv"
+        android:title="MV" />
+
+    <item
         android:id="@+id/menu_item_list"
         android:icon="@drawable/list"
         android:title="歌单" />
 
-    <item
-        android:id="@+id/menu_item_mv"
-        android:icon="@drawable/mv"
-        android:title="MV" />
 </menu>

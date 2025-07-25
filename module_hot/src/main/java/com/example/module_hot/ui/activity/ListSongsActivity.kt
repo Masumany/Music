@@ -1,5 +1,6 @@
 package com.example.module_hot.ui.activity
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -7,7 +8,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.module_hot.R
 import com.example.module_hot.adapter.ListSongsAdapter
+import com.example.module_hot.bean.list.Item0
 import com.example.module_hot.bean.list_songs.Song
 import com.example.module_hot.databinding.ActivityListSongsBinding
 import com.example.module_hot.viewModel.ListSongsViewModel
@@ -17,14 +20,17 @@ import com.therouter.TheRouter
 class ListSongsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityListSongsBinding
     private lateinit var viewModel: ListSongsViewModel
+    private var currentPlaylist: Item0? = null
 
     private val adapter by lazy{
         ListSongsAdapter(
             onItemClick = { song: Song ->
                 TheRouter.build("/module_musicplayer/musicplayer")
-                    .withString("id", song.id.toString())
                     .withString("songListName", song.name)
+                    .withString("cover", song.al.picUrl)
+                    .withLong("id", song.id)
                     .withString("athour", song.ar[0].name)
+                    .withLong("singerId", song.ar[0].id.toLong())
                     .navigation(this)
                 Log.d("ListSongsActivity", "${song.id},${song.name}, ${song.ar[0].name}")
             },
@@ -37,6 +43,17 @@ class ListSongsActivity : AppCompatActivity() {
         binding.rvSongsList.adapter = adapter
         binding.rvSongsList.layoutManager = LinearLayoutManager(this)
         viewModel = ViewModelProvider(this)[ListSongsViewModel::class.java]
+        // 初始化 SwipeRefreshLayout
+        binding.songsListSwipeRefresh.apply {
+            // 设置刷新动画的颜色
+            setColorSchemeResources(R.color.black, R.color.white)
+
+            // 设置下拉刷新的监听器
+            setOnRefreshListener {
+                // 下拉时触发数据刷新
+                loadListSongsData()
+            }
+        }
 
         initClick ()
         loadListSongsData()
@@ -45,6 +62,19 @@ class ListSongsActivity : AppCompatActivity() {
     private fun initClick() {
         binding.songsListBack.setOnClickListener {
             finish()
+        }
+        binding.btnShare.setOnClickListener {
+            Toast.makeText(this, "分享", Toast.LENGTH_SHORT).show()
+            // 跳转到分享页面
+            currentPlaylist?.let {
+                val shareIntent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_SUBJECT, "分享 歌单")
+                    putExtra(Intent.EXTRA_TEXT, "发现一个超棒的歌单：https://music.163.com/playlist?id=${it.id}")
+                    type = "text/plain"
+                }
+                startActivity(Intent.createChooser(shareIntent, "分享到..."))
+            }
         }
     }
     private fun loadListSongsData() {

@@ -50,6 +50,17 @@ class SingerFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.rvSinger.adapter = adapter
         binding.rvSinger.layoutManager = LinearLayoutManager(requireContext())
+        // 初始化 SwipeRefreshLayout
+        binding.singerSwipeRefresh.apply {
+            // 设置刷新动画的颜色
+            setColorSchemeResources(R.color.black, R.color.white)
+
+            // 设置下拉刷新的监听器
+            setOnRefreshListener {
+                // 下拉时触发数据刷新
+                loadSingerData()
+            }
+        }
 
         loadSingerData()
     }
@@ -69,13 +80,19 @@ class SingerFragment : Fragment() {
                         binding.pbSinger.visibility = android.view.View.VISIBLE
                     }
                     is LoadState.Loading -> {
-                        binding.pbSinger.visibility = android.view.View.VISIBLE
+                        if (binding.singerSwipeRefresh.isRefreshing) {
+                            binding.pbSinger.visibility = View.GONE
+                        } else {
+                            binding.pbSinger.visibility = View.VISIBLE
+                        }
                     }
                     is LoadState.Success -> {
                         binding.pbSinger.visibility = android.view.View.GONE
+                        binding.singerSwipeRefresh.isRefreshing = false
                     }
                     is LoadState.Error -> {
                         binding.pbSinger.visibility = android.view.View.GONE
+                        binding.singerSwipeRefresh.isRefreshing = false
                         Toast.makeText(requireContext(), "加载失败", Toast.LENGTH_SHORT).show()
                     }
                     else -> {

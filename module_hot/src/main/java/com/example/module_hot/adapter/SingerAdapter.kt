@@ -39,7 +39,6 @@ class SingerAdapter (
                 .into(binding.singerImg)
 
             binding.singerName.text = singer.name
-            binding.singerRank.text = (singer.lastRank + 1).toString()
 
             binding.root.setOnClickListener {
                 onItemClick(singer)

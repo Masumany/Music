@@ -48,6 +48,17 @@ class MvRankFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.rvMvRank.adapter = adapter
         binding.rvMvRank.layoutManager = LinearLayoutManager(requireContext())
+        // 初始化 SwipeRefreshLayout
+        binding.mvSwipeRefresh.apply {
+            // 设置刷新动画的颜色
+            setColorSchemeResources(R.color.black, R.color.white)
+
+            // 设置下拉刷新的监听器
+            setOnRefreshListener {
+                // 下拉时触发数据刷新
+                loadMvData()
+            }
+        }
 
         loadMvData()
     }

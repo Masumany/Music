@@ -8,19 +8,6 @@
     android:padding="5dp"
     android:background="@drawable/list_shape">
 
-<TextView
-        android:id="@+id/singer_rank"
-        android:gravity="center"
-        android:text="1"
-        android:layout_marginLeft="15dp"
-        android:layout_marginTop="10dp"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        android:layout_gravity="center"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
     <ImageView
         android:id="@+id/singer_img"
         android:layout_marginTop="10dp"

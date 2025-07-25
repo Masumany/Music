@@ -54,11 +54,6 @@ class MvPlayerActivity : AppCompatActivity() {
     private var isFullscreen = false //全屏状态标记
 
 
-    // 默认高度320dp（转成像素值，用于代码中设置）
-    private val defaultPlayerHeight by lazy {
-        // dp转px：320dp对应的像素值（适配不同屏幕密度）
-        dp2px(this, 320f)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

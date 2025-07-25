@@ -6,10 +6,17 @@
     android:background="@drawable/gb_color"
     tools:context=".ui.fragment.SingerFragment">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_singer"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/singer_swipe_refresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_singer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <ProgressBar
         android:id="@+id/pb_singer"

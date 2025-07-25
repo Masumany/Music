@@ -12,8 +12,8 @@ class HotAdapter (
 ) : FragmentStateAdapter(activity) {
     private val fragments = listOf(
         SingerFragment.newInstance(),
-        ListFragment.newInstance(),
-        MvRankFragment.newInstance()
+        MvRankFragment.newInstance(),
+        ListFragment.newInstance()
     )
 
     override fun getItemCount(): Int = fragments.size

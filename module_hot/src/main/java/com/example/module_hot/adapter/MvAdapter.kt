@@ -40,7 +40,6 @@ class MvAdapter (
 
             binding.mvName.text = data.name
             binding.mvArtistName.text = data.artistName
-            binding.mvRank.text = data.lastRank.toString()
 
             binding.root.setOnClickListener {
                 onItemClick(data)

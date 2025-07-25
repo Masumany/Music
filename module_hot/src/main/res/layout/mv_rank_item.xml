@@ -9,16 +9,6 @@
     android:gravity="center"
     android:background="@drawable/list_shape">
 
-    <TextView
-        android:id="@+id/mv_rank"
-        android:gravity="center"
-        android:text="1"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        android:layout_gravity="center"
-        android:layout_width="50dp"
-        android:layout_height="50dp"/>
 
     <ImageView
         android:id="@+id/mv_img"
