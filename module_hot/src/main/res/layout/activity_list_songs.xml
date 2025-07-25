@@ -25,12 +25,12 @@
             android:background="@drawable/back"
             android:layout_marginTop="10dp"
             android:layout_marginLeft="10dp"
-            android:layout_width="50dp"
-            android:layout_height="50dp" />
+            android:layout_width="30dp"
+            android:layout_height="30dp" />
 
         <LinearLayout
             android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -39,7 +39,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="原创榜"
-                android:textSize="45dp"
+                android:textSize="30dp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -49,51 +49,74 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <android.widget.Button
-                android:id="@+id/btn_collect"
-                android:background="@drawable/collect"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_marginLeft="70dp" />
-
-            <TextView
-                android:id="@+id/tv_collect"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+            <LinearLayout
                 android:gravity="center"
-                android:layout_marginLeft="10dp"
-                android:text="72.4" />
+                android:layout_gravity="center"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent">
 
-            <android.widget.Button
-                android:id="@+id/btn_comment"
-                android:background="@drawable/comment"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_marginLeft="10dp" />
+                <android.widget.Button
+                    android:id="@+id/btn_collect"
+                    android:background="@drawable/collect"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp" />
 
-            <TextView
-                android:id="@+id/tv_comment"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                <TextView
+                    android:id="@+id/tv_collect"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:layout_marginLeft="10dp"
+                    android:text="72.4" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:gravity="center"
-                android:layout_marginLeft="10dp"
-                android:text="72.4" />
+                android:layout_gravity="center"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent">
 
-            <android.widget.Button
-                android:id="@+id/btn_share"
-                android:background="@drawable/share"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_marginLeft="10dp" />
+                <android.widget.Button
+                    android:id="@+id/btn_comment"
+                    android:background="@drawable/comment"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="10dp" />
 
-            <TextView
-                android:id="@+id/tv_share"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                <TextView
+                    android:id="@+id/tv_comment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:layout_marginLeft="10dp"
+                    android:text="72.4" />
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:gravity="center"
-                android:layout_marginLeft="10dp"
-                android:text="72.4" />
+                android:layout_gravity="center"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent">
 
+                <android.widget.Button
+                    android:id="@+id/btn_share"
+                    android:background="@drawable/share"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="10dp" />
+
+                <TextView
+                    android:id="@+id/tv_share"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:layout_marginLeft="10dp"
+                    android:text="72.4" />
+            </LinearLayout>
 
         </LinearLayout>
     </LinearLayout>
@@ -103,6 +126,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:layout_marginTop="15dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

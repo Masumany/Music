@@ -9,6 +9,8 @@ import com.example.module_hot.bean.list.ListItem
 import com.example.module_hot.bean.list_songs.ListSongsData
 import com.example.module_hot.bean.list_songs.Song
 import com.example.module_hot.repository.NetRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -76,50 +78,47 @@ class ListViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 _loadState.value = LoadState.Loading
-                val uiItems = mutableListOf<ListItem>()
-                for (item in firstList){
-                    val responseSongs = NetRepository.apiService.getListSongs(item.id.toString())
-                    Log.d("ListViewModel", "接口请求结果：${responseSongs.message()}")
-
-                    if (responseSongs.isSuccessful) {
-                        val songData = responseSongs.body() as? ListSongsData
-                        if (songData != null && songData.code == 200) {
-                            val songs = songData.songs
-                            // 格式化前3首歌曲（处理不足3首的情况）
-                            val firstSong = if (songs.isNotEmpty()) formatSong(songs[0]) else "无歌曲"
-                            val secondSong = if (songs.size >= 2) formatSong(songs[1]) else ""
-                            val thirdSong = if (songs.size >= 3) formatSong(songs[2]) else ""
-                            //优先用第一首歌的封面，无则用歌单默认封面（Item0的coverImgUrl）
-                            val coverUrl = if (songs.isNotEmpty()) songs[0].al.picUrl else item.coverImgUrl
-
-                            // 创建ListItem
-                            val listItem = ListItem(
-                                id = item.id, // 从Item0中获取歌单ID
-                                listName = item.name,  // 歌单名（Item0的name字段）
-                                listUpdateTime = item.updateTime,  // 歌单更新时间（Item0的updateTime）
-                                listCoverUrl = coverUrl,  // 封面URL（优先歌曲封面）
-                                firstSongText = firstSong,  // 第一首歌曲
-                                secondSongText = secondSong,  // 第二首歌曲
-                                thirdSongText = thirdSong,  // 第三首歌曲
-                                songCoverUrl = coverUrl
-                            )
-                            uiItems.add(listItem)
-                        } else {
-                            uiItems.add(createErrorListItem(item, "歌曲数据无效"))
+                // 并发请求所有歌单的歌曲
+                val deferredList = firstList.map { item ->
+                    async { // 每个请求用async，实现并行
+                        try {
+                            val responseSongs = NetRepository.apiService.getListSongs(item.id.toString())
+                            if (responseSongs.isSuccessful) {
+                                val songData = responseSongs.body() as? ListSongsData
+                                if (songData != null && songData.code == 200) {
+                                    val songs = songData.songs
+                                    val firstSong = if (songs.isNotEmpty()) formatSong(songs[0]) else "无歌曲"
+                                    val secondSong = if (songs.size >= 2) formatSong(songs[1]) else ""
+                                    val thirdSong = if (songs.size >= 3) formatSong(songs[2]) else ""
+                                    val coverUrl = if (songs.isNotEmpty()) songs[0].al.picUrl else item.coverImgUrl
+                                    ListItem(
+                                        id = item.id,
+                                        listName = item.name,
+                                        listUpdateTime = item.updateTime,
+                                        listCoverUrl = coverUrl,
+                                        firstSongText = firstSong,
+                                        secondSongText = secondSong,
+                                        thirdSongText = thirdSong,
+                                        songCoverUrl = coverUrl
+                                    )
+                                } else {
+                                    createErrorListItem(item, "歌曲数据无效")
+                                }
+                            } else {
+                                createErrorListItem(item, "歌曲请求失败:${responseSongs.code()}")
+                            }
+                        } catch (e: Exception) {
+                            createErrorListItem(item, "请求异常:${e.message}")
                         }
-                    } else {
-                        // 歌曲请求失败（如404）
-                        uiItems.add(createErrorListItem(item, "歌曲请求失败"))
-                        Log.e("ListViewModel", "歌单[${item.id}]歌曲请求失败：${responseSongs.code()}")
                     }
                 }
-
-                // 更新UI数据
+                // 等待所有并行请求完成，获取结果列表
+                val uiItems = deferredList.awaitAll()
                 _listSongsData.value = uiItems
                 _loadState.value = LoadState.Success
             } catch (e: Exception) {
                 _loadState.value = LoadState.Error("歌曲加载异常：${e.message ?: "未知错误"}")
-                Log.e("ListViewModel", "歌曲加载异常", e)
+                e.printStackTrace()
             }
         }
     }

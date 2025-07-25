@@ -11,8 +11,8 @@ class HotAdapter (
     activity: FragmentActivity
 ) : FragmentStateAdapter(activity) {
     private val fragments = listOf(
-        ListFragment.newInstance(),
         SingerFragment.newInstance(),
+        ListFragment.newInstance(),
         MvRankFragment.newInstance()
     )
 

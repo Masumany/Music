@@ -1,20 +1,18 @@
 package com.example.module_hot.ui.activity
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.module_hot.R
 import com.example.module_hot.adapter.ListSongsAdapter
 import com.example.module_hot.bean.list_songs.Song
 import com.example.module_hot.databinding.ActivityListSongsBinding
 import com.example.module_hot.viewModel.ListSongsViewModel
 import com.example.module_hot.viewModel.LoadState
+import com.therouter.TheRouter
 
 class ListSongsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityListSongsBinding
@@ -23,7 +21,12 @@ class ListSongsActivity : AppCompatActivity() {
     private val adapter by lazy{
         ListSongsAdapter(
             onItemClick = { song: Song ->
-                // 跳转主页
+                TheRouter.build("/module_musicplayer/musicplayer")
+                    .withString("id", song.id.toString())
+                    .withString("songListName", song.name)
+                    .withString("athour", song.ar[0].name)
+                    .navigation(this)
+                Log.d("ListSongsActivity", "${song.id},${song.name}, ${song.ar[0].name}")
             },
         )
     }
@@ -33,6 +36,7 @@ class ListSongsActivity : AppCompatActivity() {
         setContentView(binding.root)
         binding.rvSongsList.adapter = adapter
         binding.rvSongsList.layoutManager = LinearLayoutManager(this)
+        viewModel = ViewModelProvider(this)[ListSongsViewModel::class.java]
 
         initClick ()
         loadListSongsData()
@@ -44,7 +48,12 @@ class ListSongsActivity : AppCompatActivity() {
         }
     }
     private fun loadListSongsData() {
-        val id = intent.getIntExtra("id", 0)
+        val id = intent.getLongExtra("id", 0)
+        Log.d("ListSongsActivity", "id: $id")
+        if (id == 0L) {
+            Toast.makeText(this, "id无效", Toast.LENGTH_SHORT).show()
+            return
+        }
         viewModel.getListSongsData(id)
 
         lifecycleScope.launchWhenStarted {

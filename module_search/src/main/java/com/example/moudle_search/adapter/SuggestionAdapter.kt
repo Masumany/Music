@@ -21,12 +21,18 @@ class SuggestionAdapter(
         }
     }
 ) {
+    var currentQuery: String = ""
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
     inner class SuggestionViewHolder(private val binding: SuggestionItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(match: AllMatch) {
             val keywords = match.keyword
-            val suggestionContent = highlightMatches(keywords, listOf(match))
+            val suggestionContent = highlightMatches(keywords, currentQuery)
             // 将高亮后的内容显示到TextView（需要配合富文本解析）
             binding.tvSuggestionItem.text = Html.fromHtml(suggestionContent, Html.FROM_HTML_MODE_COMPACT)
 
@@ -36,14 +42,16 @@ class SuggestionAdapter(
             }
         }
 
-        private fun highlightMatches(content: String, matches: List<AllMatch>): String {
-            return matches.fold(content) { result, match ->
-                if (match.keyword.isEmpty()) {
-                    result
-                }
-                else {
-                    result.replace(match.keyword, "<font color='#FF5722'><b>${match.keyword}</b></font>",ignoreCase = true)
-                }
+        private fun highlightMatches(keyword: String, query: String): String {
+            val startIndex = keyword.indexOf(query, ignoreCase = true)
+            return if (startIndex >= 0) {
+                val before = keyword.substring(0, startIndex)
+                val match = keyword.substring(startIndex, startIndex + query.length)
+                val after = keyword.substring(startIndex + query.length)
+                "<font color='#999999'>$before</font><font color='#000000'>$match</font><font color='#999999'>$after</font>"
+            } else {
+                // 如果没匹配上，整行变灰
+                "<font color='#999999'>$keyword</font>"
             }
         }
     }

@@ -161,6 +161,8 @@ class SearchActivity : AppCompatActivity() {
             viewModel.suggestionData.collect{ list ->
                 if (list.result.allMatch.isNotEmpty()) {
                     val sortedList = list.result.allMatch.sortedByDescending { it.keyword.length }
+                    // 传入用户当前输入的关键词
+                    suggestionAdapter.currentQuery = keyWord
                     suggestionAdapter.submitList(sortedList)
                     binding.suggestionLayout.visibility = View.VISIBLE
                     binding.hotLayout.visibility = View.GONE

@@ -14,6 +14,7 @@ import com.example.module_hot.adapter.MvAdapter
 import com.example.module_hot.databinding.FragmentMvRankBinding
 import com.example.module_hot.viewModel.LoadState
 import com.example.module_hot.viewModel.MvRankViewModel
+import com.therouter.TheRouter
 
 class MvRankFragment : Fragment() {
 
@@ -29,7 +30,9 @@ class MvRankFragment : Fragment() {
         MvAdapter(
             onItemClick = {
                 Toast.makeText(requireContext(), it.name, Toast.LENGTH_SHORT).show()
-                //  跳转到详情页面
+                TheRouter.build("/module_mvplayer/mvplayer")
+                    .withString("mvId", it.id.toString())
+                    .navigation(requireActivity())
             }
         )
     }
