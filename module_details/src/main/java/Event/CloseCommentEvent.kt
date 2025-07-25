@@ -1,0 +1,3 @@
+package Event
+
+class CloseCommentEvent

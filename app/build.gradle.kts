@@ -41,6 +41,7 @@ android {
 }
 
 dependencies {
+    implementation ("org.greenrobot:eventbus:3.3.1")
     debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.12")
     // Glide 核心库
     implementation("com.github.bumptech.glide:glide:4.16.0")

@@ -22,9 +22,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".MusicPlayService"
+        <service
+            android:name=".MusicPlayService"
             android:foregroundServiceType="mediaPlayback"
-            android:exported="true"/>
+            android:exported="true">
+            <!-- 添加自定义 action，用于跨模块隐式调用 -->
+            <intent-filter>
+                <action android:name="com.example.musicplayer.ACTION_MUSIC_SERVICE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </service>
         <activity
             android:name="com.example.module_musicplayer.CommentActivity"
             android:exported="true"/>

@@ -1,5 +1,7 @@
 package com.example.module_musicplayer
 
+import Event.CloseCommentEvent
+import Event.CloseLyricEvent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -12,6 +14,9 @@ import com.example.module_musicplayer.viewmodel.CommentViewModel
 import com.therouter.TheRouter
 import com.therouter.router.Autowired
 import com.therouter.router.Route
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 
 @Route(path = "/module_musicplayer/commentActivity")
 class CommentActivity : AppCompatActivity() {
@@ -38,6 +43,22 @@ class CommentActivity : AppCompatActivity() {
         observeCommentData()
     }
 
+    //注册EventBus
+    override fun onStart() {
+        super.onStart()
+        if(!EventBus.getDefault().isRegistered( this)){
+            EventBus.getDefault().register(this)
+        }
+    }
+
+    //解注册EventBus
+    override fun onStop() {
+        super.onStop()
+        if(EventBus.getDefault().isRegistered( this)){
+            EventBus.getDefault().unregister(this)
+        }
+    }
+
     private fun initRecyclerView() {
         commentAdapter = CommentAdapter(emptyList())
         binding.rvComment.apply {
@@ -52,6 +73,13 @@ class CommentActivity : AppCompatActivity() {
             return
         }
         commentViewModel.fetchCommentData(id!!)
+    }
+
+    //订阅事件
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun CloseCommentEvent(event: CloseCommentEvent) {
+        Log.d("CommentClose", "收到强制关闭事件，返回播放页")
+        finish()//处理事件
     }
 
     private fun observeCommentData() {

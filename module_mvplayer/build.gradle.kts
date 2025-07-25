@@ -49,7 +49,6 @@ dependencies {
 //    // 注解处理器（用于生成路由表）
 //    annotationProcessor("cn.therouter:compiler:1.2.2")
 //    implementation (files("libs/apt-1.2.2.jar"))
-
     kapt("cn.therouter:apt:1.2.2")
     implementation("cn.therouter:router:1.2.2")
     // 协程库

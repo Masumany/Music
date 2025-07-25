@@ -38,6 +38,7 @@ import kotlinx.coroutines.launch
 import android.content.res.Resources
 import androidx.cardview.widget.CardView
 import com.example.music.R
+import com.example.music.viewmodel.BottomViewModel
 import com.therouter.TheRouter
 
 @Route(path = "/main/main")
@@ -54,17 +55,21 @@ class MainActivity : AppCompatActivity() {
     private lateinit var musicIv: ImageView
     private var rotationAnimation: Animation? = null
     private var vpAdapter: Vp2Adapter? = null
-    private lateinit var viewPager: ViewPager2 // 声明ViewPager2
+    private lateinit var viewPager: ViewPager2
+    private lateinit var bottomViewModel: BottomViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        Log.d("MainActivity", "onCreate:执行初始化")
+
         if(savedInstanceState!=null){
             return  //不重复初始化
         }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        enableEdgeToEdge() // 启用边缘到边缘显示
+        enableEdgeToEdge()
 
         binding.searchView.setOnClickListener{
             TheRouter.build("/module_search/SearchActivity")
@@ -73,15 +78,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         initViews()
-        initViewPager() // 优先初始化ViewPager2
-        initHeaderView() // 拆分头部视图初始化
-        initBottomSheetDialog()
+        initViewPager() // 初始化ViewPager2
+        initHeaderView()
+        initBottomSheetDialog() //初始化底部列表弹窗
         initMusicService()
-        initRotationAnimation()
-        setupBottomNavListener() // 底部导航联动逻辑
+        initRotationAnimation()  //初始化底部栏音乐播放器
+        setupBottomNavListener() // 底部导航
     }
 
-    // 初始化头部视图及点击事件
+
     private fun initHeaderView() {
         headerBinding = NavHeaderBinding.inflate(layoutInflater)
         binding.navigationView.addView(headerBinding.root)
@@ -97,14 +102,14 @@ class MainActivity : AppCompatActivity() {
 
     // 初始化ViewPager2及适配器
     private fun initViewPager() {
-        viewPager = binding.mainContent // 绑定布局中的ViewPager2
+        viewPager = binding.mainContent
         vpAdapter = Vp2Adapter(this)
         viewPager.adapter = vpAdapter
         viewPager.setUserInputEnabled(false);
     }
 
     private fun initViews() {
-        topButton = binding.drawerButton // 直接使用binding获取视图
+        topButton = binding.drawerButton
         drawerLayout = binding.mainDrawerLayout
         bottomNavigationView = binding.bottomNavigationView
         musicIv = binding.music
@@ -119,7 +124,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // 底部导航与ViewPager2联动
+    // 底部导航与ViewPager2
     private fun setupBottomNavListener() {
         bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -175,19 +180,21 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        binding.ivMore.setOnClickListener { // 使用binding获取视图
+        binding.ivMore.setOnClickListener {
             if (!bottomSheetDialog.isShowing) {
                 bottomSheetDialog.show()
             }
         }
     }
 
+    private var isServiceBound = false
     private fun initMusicService() {
+        if(isServiceBound) return
         serviceConnection = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 val binder = service as MusicPlayService.MusicBinder
                 val musicService = binder.service
-                bottomMusicController.onServiceConnected(musicService)
+                bottomViewModel.onServiceConnected(musicService)
                 updateAnimationState(musicService.isPlaying)
 
                 musicService.setOnPlayStateChanged { isPlaying, _ ->
@@ -201,11 +208,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         val bottomBarView = binding.player
-        bottomMusicController = BottomMusicController(this, bottomBarView, serviceConnection)
+        bottomMusicController = BottomMusicController(this, bottomBarView )
+
+       bottomViewModel=ViewModelProvider(this)[BottomViewModel::class.java]
+        bottomViewModel.initService( this)
+
 
         val musicServiceIntent = Intent(this, MusicPlayService::class.java)
         startService(musicServiceIntent)
         bindService(musicServiceIntent, serviceConnection, BIND_AUTO_CREATE)
+
+        isServiceBound= true
     }
 
     private fun initRotationAnimation() {
@@ -227,7 +240,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // dp转px工具方法
+    // dp转px
     private fun Int.dpToPx(): Int {
         return (this * Resources.getSystem().displayMetrics.density + 0.5f).toInt()
     }
@@ -243,12 +256,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // 清理控制器：检查bottomMusicController是否已初始化
+        // 检查bottomMusicController是否已初始化
         if (::bottomMusicController.isInitialized) {
             bottomMusicController.onDestroy()
         }
 
-        // 其他清理逻辑
         musicIv.clearAnimation()
         if (::bottomSheetDialog.isInitialized && bottomSheetDialog.isShowing) {
             bottomSheetDialog.dismiss()

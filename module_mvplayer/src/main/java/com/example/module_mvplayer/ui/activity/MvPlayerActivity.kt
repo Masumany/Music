@@ -1,9 +1,12 @@
 package com.example.module_mvplayer.ui.activity
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.ActivityInfo
 import android.os.Bundle
+import android.os.IBinder
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -42,13 +45,14 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Route(path = "/module_mvplayer/mvplayer")
 class MvPlayerActivity : AppCompatActivity() {
-    private   var mvId: String="" // 声明变量
+    private   var mvId: String=""
     private lateinit var binding: ActivityMvPlayerBinding
     private val viewModel: MvPlayerViewModel by viewModels()
     private var player: ExoPlayer? = null
     private var mvPlayUrl: String? = null
     private var currentPlaybackState = PlayBackState.IDLE
     private var isFullscreen = false //全屏状态标记
+
 
     // 默认高度320dp（转成像素值，用于代码中设置）
     private val defaultPlayerHeight by lazy {

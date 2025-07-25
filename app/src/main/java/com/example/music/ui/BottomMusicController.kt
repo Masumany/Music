@@ -1,8 +1,6 @@
 package com.example.music.ui
 
 import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Handler
 import android.os.Looper
 import android.view.View
@@ -10,24 +8,22 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
-import Adapter.MusicDataCache
-import com.example.module_musicplayer.MusicPlayService
 import com.example.music.R
-import com.therouter.TheRouter
+import com.example.music.viewmodel.BottomViewModel
 import data.ListMusicData
+import com.example.module_recommened.R as RecommendedR
 
 class BottomMusicController(
     private val context: Context,
-    private val view: View,
-    private val serviceConnection: ServiceConnection
+    private val view: View
 ) {
-    private var musicPlayService: MusicPlayService? = null
-    private var isServiceBound = false
+    private val viewModel: BottomViewModel
     private val handler = Handler(Looper.getMainLooper())
     private val updateRunnable = object : Runnable {
         override fun run() {
+            // 可以在这里更新播放进度等UI
             handler.postDelayed(this, 1000)
         }
     }
@@ -39,22 +35,26 @@ class BottomMusicController(
     private var currentRotation = 0f
     private val animationDuration = 15000L
 
-    // LiveData观察者
-    private val songObserver = Observer<ListMusicData.Song?> { song ->
-        (context as? AppCompatActivity)?.runOnUiThread {
-            updateSongInfo(song)
-        }
-    }
-    private val playStateObserver = Observer<Boolean> { isPlaying ->
-        (context as? AppCompatActivity)?.runOnUiThread {
-            updatePlayState(isPlaying)
-        }
+    init {
+        // 初始化ViewModel
+        viewModel = ViewModelProvider(context as AppCompatActivity)[BottomViewModel::class.java]
+
+        // 初始化视图和事件
+        initView()
+        initClickEvents()
+        initObservers()
+        initAnimation()
+
+        // 初始化服务连接
+        viewModel.initService(context)
     }
 
-    init {
-        initService()
-        initClickEvents()
-        initAnimation()
+    private fun initView() {
+        // 初始化视图状态
+        val ivCover = view.findViewById<ImageView>(R.id.music)
+        val playButton = view.findViewById<ImageView>(R.id.stop)
+        ivCover.rotation = ROTATION_PAUSED
+        playButton.setImageResource(RecommendedR.drawable.list_start)
     }
 
     private fun initAnimation() {
@@ -64,100 +64,35 @@ class BottomMusicController(
         currentRotation = ROTATION_PAUSED
     }
 
-    private fun initService() {
-        val intent = Intent(context, MusicPlayService::class.java)
-        context.startService(intent)
-        context.applicationContext.bindService(
-            intent,
-            serviceConnection,
-            Context.BIND_AUTO_CREATE
-        )
-    }
-
     private fun initClickEvents() {
         // 播放/暂停按钮点击事件
         val playButton = view.findViewById<ImageView>(R.id.stop)
         playButton.setOnClickListener {
-            val service = musicPlayService ?: return@setOnClickListener
-
-            // 检查是否有歌曲列表
-            val hasSongs = !(MusicDataCache.currentSongList.isNullOrEmpty())
-
-            if (!hasSongs) {
-                // 没有歌曲时显示提示
+            val success = viewModel.togglePlayPause()
+            if (!success) {
                 Toast.makeText(context, "还没有歌曲哟", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            if (service.isPlaying) {
-                service.pause()
-                playButton.setImageResource(com.example.module_recommened.R.drawable.list_start)
-            } else {
-                val currentUrl = service.currentUrl
-                if (currentUrl.isNullOrBlank()) {
-                    val firstSong = MusicDataCache.currentSongList?.firstOrNull()
-                    if (firstSong != null) {
-                        service.play(firstSong.al.picUrl, firstSong)
-                    } else {
-                        // 双重保险检查
-                        Toast.makeText(context, "还没有歌曲哟", Toast.LENGTH_SHORT).show()
-                    }
-                    return@setOnClickListener
-                }
-
-                if (service.getCurrentPosition() > 0) {
-                    service.resume()
-                } else {
-                    service.play(currentUrl, service.currentSong)
-                }
-                playButton.setImageResource(R.drawable.now_play)
             }
         }
 
         // 底部栏封面点击事件
         view.findViewById<ImageView>(R.id.music).setOnClickListener {
-            // 检查是否有歌曲
-            val currentSongList = MusicDataCache.currentSongList ?: emptyList()
-            if (currentSongList.isEmpty()) {
+            val success = viewModel.handleCoverClick(context)
+            if (!success) {
                 Toast.makeText(context, "还没有歌曲哟!", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
             }
-
-            val service = musicPlayService ?: return@setOnClickListener
-            val currentSong = service.currentSong ?: return@setOnClickListener
-
-            // 获取当前歌曲在列表中的索引
-            val currentIndex = currentSongList.indexOfFirst { it.id == currentSong.id }
-            val safeIndex = if (currentIndex in currentSongList.indices) currentIndex else 0
-
-            // 获取当前播放进度（毫秒）
-            val playProgress = service.getCurrentPosition()
-
-            // 构建路由参数
-            TheRouter.build("/module_musicplayer/musicplayer")
-                .withString("id", currentSong.id.toString())
-                .withString("cover", currentSong.al?.picUrl)
-                .withString("songListName", currentSong.name)
-                .withString("athour", currentSong.ar.firstOrNull()?.name ?: "未知歌手")
-                .withInt("currentPosition", safeIndex)
-                .withInt("playProgress", playProgress)
-                .navigation(context)
         }
     }
 
-    fun onServiceConnected(service: MusicPlayService) {
-        musicPlayService = service
-        isServiceBound = true
-        (context as? AppCompatActivity)?.runOnUiThread {
-            // 同步服务状态到UI
-            updatePlayState(service.isPlaying)
-            updateSongInfo(service.currentSong)
+    private fun initObservers() {
+        // 观察歌曲变化
+        viewModel.currentSong.observe(context as AppCompatActivity) { song ->
+            updateSongInfo(song)
         }
 
-        // 注册观察者
-        service.currentSongLiveData.observeForever(songObserver)
-        service.isPlayingLiveData.observeForever(playStateObserver)
-        handler.post(updateRunnable)
+        // 观察播放状态变化
+        viewModel.isPlaying.observe(context as AppCompatActivity) { isPlaying ->
+            updatePlayState(isPlaying)
+        }
     }
 
     private fun updateSongInfo(song: ListMusicData.Song?) {
@@ -185,7 +120,7 @@ class BottomMusicController(
         // 更新按钮图标
         playButton.setImageResource(
             if (isPlaying) R.drawable.now_play
-            else com.example.module_recommened.R.drawable.list_start
+            else RecommendedR.drawable.list_start
         )
 
         // 控制封面旋转动画
@@ -200,7 +135,7 @@ class BottomMusicController(
         if (isAnimationRunning) return
 
         isAnimationRunning = true
-        // 移除之前的动画
+        // 取消之前的动画
         ivCover.animate().cancel()
 
         // 计算剩余旋转角度
@@ -241,12 +176,6 @@ class BottomMusicController(
     }
 
     fun onDestroy() {
-        // 移除观察者
-        musicPlayService?.let {
-            it.currentSongLiveData.removeObserver(songObserver)
-            it.isPlayingLiveData.removeObserver(playStateObserver)
-        }
-
         // 停止 Handler 任务
         handler.removeCallbacksAndMessages(null)
 
@@ -254,17 +183,5 @@ class BottomMusicController(
         val ivCover = view.findViewById<ImageView>(R.id.music)
         ivCover.animate().cancel()
         isAnimationRunning = false
-
-        // 解除服务绑定
-        if (isServiceBound) {
-            try {
-                context.applicationContext.unbindService(serviceConnection)
-            } catch (e: IllegalArgumentException) {
-                // 忽略已解除绑定的异常
-            }
-            isServiceBound = false
-        }
-
-        musicPlayService = null
     }
 }
