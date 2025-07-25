@@ -5,135 +5,156 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.module_recommened.adapter.LiAdapter
-import com.example.module_recommened.viewmodel.ListViewModel
-import androidx.lifecycle.ViewModelProvider
-import kotlinx.coroutines.launch
-import androidx.lifecycle.lifecycleScope
-import com.example.lib.base.Song
+import com.bumptech.glide.Glide
 import com.example.module_musicplayer.databinding.FragmentPlaylistBinding
-import com.example.yourproject.converter.DataConverter
+import com.example.lib.base.Song
 
 class ListFragment : Fragment() {
 
-    private lateinit var binding: FragmentPlaylistBinding
-    private val songAdapter = LiAdapter()
-    private lateinit var listViewModel: ListViewModel
+    private var _binding: FragmentPlaylistBinding? = null
+    private val binding get() = _binding!!
 
-    // 分页参数
-    private var currentPage = 1
-    private val pageSize = 5
-    private var hasMoreData = true
-    private var isLoading = false
+    private val songAdapter = PlayListAdapter()
+    private var currentPlayList: List<Song> = emptyList()
+    private var currentPlayingIndex = -1
+
+    // 歌曲选择监听器
+    private var onSongSelectListener: ((Int) -> Unit)? = null
+
+    fun setOnSongSelectListener(listener: (Int) -> Unit) {
+        onSongSelectListener = listener
+    }
+
+    fun updatePlayList(list: List<Song>, currentIndex: Int) {
+        // 保存数据，无论视图是否初始化
+        currentPlayList = list
+        currentPlayingIndex = currentIndex
+
+        // 检查视图是否已初始化
+        if (_binding == null) {
+            Log.w("ListFragment", "视图尚未初始化，暂不更新列表UI")
+            return
+        }
+
+        // 即使在隐藏状态也要更新数据，以便显示时能正确展示
+        songAdapter.updateData(list, currentIndex)
+
+        if (currentIndex >= 0) {
+            (_binding?.rvlist?.layoutManager as LinearLayoutManager)
+                ?.scrollToPositionWithOffset(currentIndex, 200)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentPlaylistBinding.inflate(inflater, container, false)
+        _binding = FragmentPlaylistBinding.inflate(inflater, container, false)
+        // 初始状态设置为隐藏
+        _binding?.root?.visibility = View.GONE
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initViewModel()
         initRecyclerView()
-        loadFirstPage()  // 加载第一页数据
         initCloseButton()
+        initAdapterListener()
+
+        // 视图创建后，如果有缓存数据，立即更新
+        if (currentPlayList.isNotEmpty()) {
+            songAdapter.updateData(currentPlayList, currentPlayingIndex)
+        }
     }
 
-    // 初始化ViewModel（与RecommendFragment使用同一个）
-    private fun initViewModel() {
-        listViewModel = ViewModelProvider(this)[ListViewModel::class.java]
+    // 控制Fragment显示/隐藏的方法
+    fun setVisible(visible: Boolean) {
+        _binding?.root?.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
     // 初始化RecyclerView
     private fun initRecyclerView() {
-
         val layoutManager = LinearLayoutManager(requireContext())
         binding.rvlist.layoutManager = layoutManager
         binding.rvlist.adapter = songAdapter
-
-        // 滚动监听（分页加载）
-        binding.rvlist.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-
-                // 计算最后一项的位置
-                val lastVisiblePosition = layoutManager.findLastVisibleItemPosition()
-                val totalItemCount = layoutManager.itemCount
-
-                // 当滚动到列表底部且有更多数据时，加载下一页
-                if (lastVisiblePosition >= totalItemCount - 1 && hasMoreData && !isLoading) {
-                    loadNextPage()
-                }
-            }
-        })
     }
 
-    // 加载第一页数据（重置分页参数）
-    private fun loadFirstPage() {
-        currentPage = 1
-        fetchListData(currentPage)
-    }
-
-    // 加载下一页数据
-    private fun loadNextPage() {
-        if (isLoading) return  // 防止重复加载
-        isLoading = true
-        currentPage++
-        fetchListData(currentPage)
-    }
-
-    // 请求列表数据
-    private fun fetchListData(page: Int) {
-        lifecycleScope.launch {
-            try {
-                val result = listViewModel.getListData(page, pageSize)
-                Log.d("CommentFragment", "数据响应: code=${result.code}")
-
-                if (result.code == 200) {
-                    val originalSongs: List<Song> = result.data?.dailySongs ?: emptyList()
-                    val convertedSongs = DataConverter.convertBaseSongList(originalSongs)
-                    hasMoreData = convertedSongs?.size ?: 0 >= pageSize  // 判断是否还有更多数据
-
-                    // 第一页替换数据，后续页追加数据
-                    if (page == 1) {
-                        songAdapter.submitList(convertedSongs)
-                    } else {
-                        if (convertedSongs != null) {
-                            songAdapter.addMoreData(convertedSongs)
-                        }
-                    }
-                    songAdapter.notifyDataSetChanged()  // 刷新列表
-                } else {
-                    hasMoreData = false
-                    Log.e("CommentFragment", "数据错误: code=${result.code}")
-                }
-            } catch (e: Exception) {
-                Log.e("CommentFragment", "加载失败: ${e.message}")
-                Toast.makeText(context, "列表加载失败", Toast.LENGTH_SHORT).show()
-            } finally {
-                isLoading = false  // 无论成功失败，都标记为未加载
-            }
+    // 初始化适配器点击事件
+    private fun initAdapterListener() {
+        songAdapter.setOnItemClickListener { position ->
+            onSongSelectListener?.invoke(position)
         }
     }
 
     // 关闭按钮逻辑
     private fun initCloseButton() {
-        binding.mpImgBack.setOnClickListener{
+        binding.mpImgBack.setOnClickListener {
             (activity as? MusicPlayerActivity)?.hideFragment()
         }
     }
 
+    // 播放列表适配器
+    inner class PlayListAdapter : RecyclerView.Adapter<PlayListAdapter.ViewHolder>() {
+        private var dataList: List<Song> = emptyList()
+        private var currentIndex = -1
+        private var itemClickListener: ((Int) -> Unit)? = null
+
+        fun updateData(list: List<Song>, currentPos: Int) {
+            dataList = list
+            currentIndex = currentPos
+            notifyDataSetChanged()
+        }
+
+        fun setOnItemClickListener(listener: (Int) -> Unit) {
+            itemClickListener = listener
+        }
+
+        inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            val songName: androidx.appcompat.widget.AppCompatTextView = itemView.findViewById(com.example.module_recommened.R.id.list_tv)
+            val singer: androidx.appcompat.widget.AppCompatTextView = itemView.findViewById(com.example.module_details.R.id.list_tv1)
+            val cover: androidx.appcompat.widget.AppCompatImageView = itemView.findViewById(com.example.module_details.R.id.list_img)
+
+            init {
+                itemView.setOnClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        itemClickListener?.invoke(position)
+                    }
+                }
+            }
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(com.example.module_details.R.layout.item_songlist, parent, false)
+            return ViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val song = dataList[position]
+            holder.songName.text = song.name
+            holder.singer.text = song.ar.joinToString { it.name }
+            Glide.with(holder.itemView).load(song.al.picUrl).into(holder.cover)
+
+            if (position == currentIndex) {
+                holder.songName.setTextColor(holder.itemView.context.getColor(com.example.module_details.R.color.white))
+                holder.singer.setTextColor(holder.itemView.context.getColor(com.example.module_details.R.color.white))
+            } else {
+                holder.songName.setTextColor(holder.itemView.context.getColor(R.color.black))
+                holder.singer.setTextColor(holder.itemView.context.getColor(R.color.grey))
+            }
+        }
+
+        override fun getItemCount() = dataList.size
+    }
+
+    // 释放binding引用，避免内存泄漏
     override fun onDestroyView() {
         super.onDestroyView()
-        // 清除适配器引用，避免内存泄漏
-        binding.rvlist.adapter = null
+        _binding = null
     }
 }

@@ -10,8 +10,8 @@
 
     <ImageView
         android:id="@+id/mp_imgBack"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:src="@drawable/mp_comment_back"
         android:layout_margin="16dp"
         app:layout_constraintEnd_toEndOf="parent"

@@ -1,6 +1,8 @@
 // SongData.kt
 package com.example.lib.base
 
+import data.ListMusicData
+
 /**
  * 根响应类（对应整个JSON）
  */
@@ -22,10 +24,10 @@ data class SongData(
  * 歌曲类（对应dailySongs中的元素）
  */
 data class Song(
-  val name: String, // 歌曲名称
-  val ar: List<Artist>, // 歌手列表
-  val al: Album ,
-  val id: Long, // 歌曲ID
+    val name: String, // 歌曲名称
+    val ar: List<ListMusicData.Song.Ar>, // 歌手列表
+    val al: ListMusicData.Song.Al,
+    val id: Long, // 歌曲ID
 )
 
 /**

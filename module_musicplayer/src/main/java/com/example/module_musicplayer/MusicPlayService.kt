@@ -21,26 +21,32 @@ import data.ListMusicData
 import java.lang.ref.WeakReference
 
 class MusicPlayService : Service() {
+    // 通知相关常量
     private val CHANNEL_ID = "music_service_channel"
     private val NOTIFICATION_ID = 10086
+
+    // 状态LiveData（供UI观察）
     val currentSongLiveData = MutableLiveData<ListMusicData.Song?>()
     val isPlayingLiveData = MutableLiveData<Boolean>()
     val currentProgress = MutableLiveData<Int>()
 
+    // 媒体播放器核心变量
     private var isMediaPrepared = false
     private var mediaPlayer: MediaPlayer? = null
     var currentUrl: String? = null
     var currentSong: ListMusicData.Song? = null
     var isPlaying = false
 
-    // 关键变量：保存暂停时的进度
-    var lastSavedProgress = 0
-    private var totalDuration = 0
+    // 进度管理
+    var lastSavedProgress = 0  // 保存暂停/停止时的进度
+    private var totalDuration = 0  // 歌曲总时长
+    private var needRestoreProgress = -1  // 标记是否需要恢复进度
 
-    // 新增：标记是否需要在准备完成后恢复进度
-    private var needRestoreProgress = -1
+    // 播放列表相关
+    var currentPlayList: List<ListMusicData.Song> = emptyList()
+    var currentIndex = -1
 
-    // 媒体播放器状态枚举
+    // 媒体播放器状态枚举（精细化管理）
     private enum class MediaPlayerState {
         IDLE,          // 初始状态
         INITIALIZED,   // 已设置数据源
@@ -51,28 +57,27 @@ class MusicPlayService : Service() {
         STOPPED,       // 已停止
         ERROR          // 错误状态
     }
-
-    // 追踪MediaPlayer状态的变量
     private var mediaPlayerState = MediaPlayerState.IDLE
 
-    // 弱引用管理监听器
+    // 监听器管理（使用弱引用避免内存泄漏）
     private var onCompletionListener: WeakReference<(() -> Unit)?> = WeakReference(null)
     fun setOnCompletionListener(listener: (() -> Unit)?) {
         onCompletionListener = WeakReference(listener)
     }
 
+    private var onPlayStateChanged: WeakReference<((isPlaying: Boolean, duration: Int) -> Unit)?> = WeakReference(null)
+    fun setOnPlayStateChanged(listener: ((isPlaying: Boolean, duration: Int) -> Unit)?) {
+        onPlayStateChanged = WeakReference(listener)
+    }
+
+    // Binder（供Activity绑定服务）
     inner class MusicBinder : Binder() {
         val service: MusicPlayService
             get() = this@MusicPlayService
     }
     private val binder = MusicBinder()
 
-    // 弱引用管理播放状态变化监听器
-    private var onPlayStateChanged: WeakReference<((isPlaying: Boolean, duration: Int) -> Unit)?> = WeakReference(null)
-    fun setOnPlayStateChanged(listener: ((isPlaying: Boolean, duration: Int) -> Unit)?) {
-        onPlayStateChanged = WeakReference(listener)
-    }
-
+    // 进度更新任务（定期更新进度）
     private val progressUpdateRunnable = object : Runnable {
         override fun run() {
             if (mediaPlayer != null &&
@@ -125,7 +130,7 @@ class MusicPlayService : Service() {
                     isMediaPrepared = true
                     totalDuration = mp.duration
 
-                    // 关键修复：如果有需要恢复的进度，在准备完成后跳转
+                    // 准备完成后恢复进度（如果需要）
                     if (needRestoreProgress > 0 && needRestoreProgress < totalDuration) {
                         Log.d("PlayPauseFix", "准备完成，恢复到进度: $needRestoreProgress")
                         try {
@@ -191,7 +196,7 @@ class MusicPlayService : Service() {
     private fun updatePlayingState(playing: Boolean) {
         isPlaying = playing
         val duration = getDuration()
-        // 优先更新状态，确保UI正确
+        // 通知监听器状态变化
         onPlayStateChanged.get()?.invoke(playing, duration)
         isPlayingLiveData.postValue(playing)
 
@@ -212,7 +217,6 @@ class MusicPlayService : Service() {
         isMediaPrepared = false
         mediaPlayerState = MediaPlayerState.STOPPED
         // 保留最后进度，以便后续恢复
-        // lastSavedProgress 不重置，保持暂停时的进度
         onPlayStateChanged.get()?.invoke(false, totalDuration)
         isPlayingLiveData.postValue(false)
         currentProgress.postValue(lastSavedProgress)
@@ -257,14 +261,14 @@ class MusicPlayService : Service() {
         }
     }
 
-    // 修复暂停方法，确保进度正确保存
+    // 暂停播放
     fun pause() {
         Log.d("PlayPauseFix", "执行暂停，当前进度: ${mediaPlayer?.currentPosition ?: 0}")
         try {
             val mp = mediaPlayer ?: return
 
             if (mp.isPlaying) {
-                // 关键修复：暂停时强制获取并保存当前进度
+                // 暂停时强制获取并保存当前进度
                 lastSavedProgress = mp.currentPosition
                 Log.d("PlayPauseFix", "暂停成功，保存进度: $lastSavedProgress")
 
@@ -304,14 +308,14 @@ class MusicPlayService : Service() {
         isPlayingLiveData.postValue(false)
     }
 
-    // 修复恢复播放方法，确保从保存的进度开始
+    // 恢复播放
     fun resume() {
         Log.d("PlayPauseFix", "执行恢复播放，保存的进度: $lastSavedProgress")
         try {
             val mp = mediaPlayer ?: return
 
             if (!isPlaying) {
-                // 关键修复：恢复时强制跳转到保存的进度
+                // 恢复时强制跳转到保存的进度
                 if (lastSavedProgress > 0) {
                     Log.d("PlayPauseFix", "恢复到进度: $lastSavedProgress")
                     try {
@@ -332,7 +336,7 @@ class MusicPlayService : Service() {
             mediaPlayerState = MediaPlayerState.ERROR
             // 异常处理：尝试从保存的进度重新播放
             if (lastSavedProgress > 0 && !currentUrl.isNullOrBlank()) {
-                Log.d("PlayPauseFix", "尝试")
+                Log.d("PlayPauseFix", "尝试从错误中恢复播放")
                 needRestoreProgress = lastSavedProgress
                 play(currentUrl!!, currentSong)
             } else {

@@ -51,6 +51,7 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2")
     implementation(project(":module_details"))
     implementation ("org.greenrobot:eventbus:3.3.1")
+    implementation(libs.androidx.fragment)
     kapt("cn.therouter:apt:1.2.2")
     implementation("cn.therouter:router:1.2.2")
     implementation(project(":lib_base"))
