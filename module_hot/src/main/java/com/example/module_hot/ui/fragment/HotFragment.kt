@@ -30,8 +30,8 @@ class HotFragment : Fragment() {
         binding.hotBottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id. menu_item_singer-> binding.hotViewPager.currentItem = 0
-                R.id.menu_item_list -> binding.hotViewPager.currentItem = 1
-                R.id.menu_item_mv -> binding.hotViewPager.currentItem = 2
+                R.id.menu_item_mv -> binding.hotViewPager.currentItem = 1
+                R.id.menu_item_list -> binding.hotViewPager.currentItem = 2
             }
             true
         }
@@ -41,8 +41,8 @@ class HotFragment : Fragment() {
             override fun onPageSelected(position: Int) {
                 binding.hotBottomNavigationView.selectedItemId = when (position) {
                     0 -> R.id.menu_item_singer
-                    1 -> R.id.menu_item_list
-                    2 -> R.id.menu_item_mv
+                    1 -> R.id.menu_item_mv
+                    2 -> R.id.menu_item_list
                     else -> R.id.menu_item_singer
                 }
             }

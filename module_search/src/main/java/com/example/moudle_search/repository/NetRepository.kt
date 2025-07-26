@@ -38,6 +38,10 @@ object NetRepository {
             @Query("type") type: String = "mobile"
         ): Response<SearchSuggestionData>
 
+        @GET("/search")
+        suspend fun getSongsResult(
+            @Query("keywords") keywords: String
+        ): Response<SearchData>
 
     }
 }
