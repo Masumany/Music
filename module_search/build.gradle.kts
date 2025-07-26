@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.moudle_search"
-    compileSdk = 34
+    compileSdk = 35
     buildFeatures {
         viewBinding = true
     }

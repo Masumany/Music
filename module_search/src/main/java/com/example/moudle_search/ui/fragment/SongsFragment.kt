@@ -7,22 +7,34 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.moudle_search.R
+import com.example.moudle_search.adapter.SearchResultAdapter
 import com.example.moudle_search.adapter.SongsAdapter
 import com.example.moudle_search.databinding.FragmentSongsBinding
+import com.example.moudle_search.ui.fragment.SingersFragment.Companion
 import com.example.moudle_search.viewModel.LoadState
-import com.example.moudle_search.viewModel.SharedViewModel
+import com.example.moudle_search.viewModel.SongsViewModel
+import com.therouter.TheRouter
 
-class SongsFragment : Fragment() {
+class SongsFragment : Fragment(), SearchResultAdapter.Searchable {
 
+    override fun onNewSearch(keyword: String) {
+        if (keyword != currentKeyword) {
+            currentKeyword = keyword
+            viewModel.getSongsData(keyword)
+        }
+    }
     companion object {
-        fun newInstance() = SongsFragment()
+        private const val ARG_KEYWORDS = "keywords"
+        fun newInstance(keywords: String) = SongsFragment().apply {
+            arguments = Bundle().apply {
+                putString(ARG_KEYWORDS, keywords)
+            }
+        }
     }
 
-    private val viewModel: SharedViewModel by activityViewModels()
+    private val viewModel: SongsViewModel by viewModels()
     private lateinit var _binding: FragmentSongsBinding
     private val binding get() = _binding!!
 
@@ -30,11 +42,23 @@ class SongsFragment : Fragment() {
         SongsAdapter (
             onItemClick = {
                 Toast.makeText(requireContext(), it.name, Toast.LENGTH_SHORT).show()
-                //  跳转
+                TheRouter.build("/module_musicplayer/musicplayer")
+                    .withString("songListName", it.name)
+                    .withString("cover", it.al.picUrl)
+                    .withLong("id", it.id)
+                    .withString("athour", it.ar[0].name?: "未知")
+                    .withLong("singerId", it.ar[0].id.toLong()?: 0)
+                    .navigation(this)
             }
         )
     }
+    // 当前搜索关键词
+    private var currentKeyword: String = ""
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        currentKeyword = arguments?.getString(ARG_KEYWORDS).orEmpty()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,13 +72,13 @@ class SongsFragment : Fragment() {
         binding.rvSongs.adapter = adapter
         binding.rvSongs.layoutManager = LinearLayoutManager(requireContext())
 
-        loadSingersData ()
+        loadSingersData (currentKeyword)
     }
-    private fun loadSingersData () {
+    private fun loadSingersData (keywords: String) {
+        viewModel.getSongsData(keywords)
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            viewModel.searchResult.collect { searchData ->
-                // 从 SearchData 中提取歌手列表
-                val songList = searchData.result?.song ?: emptyList()
+            viewModel.songsResult.collect {
+                val songList = it.result.songs
                 adapter.submitList(songList)
             }
         }

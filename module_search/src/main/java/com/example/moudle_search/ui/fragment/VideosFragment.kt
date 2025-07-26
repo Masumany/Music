@@ -7,34 +7,54 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.moudle_search.R
-import com.example.moudle_search.adapter.SingersAdapter
+import com.example.moudle_search.adapter.SearchResultAdapter
 import com.example.moudle_search.adapter.VideoAdapter
-import com.example.moudle_search.databinding.FragmentSingersBinding
 import com.example.moudle_search.databinding.FragmentVideosBinding
+import com.example.moudle_search.ui.fragment.SongsFragment.Companion
 import com.example.moudle_search.viewModel.LoadState
-import com.example.moudle_search.viewModel.SharedViewModel
+import com.example.moudle_search.viewModel.VideosViewModel
+import com.therouter.TheRouter
 
-class VideosFragment : Fragment() {
+class VideosFragment : Fragment(), SearchResultAdapter.Searchable {
 
-    companion object {
-        fun newInstance() = VideosFragment()
+    override fun onNewSearch(keyword: String) {
+        if (keyword != currentKeyword) {
+            currentKeyword = keyword
+            viewModel.getVideosData(keyword)
+        }
     }
 
-    private val viewModel: SharedViewModel by activityViewModels()
+    companion object {
+        private const val ARG_KEYWORDS = "keywords"
+        fun newInstance(keywords: String) = VideosFragment().apply {
+            arguments = Bundle().apply {
+                putString(ARG_KEYWORDS, keywords)
+            }
+        }
+    }
+
+    private val viewModel: VideosViewModel by viewModels()
     private lateinit var _binding: FragmentVideosBinding
     private val binding get() = _binding!!
 
     private val adapter by lazy {
         VideoAdapter (
             onItemClick = {
-                Toast.makeText(requireContext(), it.title, Toast.LENGTH_SHORT).show()
-                //
+                Toast.makeText(requireContext(), it.name, Toast.LENGTH_SHORT).show()
+                TheRouter.build("/module_mvplayer/mvplayer")
+                    .withString("mvId", it.id.toString())
+                    .navigation(requireActivity())
             }
         )
+    }
+    // 当前搜索关键词
+    private var currentKeyword: String = ""
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        currentKeyword = arguments?.getString(ARG_KEYWORDS).orEmpty()
     }
 
     override fun onCreateView(
@@ -49,13 +69,13 @@ class VideosFragment : Fragment() {
         binding.rvVideos.adapter = adapter
         binding.rvVideos.layoutManager = LinearLayoutManager(requireContext())
 
-        loadVideosData ()
+        loadVideosData (currentKeyword)
     }
-    private fun loadVideosData () {
+    private fun loadVideosData (keywords: String) {
+        viewModel.getVideosData(keywords)
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            viewModel.searchResult.collect { searchData ->
-                // 从 SearchData 中提取歌手列表
-                val videoList = searchData.result?.new_mlog ?: emptyList()
+            viewModel.videosResult.collect {
+                val videoList = it.result.mvs
                 adapter.submitList(videoList)
             }
         }

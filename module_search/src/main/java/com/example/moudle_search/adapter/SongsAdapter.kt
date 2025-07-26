@@ -6,20 +6,20 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.moudle_search.R
-import com.example.moudle_search.bean.search.Song
+import com.example.moudle_search.bean.Song1
 import com.example.moudle_search.databinding.SongsItemBinding
 
 class SongsAdapter (
-    private val onItemClick: (Song) -> Unit
-): androidx.recyclerview.widget.ListAdapter<Song, SongsAdapter.SongsViewHolder>(
+    private val onItemClick: (Song1) -> Unit
+): androidx.recyclerview.widget.ListAdapter<Song1, SongsAdapter.SongsViewHolder>(
 //用于高效更新数据，帮助实现自动刷新
-    object : DiffUtil.ItemCallback<Song>() {
+    object : DiffUtil.ItemCallback<Song1>() {
         //比较两个item是否为同一个
-        override fun areItemsTheSame(oldItem: Song, newItem:Song): Boolean {
+        override fun areItemsTheSame(oldItem: Song1, newItem:Song1): Boolean {
             return oldItem.id == newItem.id
         }
         //比较两个item的内容是否相同
-        override fun areContentsTheSame(oldItem: Song, newItem: Song): Boolean {
+        override fun areContentsTheSame(oldItem: Song1, newItem: Song1): Boolean {
             return oldItem == newItem
         }
     }
@@ -28,19 +28,19 @@ class SongsAdapter (
     inner class SongsViewHolder(private val binding: SongsItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(song: Song) {
+        fun bind(song: Song1) {
 
             Glide.with(binding.songsItemImg.context)
-                .load(song.album.picUrl)
-                .circleCrop()
+                .load(song.al.picUrl)
                 .placeholder(R.drawable.loading)  // 加载中占位图
                 .error(R.drawable.error)  // 加载失败图
                 .centerCrop()  // 与布局的scaleType一致，避免拉伸
+                .circleCrop()
                 .into(binding.songsItemImg)
 
             binding.songItemName.text = song.name
 
-            val singerNames = song.artists.joinToString("/") { it.name }  // 多歌手用"/"分隔
+            val singerNames = song.ar.joinToString("/") { it.name }  // 多歌手用"/"分隔
             binding.songItemSinger.text = singerNames
 
             binding.root.setOnClickListener {

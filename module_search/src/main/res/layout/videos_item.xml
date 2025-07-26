@@ -19,6 +19,7 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_weight="1"
+        android:layout_gravity="center"
         android:orientation="vertical"
         android:layout_height="match_parent">
 
@@ -29,7 +30,6 @@
             android:layout_marginTop="10dp"
             android:text="春风吹"
             android:textSize="15sp"
-            android:textColor="#FFFFFF"
             android:textStyle="bold"/>
 
         <TextView
@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:text="方大同"
-            android:textColor="#DCCCFA"
+            android:textColor="#5E5E5F"
             android:textSize="10sp"/>
 
     </LinearLayout>

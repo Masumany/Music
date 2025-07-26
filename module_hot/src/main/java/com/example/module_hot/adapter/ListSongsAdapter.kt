@@ -29,9 +29,10 @@ class ListSongsAdapter (
         fun bind(song : Song){
             Glide.with(binding.songsListImg.context)
                 .load(song.al.picUrl)
-                .circleCrop()
                 .placeholder(R.drawable.loading)
                 .error(R.drawable.error)
+                .centerCrop()
+                .circleCrop()
                 .into(binding.songsListImg)
 
             binding.songName.text = song.name

@@ -8,7 +8,7 @@ data class SongsResultData(
 // 搜索结果容器类
 data class SongResult(
     val songCount: Int, // 歌曲总数
-    val songs: List<Song> // 歌曲列表
+    val songs: List<Song1> // 歌曲列表
 )
 
 // 歌曲核心信息类
@@ -16,7 +16,7 @@ data class Song1(
     val id: Long, // 歌曲唯一Id
     val name: String, // 歌曲名字
     val al: Album1, // 专辑信息（包含封面）
-    val ar: List<Artist> // 歌手列表（支持多人演唱）
+    val ar: List<Artist1> // 歌手列表（支持多人演唱）
 )
 
 // 专辑信息类

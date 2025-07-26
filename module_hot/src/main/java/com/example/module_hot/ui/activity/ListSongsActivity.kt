@@ -16,6 +16,7 @@ import com.example.module_hot.databinding.ActivityListSongsBinding
 import com.example.module_hot.viewModel.ListSongsViewModel
 import com.example.module_hot.viewModel.LoadState
 import com.therouter.TheRouter
+import kotlinx.coroutines.Job
 
 class ListSongsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityListSongsBinding
@@ -29,8 +30,8 @@ class ListSongsActivity : AppCompatActivity() {
                     .withString("songListName", song.name)
                     .withString("cover", song.al.picUrl)
                     .withLong("id", song.id)
-                    .withString("athour", song.ar[0].name)
-                    .withLong("singerId", song.ar[0].id.toLong())
+                    .withString("athour", song.ar[0].name?: "未知")
+                    .withLong("singerId", song.ar[0].id.toLong()?: 0)
                     .navigation(this)
                 Log.d("ListSongsActivity", "${song.id},${song.name}, ${song.ar[0].name}")
             },
