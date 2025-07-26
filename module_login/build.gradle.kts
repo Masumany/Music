@@ -40,6 +40,8 @@ android {
 
 dependencies {
 
+    kapt("cn.therouter:apt:1.2.2")
+    implementation("cn.therouter:router:1.2.2")
     implementation(project(":lib_base"))
     // TheRouter 核心库
 //    implementation("cn.therouter:api:1.2.2" )

@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.moudle_search.R
 import com.example.moudle_search.bean.Singer2
-import com.example.moudle_search.bean.search.Artist
 import com.example.moudle_search.databinding.SingersItemBinding
 
 class SingersAdapter (

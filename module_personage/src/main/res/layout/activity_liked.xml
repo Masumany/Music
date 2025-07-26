@@ -7,6 +7,21 @@
     android:layout_height="match_parent"
     tools:context="com.example.module_personage.ui.activity.LikedActivity">
 
+    <Button
+        android:id="@+id/liked_back"
+        android:layout_width="35dp"
+        android:layout_height="30dp"
+        android:layout_gravity="center"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/back"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.044"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.01" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_liked"
         android:layout_width="match_parent"

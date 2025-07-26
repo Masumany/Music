@@ -1,5 +1,6 @@
 package com.example.moudle_search.ui.activity
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -31,8 +32,8 @@ class SearchResultActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.menu_item_song -> binding.searchViewPager.currentItem = 0
                 R.id.menu_item_singer -> binding.searchViewPager.currentItem = 1
-//                R.id.menu_item_list -> binding.searchViewPager.currentItem = 2
-                R.id.menu_item_mv -> binding.searchViewPager.currentItem = 2
+                R.id.menu_item_list -> binding.searchViewPager.currentItem = 2
+                R.id.menu_item_mv -> binding.searchViewPager.currentItem = 3
             }
             true
         }
@@ -43,8 +44,8 @@ class SearchResultActivity : AppCompatActivity() {
                 binding.searchBottomNavigationView.selectedItemId = when (position) {
                     0 -> R.id.menu_item_song   // 页面 0 对应 song
                     1 -> R.id.menu_item_singer // 页面 1 对应 singer
-//                    2 -> R.id.menu_item_list   // 页面 2 对应 list
-                    2 -> R.id.menu_item_mv     // 页面 3 对应 mv
+                    2 -> R.id.menu_item_list   // 页面 2 对应 list
+                    3 -> R.id.menu_item_mv     // 页面 3 对应 mv
                     else -> R.id.menu_item_song
                 }
             }
@@ -61,17 +62,20 @@ class SearchResultActivity : AppCompatActivity() {
             if (keyword.isBlank()) {
                 Toast.makeText(this, "请输入关键词", Toast.LENGTH_SHORT).show()
             } else {
-                performNewSearch(keyword)
+                returnToSearchActivity(keyword)
             }
         }
-    }
-    private fun performNewSearch(keyword: String) {
-        Toast.makeText(this, "搜索：$keyword", Toast.LENGTH_SHORT).show()
 
-        // 通知 Adapter 内部的 Fragment 更新搜索关键词
-        val adapter = binding.searchViewPager.adapter
-        if (adapter is SearchResultAdapter) {
-            adapter.updateKeyword(keyword)
+        // 添加搜索框点击事件：返回 SearchActivity
+        binding.searchEt.setOnClickListener {
+            val keyword = binding.searchEt.text.toString()
+            returnToSearchActivity(keyword)
         }
+    }
+    private fun returnToSearchActivity(keyword: String) {
+        val intent = Intent()
+        intent.putExtra("keywords", keyword) // 携带当前关键词
+        setResult(RESULT_OK, intent)
+        finish() // 关闭当前页面，返回 SearchActivity
     }
 }

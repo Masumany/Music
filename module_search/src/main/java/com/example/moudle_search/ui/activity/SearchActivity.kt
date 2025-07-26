@@ -1,11 +1,13 @@
 package com.example.moudle_search.ui.activity
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
@@ -26,6 +28,7 @@ import com.therouter.router.Route
 class SearchActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySearchBinding
     private lateinit var viewModel: SearchViewModel
+    private var currentKeyword: String = "" // 保存当前搜索关键词
     private val adapter by lazy {
         HotAdapter (
             onItemClick = { hot: Hot ->
@@ -110,17 +113,32 @@ class SearchActivity : AppCompatActivity() {
         }
     }
     private fun search(keyWord: String) {
-        Toast.makeText(this, "搜索：$keyWord", Toast.LENGTH_SHORT).show()
-        val searchLayout = binding.searchLayout  // 搜索页的搜索布局
-        val searchEt = binding.searchEt  // 搜索框输入控件
+        currentKeyword = keyWord // 保存当前关键词
         val intent = Intent(this, SearchResultActivity::class.java)
         intent.putExtra("keywords", keyWord)
-        val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-            this,
-            searchLayout, // 搜索页的共享元素
-            "search_box" // 与结果页布局的 transitionName 一致
-        )
-        startActivity(intent,options.toBundle())
+        startActivityForResult(intent, REQUEST_CODE_SEARCH) // 使用带回调的启动方式
+    }
+    // 处理返回结果
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_SEARCH && resultCode == RESULT_OK) {
+            val keyword = data?.getStringExtra("keywords") ?: ""
+            if (keyword.isNotBlank()) {
+                binding.searchEt.setText(keyword)
+                binding.searchEt.setSelection(keyword.length)
+
+                // 自动显示搜索建议
+                loadSuggestion(keyword)
+
+                // 显示键盘（可选）
+                binding.searchEt.requestFocus()
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showSoftInput(binding.searchEt, InputMethodManager.SHOW_IMPLICIT)
+            }
+        }
+    }
+    companion object {
+        private const val REQUEST_CODE_SEARCH = 1001
     }
     private fun initEditTextListener() {
         binding.searchEt.addTextChangedListener(object : TextWatcher{

@@ -30,6 +30,9 @@
 
         <SearchView
             android:id="@+id/searchView"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:clickable="true"
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:layout_marginStart="16dp"

@@ -12,6 +12,7 @@ plugins {
 //    }
 //}
 // build.gradle.kts（项目级）
+
 allprojects {
     configurations.all {
         resolutionStrategy {

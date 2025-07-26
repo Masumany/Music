@@ -4,7 +4,7 @@ import com.example.moudle_search.bean.ListsResultData
 import com.example.moudle_search.bean.SingerResultData
 import com.example.moudle_search.bean.SongsResultData
 import com.example.moudle_search.bean.VideosResultData
-import com.example.moudle_search.bean.search.SearchData
+import com.example.moudle_search.bean.list_songs.ListSongsData
 import com.example.moudle_search.bean.searchHot.SearchHotData
 import com.example.moudle_search.bean.searchKeyWord.SearchKeyWordData
 import com.example.moudle_search.bean.searchSuggestionData.SearchSuggestionData
@@ -25,10 +25,6 @@ object NetRepository {
     val apiService = retrofit.create(ApiService::class.java)
 
     interface ApiService {
-        @GET("/search/multimatch")
-        suspend fun getSearchData(
-            @Query("keywords") keywords: String,
-        ): Response<SearchData>
 
         @GET("/search/default")
         suspend fun getSearchKeyWord(): Response<SearchKeyWordData>
@@ -65,5 +61,10 @@ object NetRepository {
             @Query("keywords") keywords: String,
             @Query("type") type: Int = 1000
         ): Response<ListsResultData>
+
+        @GET("/playlist/track/all")
+        suspend fun getListSongs(
+            @Query("id") id: String,
+        ): Response<ListSongsData>
     }
 }

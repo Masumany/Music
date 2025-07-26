@@ -263,8 +263,8 @@ class MvPlayerActivity : AppCompatActivity() {
         val constraintSet = ConstraintSet()
         constraintSet.clone(binding.main)
         if (isFullscreen) {
-            //强制横屏
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+//            //强制横屏
+//            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
             hideSystemUI()
             // 设置 PlayerView 全屏约束
             constraintSet.constrainHeight(binding.playerView.id, ConstraintSet.MATCH_CONSTRAINT)

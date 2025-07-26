@@ -2,6 +2,7 @@ package com.example.moudle_search.ui.fragment
 
 import androidx.fragment.app.viewModels
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -35,20 +36,25 @@ class SongsFragment : Fragment(), SearchResultAdapter.Searchable {
     }
 
     private val viewModel: SongsViewModel by viewModels()
-    private lateinit var _binding: FragmentSongsBinding
+    private var _binding: FragmentSongsBinding? = null
     private val binding get() = _binding!!
 
     private val adapter by lazy {
         SongsAdapter (
             onItemClick = {
-                Toast.makeText(requireContext(), it.name, Toast.LENGTH_SHORT).show()
-                TheRouter.build("/module_musicplayer/musicplayer")
-                    .withString("songListName", it.name)
-                    .withString("cover", it.al.picUrl)
-                    .withLong("id", it.id)
-                    .withString("athour", it.ar[0].name?: "未知")
-                    .withLong("singerId", it.ar[0].id.toLong()?: 0)
-                    .navigation(this)
+                Log.d("SongsFragment", "跳转参数：id=${it.id}, ar.size=${it.ar.size}, al.picUrl=${it.al.picUrl}")
+                try {
+                    Toast.makeText(requireContext(), it.name, Toast.LENGTH_SHORT).show()
+                    val author = if (it.ar.isNotEmpty()) it.ar[0].name ?: "未知歌手" else "未知歌手"
+                    TheRouter.build("/module_musicplayer/musicplayer")
+                        .withString("songListName", it.name?: "未知歌曲")
+                        .withString("cover", it.al.picUrl?: "")
+                        .withLong("id", it.id)
+                        .withString("athour", author)
+                        .navigation(requireActivity())
+                }catch (e: Exception) {
+                    Log.e("SongsFragment", "跳转音乐播放器失败: ${e.message}")
+                }
             }
         )
     }
@@ -66,6 +72,12 @@ class SongsFragment : Fragment(), SearchResultAdapter.Searchable {
     ): View {
         _binding = FragmentSongsBinding.inflate(inflater, container, false)
         return binding.root
+    }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding.rvSongs.adapter = null
+        adapter.onItemClick = null
+        _binding = null
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

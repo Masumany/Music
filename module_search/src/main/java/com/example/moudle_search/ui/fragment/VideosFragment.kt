@@ -36,7 +36,7 @@ class VideosFragment : Fragment(), SearchResultAdapter.Searchable {
     }
 
     private val viewModel: VideosViewModel by viewModels()
-    private lateinit var _binding: FragmentVideosBinding
+    private var _binding: FragmentVideosBinding? = null
     private val binding get() = _binding!!
 
     private val adapter by lazy {
@@ -63,6 +63,11 @@ class VideosFragment : Fragment(), SearchResultAdapter.Searchable {
     ): View {
         _binding = FragmentVideosBinding.inflate(inflater, container, false)
         return binding.root
+    }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding.rvVideos.adapter = null
+        _binding = null
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

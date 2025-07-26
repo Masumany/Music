@@ -35,7 +35,7 @@ class SingersFragment : Fragment(), SearchResultAdapter.Searchable {
     }
 
     private val viewModel: SingerViewModel by viewModels()
-    private lateinit var _binding: FragmentSingersBinding
+    private var _binding: FragmentSingersBinding? = null
     private val binding get() = _binding!!
 
     private val adapter by lazy {
@@ -62,6 +62,11 @@ class SingersFragment : Fragment(), SearchResultAdapter.Searchable {
     ): View {
         _binding = FragmentSingersBinding.inflate(inflater, container, false)
         return binding.root
+    }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding.rvSingers.adapter = null
+        _binding = null
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -101,8 +106,4 @@ class SingersFragment : Fragment(), SearchResultAdapter.Searchable {
             }
         }
     }
-//    override fun onDestroyView() {
-//        super.onDestroyView()
-//        _binding = null
-//    }
 }

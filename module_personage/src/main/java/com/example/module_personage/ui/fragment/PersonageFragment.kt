@@ -2,6 +2,7 @@ package com.example.module_personage.ui.fragment
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +16,7 @@ import com.example.module_personage.ui.activity.DownloadActivity
 import com.example.module_personage.ui.activity.LikedActivity
 import com.example.module_personage.ui.activity.LikeActivity
 import com.example.module_personage.viewModel.PersonageViewModel
+import com.therouter.TheRouter
 
 class PersonageFragment : Fragment() {
     // 视图绑定
@@ -77,7 +79,8 @@ class PersonageFragment : Fragment() {
     // 初始化按钮点击事件
     private fun initClick() {
         binding.personageImageView.setOnClickListener {
-            //跳转
+            Log.d("ClickTest", "头像被点击了")
+            TheRouter.build("/module_login_register/login").navigation()
         }
 
         binding.likeButton.setOnClickListener {

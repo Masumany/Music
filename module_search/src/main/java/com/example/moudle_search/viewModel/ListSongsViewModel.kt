@@ -3,36 +3,34 @@ package com.example.moudle_search.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.moudle_search.bean.SingerResultData
-import com.example.moudle_search.bean.VideoResult
-import com.example.moudle_search.bean.VideosResultData
+import com.example.moudle_search.bean.list_songs.ListSongsData
 import com.example.moudle_search.repository.NetRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class VideosViewModel: ViewModel() {
 
-    private val _videosResult = MutableStateFlow(VideosResultData(0, VideoResult( emptyList()) ))
-    val videosResult: StateFlow<VideosResultData> = _videosResult.asStateFlow()
+class ListSongsViewModel: ViewModel() {
+    private val _listSongsData = MutableStateFlow(ListSongsData(0, emptyList(), emptyList()))
+    val listSongsData: StateFlow<ListSongsData> = _listSongsData.asStateFlow()
 
     private val _loadState = MutableStateFlow<LoadState>(LoadState.Init)
     val loadState: StateFlow<LoadState> = _loadState.asStateFlow()
 
-    fun getVideosData(keywords: String) {
+    fun getListSongsData(id: Long) {
         if (_loadState.value is LoadState.Loading){
             return
         }
         viewModelScope.launch {
             try {
                 _loadState.value = LoadState.Loading
-                val response = NetRepository.apiService.getVideosResult( keywords)
-                Log.d("VideosViewModel", "获取成功 ${response.body()}")
+                val response = NetRepository.apiService.getListSongs( id.toString())
+                Log.d("ListSongsViewModel", "获取成功 ${response.body()}")
                 if (response.isSuccessful){
                     val data = response.body()
                     if (data != null && data.code == 200){
-                        _videosResult.value = data
+                        _listSongsData.value = data
                         _loadState.value = LoadState.Success
                     }else{
                         if (data == null){
@@ -44,10 +42,10 @@ class VideosViewModel: ViewModel() {
 
                 }else{
                     _loadState.value = LoadState.Error("获取失败 ${response.message()}")
-                    Log.e("VideosViewModel", "获取失败 ${response.message()}")
+                    Log.e("ListSongsViewModel", "获取失败 ${response.message()}")
                 }
             }catch (e: Exception){
-                Log.e("VideosViewModel", "获取异常 ${e.message}")
+                Log.e("ListSongsViewModel", "获取异常 ${e.message}")
                 _loadState.value = LoadState.Error("获取异常 ${e.message}")
                 e.printStackTrace()
             }

@@ -1,4 +1,4 @@
-package com.example.module_hot.ui.activity
+package com.example.moudle_search.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,21 +8,19 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.module_hot.R
-import com.example.module_hot.adapter.ListSongsAdapter
-import com.example.module_hot.bean.list.Item0
-import com.example.module_hot.bean.list_songs.Song
-import com.example.module_hot.databinding.ActivityListSongsBinding
-import com.example.module_hot.viewModel.ListSongsViewModel
-import com.example.module_hot.viewModel.LoadState
+import com.example.moudle_search.bean.list_songs.Song
+import com.example.moudle_search.R
+import com.example.moudle_search.adapter.ListSongsAdapter
+import com.example.moudle_search.bean.Playlist
+import com.example.moudle_search.databinding.ActivityListSongsBinding
+import com.example.moudle_search.viewModel.ListSongsViewModel
+import com.example.moudle_search.viewModel.LoadState
 import com.therouter.TheRouter
-import com.therouter.router.Route
-import kotlinx.coroutines.Job
 
 class ListSongsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityListSongsBinding
     private lateinit var viewModel: ListSongsViewModel
-    private var currentPlaylist: Item0? = null
+    private var currentPlaylist: Playlist? = null
 
     private val adapter by lazy{
         ListSongsAdapter(

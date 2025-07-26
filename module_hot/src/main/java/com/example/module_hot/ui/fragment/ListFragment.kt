@@ -36,6 +36,7 @@ class ListFragment : Fragment() {
                 Toast.makeText(requireContext(), it.listName, Toast.LENGTH_SHORT).show()
                 val intent = Intent(requireActivity(), ListSongsActivity::class.java)
                 intent.putExtra("id", it.id)
+                intent.putExtra("name", it.listName)
                 startActivity(intent)
             }
         )

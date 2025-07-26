@@ -38,7 +38,13 @@ class LikedActivity : AppCompatActivity() {
         binding.rvLiked.adapter = adapter
         binding.rvLiked.layoutManager = LinearLayoutManager(this)
 
+        initClick()
         loadLikedData()
+    }
+    private fun initClick(){
+        binding.likedBack.setOnClickListener {
+            finish()
+        }
     }
     private fun loadLikedData(){
         val uid = intent.getIntExtra("uid", 0)

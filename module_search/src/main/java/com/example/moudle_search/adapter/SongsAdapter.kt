@@ -10,7 +10,7 @@ import com.example.moudle_search.bean.Song1
 import com.example.moudle_search.databinding.SongsItemBinding
 
 class SongsAdapter (
-    private val onItemClick: (Song1) -> Unit
+    var onItemClick: ((Song1) -> Unit)?
 ): androidx.recyclerview.widget.ListAdapter<Song1, SongsAdapter.SongsViewHolder>(
 //用于高效更新数据，帮助实现自动刷新
     object : DiffUtil.ItemCallback<Song1>() {
@@ -44,7 +44,7 @@ class SongsAdapter (
             binding.songItemSinger.text = singerNames
 
             binding.root.setOnClickListener {
-                onItemClick(song)  // 用于跳转
+                onItemClick?.let { it1 -> it1(song) }  // 用于跳转
             }
         }
     }
@@ -53,6 +53,7 @@ class SongsAdapter (
         return SongsViewHolder(binding)
     }
     override fun onBindViewHolder(holder: SongsViewHolder, position: Int) {
-        holder.bind(getItem( position))
+        val song = getItem(position)
+        holder.bind(song)
     }
 }

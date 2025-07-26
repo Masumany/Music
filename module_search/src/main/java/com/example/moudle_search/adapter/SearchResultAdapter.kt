@@ -4,6 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.moudle_search.ui.fragment.SingersFragment
+import com.example.moudle_search.ui.fragment.SongListsFragment
 import com.example.moudle_search.ui.fragment.SongsFragment
 import com.example.moudle_search.ui.fragment.VideosFragment
 
@@ -15,7 +16,8 @@ class SearchResultAdapter (
     private val fragments = listOf(
         SongsFragment(),
         SingersFragment(),
-        VideosFragment
+        SongListsFragment(),
+        VideosFragment()
     )
 
     override fun getItemCount(): Int = fragments.size
@@ -24,8 +26,8 @@ class SearchResultAdapter (
         return when (position) {
             0 -> SongsFragment.newInstance(keywords)
             1 -> SingersFragment.newInstance(keywords)
-//            2 -> SongListsFragment.newInstance(keywords)
-            2 -> VideosFragment.newInstance(keywords)
+            2 -> SongListsFragment.newInstance(keywords)
+            3 -> VideosFragment.newInstance(keywords)
             else -> throw IllegalArgumentException("Invalid position: $position")
         }
     }

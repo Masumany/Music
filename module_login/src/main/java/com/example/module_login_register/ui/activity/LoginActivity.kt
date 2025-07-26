@@ -10,11 +10,14 @@ import androidx.lifecycle.lifecycleScope
 import com.example.module_login_register.viewModel.LoginState
 import com.example.module_login_register.viewModel.LoginViewModel
 import com.example.module_login_register.R
+import com.therouter.router.Route
 import kotlinx.coroutines.launch
 
 
+@Route(path = "/module_login_register/login")
 class LoginActivity : AppCompatActivity() {
     private lateinit var viewModel: LoginViewModel
+    private lateinit var backbtn: Button
     private lateinit var loginbtn: Button
     private lateinit var registerbtn: Button
     private lateinit var visitorbtn: Button
@@ -24,6 +27,7 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
         viewModel = ViewModelProvider(this)[LoginViewModel::class.java]
+        backbtn = findViewById(R.id.back_btn)
         loginbtn = findViewById(R.id.phone_login)
         registerbtn = findViewById(R.id.register)
         visitorbtn = findViewById(R.id.visitor_login)
@@ -33,6 +37,9 @@ class LoginActivity : AppCompatActivity() {
         collectLoginState()
     }
     private fun initClick () {
+        backbtn.setOnClickListener {
+            finish()
+        }
         loginbtn.setOnClickListener {
             val intent = Intent(this, PhoneLoginActivity::class.java)
             startActivity(intent)

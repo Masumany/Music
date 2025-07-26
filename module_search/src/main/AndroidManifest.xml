@@ -15,6 +15,9 @@
             android:name=".ui.activity.SearchResultActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.activity.ListSongsActivity"
+            android:exported="true" />
+        <activity
             android:name=".ui.activity.SearchActivity"
             android:exported="true">
             <intent-filter>

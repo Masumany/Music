@@ -27,7 +27,7 @@ class SingerViewModel : ViewModel() {
             try {
                 _loadState.value = LoadState.Loading
                 val response = NetRepository.apiService.getSingersResult( keywords)
-                Log.d("SingerViewModel", "获取成功 ${response.message()}")
+                Log.d("SingerViewModel1", "获取成功 ${response.message()}")
                 if (response.isSuccessful){
                     val data = response.body()
                     if (data != null && data.code == 200){
