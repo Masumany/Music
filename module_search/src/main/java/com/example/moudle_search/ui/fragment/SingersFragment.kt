@@ -7,25 +7,34 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.moudle_search.R
+import com.example.moudle_search.adapter.SearchResultAdapter
 import com.example.moudle_search.adapter.SingersAdapter
 import com.example.moudle_search.databinding.FragmentSingersBinding
 import com.example.moudle_search.viewModel.LoadState
-import com.example.moudle_search.viewModel.SharedViewModel
-import kotlinx.coroutines.launch
+import com.example.moudle_search.viewModel.SingerViewModel
+import com.therouter.TheRouter
 
-class SingersFragment : Fragment() {
+class SingersFragment : Fragment(), SearchResultAdapter.Searchable {
 
-    companion object {
-        fun newInstance() = SingersFragment()
+    override fun onNewSearch(keyword: String) {
+        if (keyword != currentKeyword) {
+            currentKeyword = keyword
+            viewModel.getSingerData(keyword)
+        }
     }
 
-    private val viewModel: SharedViewModel by activityViewModels()
+    companion object {
+        private const val ARG_KEYWORDS = "keywords"
+        fun newInstance(keywords: String) = SingersFragment().apply {
+            arguments = Bundle().apply {
+                putString(ARG_KEYWORDS, keywords)
+            }
+        }
+    }
+
+    private val viewModel: SingerViewModel by viewModels()
     private lateinit var _binding: FragmentSingersBinding
     private val binding get() = _binding!!
 
@@ -33,11 +42,19 @@ class SingersFragment : Fragment() {
         SingersAdapter (
             onItemClick = {
                 Toast.makeText(requireContext(), it.name, Toast.LENGTH_SHORT).show()
-                //  跳转到歌手详情页面
+                TheRouter.build("/singer/SingerActivity")
+                    .withLong("id", it.id.toLong())
+                    .navigation(requireActivity())
             }
         )
     }
+    // 当前搜索关键词
+    private var currentKeyword: String = ""
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        currentKeyword = arguments?.getString(ARG_KEYWORDS).orEmpty()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,13 +68,13 @@ class SingersFragment : Fragment() {
         binding.rvSingers.adapter = adapter
         binding.rvSingers.layoutManager = LinearLayoutManager(requireContext())
 
-        loadSingersData ()
+        loadSingersData (currentKeyword)
     }
-    private fun loadSingersData () {
+    private fun loadSingersData (keywords: String) {
+        viewModel.getSingerData(keywords)
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            viewModel.searchResult.collect { searchData ->
-                // 从 SearchData 中提取歌手列表
-                val artistList = searchData.result?.artist ?: emptyList()
+            viewModel.singerResult.collect {
+                val artistList = it.result.singers
                 adapter.submitList(artistList)
             }
         }
@@ -84,4 +101,8 @@ class SingersFragment : Fragment() {
             }
         }
     }
+//    override fun onDestroyView() {
+//        super.onDestroyView()
+//        _binding = null
+//    }
 }

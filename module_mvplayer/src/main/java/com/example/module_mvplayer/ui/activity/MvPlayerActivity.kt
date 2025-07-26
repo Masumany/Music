@@ -263,8 +263,8 @@ class MvPlayerActivity : AppCompatActivity() {
         val constraintSet = ConstraintSet()
         constraintSet.clone(binding.main)
         if (isFullscreen) {
-//            //强制横屏
-//            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            //强制横屏
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
             hideSystemUI()
             // 设置 PlayerView 全屏约束
             constraintSet.constrainHeight(binding.playerView.id, ConstraintSet.MATCH_CONSTRAINT)
@@ -283,8 +283,55 @@ class MvPlayerActivity : AppCompatActivity() {
             showSystemUI()
             // 设置 PlayerView 默认高度约束
             constraintSet.constrainHeight(binding.playerView.id, ConstraintSet.WRAP_CONTENT)
-            constraintSet.clear(binding.playerView.id, ConstraintSet.BOTTOM) // 清除底部约束
-            constraintSet.connect(binding.playerView.id, ConstraintSet.TOP, binding.mvBack.id, ConstraintSet.BOTTOM, dp2px(this, 5f))
+            constraintSet.clear(binding.playerView.id, ConstraintSet.BOTTOM)
+            constraintSet.connect(
+                binding.playerView.id,
+                ConstraintSet.TOP,
+                binding.mvBack.id,
+                ConstraintSet.BOTTOM,
+                dp2px(this, 5f)
+            )
+
+// 恢复 mvInfo 和 mvBackLayout 的布局约束
+            constraintSet.connect(
+                binding.mvInfo.id,
+                ConstraintSet.TOP,
+                binding.playerView.id,
+                ConstraintSet.BOTTOM,
+                dp2px(this, 5f)
+            )
+            constraintSet.connect(
+                binding.mvInfo.id,
+                ConstraintSet.START,
+                ConstraintSet.PARENT_ID,
+                ConstraintSet.START
+            )
+            constraintSet.connect(
+                binding.mvInfo.id,
+                ConstraintSet.END,
+                ConstraintSet.PARENT_ID,
+                ConstraintSet.END
+            )
+
+            constraintSet.connect(
+                binding.mvBackLayout.id,
+                ConstraintSet.TOP,
+                ConstraintSet.PARENT_ID,
+                ConstraintSet.TOP
+            )
+            constraintSet.connect(
+                binding.mvBackLayout.id,
+                ConstraintSet.START,
+                ConstraintSet.PARENT_ID,
+                ConstraintSet.START
+            )
+            constraintSet.connect(
+                binding.mvBackLayout.id,
+                ConstraintSet.END,
+                ConstraintSet.PARENT_ID,
+                ConstraintSet.END
+            )
+
             binding.mvInfo.visibility = View.VISIBLE
             binding.mvBackLayout.visibility = View.VISIBLE
             binding.fullscreenButton.setBackgroundResource(R.drawable.full)

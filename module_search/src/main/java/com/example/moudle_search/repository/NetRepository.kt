@@ -1,5 +1,9 @@
 package com.example.moudle_search.repository
 
+import com.example.moudle_search.bean.ListsResultData
+import com.example.moudle_search.bean.SingerResultData
+import com.example.moudle_search.bean.SongsResultData
+import com.example.moudle_search.bean.VideosResultData
 import com.example.moudle_search.bean.search.SearchData
 import com.example.moudle_search.bean.searchHot.SearchHotData
 import com.example.moudle_search.bean.searchKeyWord.SearchKeyWordData
@@ -38,10 +42,28 @@ object NetRepository {
             @Query("type") type: String = "mobile"
         ): Response<SearchSuggestionData>
 
-        @GET("/search")
+        @GET("/cloudsearch")
         suspend fun getSongsResult(
-            @Query("keywords") keywords: String
-        ): Response<SearchData>
+            @Query("keywords") keywords: String,
+            @Query("type") type: Int = 1
+        ): Response<SongsResultData>
 
+        @GET("/cloudsearch")
+        suspend fun getSingersResult(
+            @Query("keywords") keywords: String,
+            @Query("type") type: Int = 100
+        ): Response<SingerResultData>
+
+        @GET("/cloudsearch")
+        suspend fun getVideosResult(
+            @Query("keywords") keywords: String,
+            @Query("type") type: Int = 1004
+        ): Response<VideosResultData>
+
+        @GET("/cloudsearch")
+        suspend fun getListsResult(
+            @Query("keywords") keywords: String,
+            @Query("type") type: Int = 1000
+        ): Response<ListsResultData>
     }
 }

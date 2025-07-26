@@ -42,7 +42,8 @@
         <android.widget.Button
             android:id="@+id/search_button"
             android:layout_marginRight="15dp"
-            android:background="@drawable/search"
+            android:layout_gravity="center"
+            android:background="@drawable/suggestion_search"
             android:layout_width="30dp"
             android:layout_height="30dp"/>
     </LinearLayout>
