@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.module_details.R
 import com.example.module_details.databinding.ItemTopBinding
-import com.example.yourproject.converter.DataConverter
 import com.therouter.TheRouter
 import data.TopData
 

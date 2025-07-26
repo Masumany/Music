@@ -1,5 +1,8 @@
 package com.example.moudle_search.bean
 
+import com.example.moudle_search.bean.search.Artist
+import com.example.moudle_search.bean.search.Song
+
 data class SongsResultData(
     val code: Int, // 响应状态码（200为成功）
     val result: SongResult

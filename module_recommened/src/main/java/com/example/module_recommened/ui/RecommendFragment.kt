@@ -1,5 +1,6 @@
 package com.example.module_recommened.ui
 
+import DataConverter
 import android.graphics.Rect
 import android.os.Bundle
 import android.os.Handler
@@ -23,7 +24,6 @@ import com.example.module_recommened.databinding.FragmentRecommendBinding
 import com.example.module_recommened.viewmodel.BannerViewModel
 import com.example.module_recommened.viewmodel.ListViewModel
 import com.example.module_recommened.viewmodel.RecommenedViewModel
-import com.example.yourproject.converter.DataConverter
 import kotlinx.coroutines.launch
 import com.example.lib.base.Song as BaseSong
 

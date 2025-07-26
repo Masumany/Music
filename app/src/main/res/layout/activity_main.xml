@@ -100,8 +100,6 @@
                 app:layout_constraintStart_toEndOf="@id/music_cd"
                 app:layout_constraintTop_toTopOf="@id/music_cd" />
 
-            <!-- 歌手名 -->
-
             <!-- 播放/暂停按钮 -->
             <TextView
                 android:id="@+id/tv_artist"
