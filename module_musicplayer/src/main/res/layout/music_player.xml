@@ -5,8 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
-    >
+    android:background="@drawable/background">
 
     <TextView
         android:id="@+id/mp_name"
@@ -14,12 +13,12 @@
         android:layout_height="50dp"
         android:layout_marginStart="28dp"
         android:layout_marginTop="488dp"
-        android:text="歌词"
-        android:singleLine="true"
         android:ellipsize="marquee"
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:marqueeRepeatLimit="-1"
+        android:singleLine="true"
+        android:text="歌词"
         android:textColor="#673670"
         android:textSize="25sp"
         android:textStyle="bold"
@@ -77,9 +76,9 @@
         android:id="@+id/mp_Mback"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:src="@drawable/mp_back"
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
+        android:src="@drawable/mp_back"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -105,11 +104,12 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.554"
         app:layout_constraintStart_toStartOf="parent">
+
         <ImageView
             android:id="@+id/mp_center"
             android:layout_width="250dp"
-            android:scaleType="centerCrop"
             android:layout_height="250dp"
+            android:scaleType="centerCrop"
             android:src="@drawable/mp_music" />
     </androidx.cardview.widget.CardView>
 
@@ -142,8 +142,7 @@
         android:layout_marginBottom="40dp"
         android:src="@drawable/mp_start"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <ImageView
         android:id="@+id/mp_last"
@@ -153,8 +152,7 @@
         android:layout_marginBottom="40dp"
         android:src="@drawable/mp_before"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <ImageView
         android:id="@+id/mp_next"
@@ -164,8 +162,7 @@
         android:layout_marginBottom="40dp"
         android:src="@drawable/mp_next"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <ImageView
         android:id="@+id/mp_count"
@@ -175,8 +172,7 @@
         android:layout_marginBottom="40dp"
         android:src="@drawable/play_count"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <ImageView
         android:id="@+id/mp_list"
@@ -186,8 +182,7 @@
         android:layout_marginBottom="40dp"
         android:src="@drawable/music_list"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/mp_fragment"

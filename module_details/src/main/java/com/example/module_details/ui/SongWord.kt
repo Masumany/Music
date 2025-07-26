@@ -13,13 +13,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.DiffUtil
 import com.example.module_details.databinding.ActivitySongwordBinding
 import com.therouter.TheRouter
 import com.therouter.router.Autowired
@@ -32,25 +30,25 @@ import viewmodel.SongWordViewModel
 
 // 歌词行数据类
 data class LyricLine(
-    val timeMs: Long,  // 演唱开始时间戳（毫秒）
-    val content: String  // 歌词内容
+    val timeMs: Long,
+    val content: String
 )
 
-// 时间解析工具类
+// 时间解析
 object LyricTimeParser {
     fun parseTimeTag(timeTag: String): Long {
         return try {
-            val timeStr = timeTag.replace(Regex("\\s+"), "").removeSurrounding("[", "]")
+            val timeStr = timeTag.replace(Regex("\\s+"), "").removeSurrounding("[", "]")  //去除[]
             val minSec = timeStr.split(":")
-            val minutes = minSec[0].toLong()
+            val minutes = minSec[0].toLong()  //分割分钟和秒数
             val secMs = minSec[1].split(".")
-            val seconds = secMs[0].toLong()
-            val milliseconds = if (secMs.size > 1) {
+            val seconds = secMs[0].toLong()//分割秒数和毫秒
+            val milliseconds = if (secMs.size > 1) {  //让毫秒部分为3位，要不与它的数据类不匹配了
                 secMs[1].padEnd(3, '0').take(3).toLong()
             } else {
                 0
             }
-            minutes * 60 * 1000 + seconds * 1000 + milliseconds
+            minutes * 60 * 1000 + seconds * 1000 + milliseconds  //总的毫秒数
         } catch (e: Exception) {
             Log.e("TimeParseError", "解析失败: $timeTag", e)
             0L
@@ -74,7 +72,7 @@ class LyricAdapter : ListAdapter<LyricLine, LyricAdapter.LyricViewHolder>(LyricD
                 lyricText.textSize = 18f
                 lyricText.alpha = 1.0f
             } else {
-                // 未演唱或已演唱的歌词
+                // 未演唱或者是已经演唱了的歌词
                 lyricText.setTextColor(itemView.context.getColor(R.color.commom))
                 lyricText.textSize = 14f
                 lyricText.alpha = 0.7f
@@ -93,6 +91,7 @@ class LyricAdapter : ListAdapter<LyricLine, LyricAdapter.LyricViewHolder>(LyricD
         holder.bind(lyricLine, position == currentLinePosition)
     }
 
+    //更新当前播放的歌词的位置
     fun updateCurrentLine(position: Int) {
         if (currentLinePosition != position) {
             val oldPosition = currentLinePosition
@@ -104,6 +103,7 @@ class LyricAdapter : ListAdapter<LyricLine, LyricAdapter.LyricViewHolder>(LyricD
         }
     }
 
+    // 歌词数据对比
     private class LyricDiffCallback : DiffUtil.ItemCallback<LyricLine>() {
         override fun areItemsTheSame(oldItem: LyricLine, newItem: LyricLine): Boolean {
             return oldItem.timeMs == newItem.timeMs
@@ -150,12 +150,6 @@ class SongWord : AppCompatActivity() {
         // 初始化当前播放时间
         currentPlayTime = currentPos.toLong()
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
-
         if (id.isBlank()) {
             Toast.makeText(this, "歌曲ID不能为空", Toast.LENGTH_SHORT).show()
             finish()
@@ -199,12 +193,15 @@ class SongWord : AppCompatActivity() {
         updateLyricPosition()
 
     }
+
+    //接收播放器发送的切换歌曲事件
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onSongChangeEvent(event: SongChangeEvent){
+    fun onSongChangeEvent(event: SongChangeEvent) {
         overridePendingTransition(0, R.anim.back_anim) // 第二个参数为退出动画
         finish()
     }
 
+    // 接收播放器发送的强制关闭歌词事件
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onCloseLyricEvent(event: CloseLyricEvent) {
         Log.d("LyricClose", "收到强制关闭事件，返回播放页")
@@ -216,14 +213,18 @@ class SongWord : AppCompatActivity() {
         songWordViewModel.songWordData.observe(this) { songWordData ->
             songWordData?.let {
                 parseLyrics(it)
-                updateLyricPosition()
+                updateLyricPosition()  //解析歌词并且更新ui
             }
         }
 
         songWordViewModel.loadingState.observe(this) { state ->
             when (state) {
-                is SongWordViewModel.LoadingState.Loading -> binding.lyricRecyclerView.visibility = View.GONE
-                is SongWordViewModel.LoadingState.Success -> binding.lyricRecyclerView.visibility = View.VISIBLE
+                is SongWordViewModel.LoadingState.Loading -> binding.lyricRecyclerView.visibility =
+                    View.GONE
+
+                is SongWordViewModel.LoadingState.Success -> binding.lyricRecyclerView.visibility =
+                    View.VISIBLE
+
                 is SongWordViewModel.LoadingState.Error -> {
                     Log.d("LyricDebug", "加载错误: ${state.message}")
                     binding.lyricRecyclerView.visibility = View.GONE
@@ -232,6 +233,7 @@ class SongWord : AppCompatActivity() {
         }
     }
 
+    //解析歌词数据
     private fun parseLyrics(songWordData: SongWordData) {
         val rawLyric = songWordData.lrc.lyric
         Log.d("LyricDebug", "原始歌词: $rawLyric")
@@ -240,13 +242,13 @@ class SongWord : AppCompatActivity() {
             lyricLines = emptyList()
             lyricAdapter.submitList(lyricLines)
             return
-        }
+        }  //没有歌词的情况
 
         val lyricList = mutableListOf<LyricLine>()
-        val lines = rawLyric.split("\n")
-        val timeTagPattern = Regex("^\\[\\d{2}:\\d{2}\\.\\d{1,3}\\]\\s*")
+        val lines = rawLyric.split("\n")   //按行分割歌词
+        val timeTagPattern = Regex("^\\[\\d{2}:\\d{2}\\.\\d{1,3}\\]\\s*")  //匹配时间的正则表达式
 
-        for (line in lines) {
+        for (line in lines) {  //行行解析
             val trimmedLine = line.trim()
             if (trimmedLine.isBlank()) continue
 
@@ -261,16 +263,15 @@ class SongWord : AppCompatActivity() {
             }
         }
 
-        lyricLines = lyricList.sortedBy { it.timeMs }
+        lyricLines = lyricList.sortedBy { it.timeMs }  //按时间排序歌词的行
         Log.d("LyricDebug", "解析完成，共${lyricLines.size}行歌词")
         lyricAdapter.submitList(lyricLines)
     }
 
-    // 核心修正：精准匹配当前播放时间与歌词时间戳
     private fun updateLyricPosition() {
         if (lyricLines.isEmpty()) return
 
-        // 找到最后一句时间戳 <= 当前播放时间的歌词（已演唱的最后一句）
+        // 找到最后一句时间戳<= 当前播放时间的歌词
         var currentIndex = -1
         for (i in lyricLines.indices.reversed()) {
             if (lyricLines[i].timeMs <= currentPlayTime) {
@@ -287,7 +288,7 @@ class SongWord : AppCompatActivity() {
             val layoutManager = binding.lyricRecyclerView.layoutManager as LinearLayoutManager
             layoutManager.scrollToPositionWithOffset(
                 currentIndex,
-                binding.lyricRecyclerView.height / 2 - dpToPx(30)
+                binding.lyricRecyclerView.height / 2 - dpToPx(30)  //调整，让歌词在水平中间
             )
         }
     }

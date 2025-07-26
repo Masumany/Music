@@ -1,8 +1,8 @@
 package com.example.module_recommened.adapter
 
+import Adapter.MusicDataCache
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import Adapter.MusicDataCache
 import com.example.module_recommened.R
 import com.example.module_recommened.databinding.ItemListBinding
 import com.therouter.TheRouter
@@ -22,16 +21,23 @@ class LiAdapter : ListAdapter<ListMusicData.Song, LiAdapter.LiViewHolder>(SongDi
 
 
     class SongDiffCallback : DiffUtil.ItemCallback<ListMusicData.Song>() {
-        override fun areItemsTheSame(oldItem: ListMusicData.Song, newItem: ListMusicData.Song): Boolean {
+        override fun areItemsTheSame(
+            oldItem: ListMusicData.Song,
+            newItem: ListMusicData.Song
+        ): Boolean {
             return oldItem.id == newItem.id
         }
 
-        override fun areContentsTheSame(oldItem: ListMusicData.Song, newItem: ListMusicData.Song): Boolean {
+        override fun areContentsTheSame(
+            oldItem: ListMusicData.Song,
+            newItem: ListMusicData.Song
+        ): Boolean {
             return oldItem == newItem
         }
     }
 
-    inner class LiViewHolder(private  val binding:ItemListBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class LiViewHolder(private val binding: ItemListBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         val textView: TextView = binding.listTv
         val textView1: TextView = binding.listTv1
         val imgView: ImageView = binding.listImg
@@ -62,7 +68,6 @@ class LiAdapter : ListAdapter<ListMusicData.Song, LiAdapter.LiViewHolder>(SongDi
             onItemClickListener?.invoke(position, song)
             MusicDataCache.currentSongList = currentList.toList()
 
-            // 构建路由（无需let函数，直接使用singerId）
             val route = TheRouter.build("/module_musicplayer/musicplayer")
                 .withString("songListName", song.name)
                 .withString("singer", song.ar.firstOrNull()?.name ?: "未知歌手")
@@ -75,6 +80,7 @@ class LiAdapter : ListAdapter<ListMusicData.Song, LiAdapter.LiViewHolder>(SongDi
             route.navigation(holder.itemView.context)
         }
     }
+
     fun addMoreData(newData: List<ListMusicData.Song>) {
         val currentList = currentList.toMutableList()
         currentList.addAll(newData)

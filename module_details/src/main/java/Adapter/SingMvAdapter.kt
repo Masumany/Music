@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -16,17 +15,17 @@ import com.bumptech.glide.Glide
 import com.example.module_details.R
 import com.example.module_details.databinding.ItemSingermvBinding
 import com.example.module_mvplayer.ui.activity.MvPlayerActivity
-import com.therouter.TheRouter
 import data.SingerMvData
 
-class SingMvAdapter (private val singMvList: List<SingerMvData.Mv>):
+class SingMvAdapter(private val singMvList: List<SingerMvData.Mv>) :
     RecyclerView.Adapter<SingMvAdapter.SingMvViewHolder>() {
 
-        inner class SingMvViewHolder(private val binding: ItemSingermvBinding):RecyclerView.ViewHolder(binding.root) {
-            var textView: TextView =binding.singerMvText
-            val imgView: ImageView =binding.singerMvImg
-            val moreImg: ImageView =binding.singerMvMore
-        }
+    inner class SingMvViewHolder(private val binding: ItemSingermvBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        var textView: TextView = binding.singerMvText
+        val imgView: ImageView = binding.singerMvImg
+        val moreImg: ImageView = binding.singerMvMore
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SingMvViewHolder {
         val view = ItemSingermvBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -48,21 +47,22 @@ class SingMvAdapter (private val singMvList: List<SingerMvData.Mv>):
 
         holder.itemView.setOnClickListener {
             val context = holder.itemView.context
-            // 直接创建Intent，指定目标Activity
             val intent = Intent(context, MvPlayerActivity::class.java)
-            // 传递mvId参数
             intent.putExtra("mvId", item.id.toString())
             context.startActivity(intent)
             Log.d("MV", "点击跳转，mvId: ${item.id}")
         }
     }
+
     private fun dpToPx(context: Context, dp: Int): Int {
         return (dp * context.resources.displayMetrics.density).toInt()
     }
+
     private fun showPopupWindow(moreImg: ImageView, item: SingerMvData.Mv) {
-            val context = moreImg.context
-            val popupView=LayoutInflater.from(context).inflate(R.layout.popuplayout, null)
-            val popupWindow = PopupWindow(popupView, dpToPx(context, 150), ViewGroup.LayoutParams.WRAP_CONTENT,true)
+        val context = moreImg.context
+        val popupView = LayoutInflater.from(context).inflate(R.layout.popuplayout, null)
+        val popupWindow =
+            PopupWindow(popupView, dpToPx(context, 150), ViewGroup.LayoutParams.WRAP_CONTENT, true)
 
         popupWindow.setBackgroundDrawable(context.getDrawable(R.color.white))
 

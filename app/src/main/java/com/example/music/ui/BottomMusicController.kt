@@ -21,25 +21,17 @@ class BottomMusicController(
 ) {
     private val viewModel: BottomViewModel
     private val handler = Handler(Looper.getMainLooper())
-    private val updateRunnable = object : Runnable {
-        override fun run() {
-            // 可以在这里更新播放进度等UI
-            handler.postDelayed(this, 1000)
-        }
-    }
 
     // 动画相关变量
     private val ROTATION_PAUSED = 0f
     private val ROTATION_PLAYING = 360f // 完整旋转一周
     private var isAnimationRunning = false
-    private var currentRotation = 0f
-    private val animationDuration = 15000L
+    private var currentRotation = 0f  //当前的旋转角度
+    private val animationDuration = 15000L  //唱片转一圈儿的时间
 
     init {
-        // 初始化ViewModel
         viewModel = ViewModelProvider(context as AppCompatActivity)[BottomViewModel::class.java]
 
-        // 初始化视图和事件
         initView()
         initClickEvents()
         initObservers()
@@ -50,17 +42,15 @@ class BottomMusicController(
     }
 
     private fun initView() {
-        // 初始化视图状态
         val ivCover = view.findViewById<ImageView>(R.id.music)
         val playButton = view.findViewById<ImageView>(R.id.stop)
-        ivCover.rotation = ROTATION_PAUSED
+        ivCover.rotation = ROTATION_PAUSED  //初始封面不转动
         playButton.setImageResource(RecommendedR.drawable.list_start)
     }
 
     private fun initAnimation() {
-        // 初始状态设置为暂停角度
         val ivCover = view.findViewById<ImageView>(R.id.music)
-        ivCover.rotation = ROTATION_PAUSED
+        ivCover.rotation = ROTATION_PAUSED  //初始状态设为0度也就是暂停时的角度
         currentRotation = ROTATION_PAUSED
     }
 
@@ -86,15 +76,16 @@ class BottomMusicController(
     private fun initObservers() {
         // 观察歌曲变化
         viewModel.currentSong.observe(context as AppCompatActivity) { song ->
-            updateSongInfo(song)
+            updateSongInfo(song)  //更新ui
         }
 
         // 观察播放状态变化
         viewModel.isPlaying.observe(context as AppCompatActivity) { isPlaying ->
-            updatePlayState(isPlaying)
+            updatePlayState(isPlaying)  //播放状态发生变化时，更新播放状态
         }
     }
 
+    // 更新歌曲信息
     private fun updateSongInfo(song: ListMusicData.Song?) {
         val tvSong = view.findViewById<TextView>(R.id.tv_song)
         val tvArtist = view.findViewById<TextView>(R.id.tv_artist)
@@ -113,6 +104,7 @@ class BottomMusicController(
         }
     }
 
+    // 播放状态变化
     private fun updatePlayState(isPlaying: Boolean) {
         val playButton = view.findViewById<ImageView>(R.id.stop)
         val ivCover = view.findViewById<ImageView>(R.id.music)
@@ -125,14 +117,14 @@ class BottomMusicController(
 
         // 控制封面旋转动画
         if (isPlaying) {
-            startCoverRotation(ivCover)
+            startCoverRotation(ivCover)  //播放时
         } else {
-            pauseCoverRotation(ivCover)
+            pauseCoverRotation(ivCover)  //暂停时
         }
     }
 
     private fun startCoverRotation(ivCover: ImageView) {
-        if (isAnimationRunning) return
+        if (isAnimationRunning) return  //如果已经有动画了，直接返回，避免重复启动同一个动画
 
         isAnimationRunning = true
         // 取消之前的动画
@@ -143,8 +135,8 @@ class BottomMusicController(
 
         // 开始旋转动画
         ivCover.animate()
-            .rotation(currentRotation + remainingRotation)
-            .setDuration((remainingRotation / ROTATION_PLAYING * animationDuration).toLong())
+            .rotation(currentRotation + remainingRotation)  //旋转到目标角度
+            .setDuration((remainingRotation / ROTATION_PLAYING * animationDuration).toLong())  //匀速转动
             .withEndAction {
                 // 完成一次旋转后重新开始，形成无限循环
                 currentRotation = 0f
@@ -155,7 +147,6 @@ class BottomMusicController(
 
     private fun pauseCoverRotation(ivCover: ImageView) {
         if (!isAnimationRunning) return
-
         // 记录当前旋转角度
         currentRotation = ivCover.rotation
         // 停止动画
@@ -163,6 +154,7 @@ class BottomMusicController(
         isAnimationRunning = false
     }
 
+    // 当歌曲切换时，重置动画状态
     private fun resetAnimationOnSongChange() {
         val ivCover = view.findViewById<ImageView>(R.id.music)
         // 重置旋转状态

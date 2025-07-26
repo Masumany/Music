@@ -13,13 +13,14 @@ object RetrofitClient {
     fun init(context: Context) {
         sharedPreferences = context.getSharedPreferences("user", Context.MODE_PRIVATE)
     }
+
     val okHttpClient by lazy {
         OkHttpClient.Builder()
             .addInterceptor(CookieInterceptor(sharedPreferences))
             .build()
     }
 
-    val retrofit:Retrofit by lazy {
+    val retrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl("http://43.139.173.183:3000/")
             .client(okHttpClient)

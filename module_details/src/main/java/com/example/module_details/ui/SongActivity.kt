@@ -7,8 +7,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -35,8 +33,6 @@ class SongActivity : AppCompatActivity() {
     @Autowired
     var recommendName: String = ""
 
-
-
     private lateinit var binding: ActivitySongBinding
     private lateinit var songViewModel: SongViewModel
     private var lastScrollY = 0  // 累计滚动距离
@@ -52,11 +48,6 @@ class SongActivity : AppCompatActivity() {
         binding = ActivitySongBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
         songViewModel = ViewModelProvider(this)[SongViewModel::class.java]
 
         binding.back.setOnClickListener {
@@ -77,7 +68,8 @@ class SongActivity : AppCompatActivity() {
             // 获取专辑区自身高度
             val albumHeight = binding.albumArea.height
             // 获取专辑区的顶部margin
-            val layoutParams = binding.albumArea.layoutParams as androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
+            val layoutParams =
+                binding.albumArea.layoutParams as androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
             val marginTop = layoutParams.topMargin
             // 总高度 = 自身高度 + 顶部margin
             albumTotalHeight = albumHeight + marginTop
@@ -89,19 +81,19 @@ class SongActivity : AppCompatActivity() {
         binding.mdRv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                // 专辑区高度未测量完成时，不执行滚动逻辑
+                // 专辑区高度未测量完成时，不执行滚动
                 if (albumTotalHeight == 0) return
 
-                // 更新累计滚动距离（限制最小值为0）
+                // 更新累计滚动距离
                 lastScrollY += dy
                 if (lastScrollY < 0) lastScrollY = 0
 
-                // 上滑：滚动距离超过专辑区高度 → 固定到顶部
+                // 当滚动距离超过专辑区高度时，把它固定到顶部
                 if (dy > 0 && lastScrollY > albumTotalHeight && !isFixedAtTop) {
                     fixPlayAreaAtTop()
                     isFixedAtTop = true
                 }
-                // 下滑：滚动距离小于专辑区高度 → 恢复原位
+                // 当滚动距离小于专辑区高度，恢复原位
                 else if (dy < 0 && lastScrollY < albumTotalHeight && isFixedAtTop) {
                     restorePlayAreaPosition()
                     isFixedAtTop = false
@@ -112,7 +104,7 @@ class SongActivity : AppCompatActivity() {
 
     // “播放全部”区域固定在顶部
     private fun fixPlayAreaAtTop() {
-        // 移动“播放全部”区域到顶部（上移专辑区总高度）
+        // 移动“播放全部”区域到顶部
         binding.fixedArea.animate()
             .translationY(-albumTotalHeight.toFloat())
             .setDuration(300)
@@ -133,7 +125,7 @@ class SongActivity : AppCompatActivity() {
             .setDuration(300)
             .start()
 
-        //  显示专辑区
+        //显示专辑区
         binding.albumArea.animate()
             .alpha(1f)
             .setDuration(300)
@@ -180,7 +172,7 @@ class SongActivity : AppCompatActivity() {
                 return@observe
             }
 
-            val count= songViewModel.listMusicData.value?.songs?.size
+            val count = songViewModel.listMusicData.value?.songs?.size
             binding.count.setText("(${count})")
 
             val limitedList = listMusicData.songs

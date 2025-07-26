@@ -13,6 +13,7 @@ class MyApplication : Application() {
         lateinit var context: Context
             private set // 私有set，避免外部修改
     }
+
     override fun onCreate() {
         super.onCreate()
         //初始化全局上下文（供其他模块获取）
@@ -23,6 +24,7 @@ class MyApplication : Application() {
         //初始化网络库（RetrofitClient）
         initNetWork()
     }
+
     private fun initRouter() {
         TheRouter.init(this)
     }

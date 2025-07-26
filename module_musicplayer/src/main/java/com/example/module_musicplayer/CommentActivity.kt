@@ -1,7 +1,6 @@
 package com.example.module_musicplayer
 
 import Event.CloseCommentEvent
-import Event.CloseLyricEvent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -46,7 +45,7 @@ class CommentActivity : AppCompatActivity() {
     //注册EventBus
     override fun onStart() {
         super.onStart()
-        if(!EventBus.getDefault().isRegistered( this)){
+        if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this)
         }
     }
@@ -54,7 +53,7 @@ class CommentActivity : AppCompatActivity() {
     //解注册EventBus
     override fun onStop() {
         super.onStop()
-        if(EventBus.getDefault().isRegistered( this)){
+        if (EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().unregister(this)
         }
     }

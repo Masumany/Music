@@ -1,6 +1,3 @@
-// 文件名: DataConverter.kt
-// 包路径: 可以是 com.example.yourproject.converter (根据你的项目结构调整)
-
 package com.example.yourproject.converter
 
 import com.example.lib.base.Song as BaseSong
@@ -93,7 +90,6 @@ object DataConverter {
     }
 
         fun convertTopSongToMusicData(song: TopData.Song): ListMusicData.Song {
-            // 转换歌手列表（TopData.Song.Ar -> ListMusicData.Song.Ar）
             val convertedArtists = song.ar.map { topArtist ->
                 ListMusicData.Song.Ar(
                     alias = topArtist.alias ?: emptyList(),
@@ -103,7 +99,6 @@ object DataConverter {
                 )
             }
 
-            // 转换专辑信息（TopData.Song.Al -> ListMusicData.Song.Al）
             val convertedAlbum = ListMusicData.Song.Al(
                 id = song.al.id ?: 0L,
                 name = song.al.name ?: "未知专辑",
@@ -113,7 +108,6 @@ object DataConverter {
                 tns = song.al.tns ?: emptyList()
             )
 
-            // 填充 ListMusicData.Song 其他字段（按需从 TopData.Song 映射）
             return ListMusicData.Song(
                 a = null,
                 additionalTitle = null,

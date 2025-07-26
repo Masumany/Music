@@ -5,13 +5,13 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.lib.base.ListData
-import com.example.lib.base.NetWorkClient
+import com.example.lib.base.NetworkClient
 
-class ListViewModel : ViewModel(){
+class ListViewModel : ViewModel() {
     val listData = MutableLiveData<ListData>()
     suspend fun getListData(page: Int, pageSize: Int): ListData {
         try {
-            val result = NetWorkClient.apiService2.getListData()
+            val result = NetworkClient.apiService.getDailyRecommendSongs()
             return result
         } catch (e: Exception) {
             Log.d("TAG", "getRecommenedData: $e")

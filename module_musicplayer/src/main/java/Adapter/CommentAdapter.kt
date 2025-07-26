@@ -1,7 +1,6 @@
 package com.example.module_musicplayer.Adapter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
@@ -17,7 +16,8 @@ class CommentAdapter(
     private var commentText: List<CommentData.HotComment> = emptyList()
 ) : RecyclerView.Adapter<CommentAdapter.CommentViewHolder>() {
 
-    inner class CommentViewHolder(private val binding: ItemCommentBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class CommentViewHolder(private val binding: ItemCommentBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         val tvNickname: TextView = binding.commentTv
         val tvContent: TextView = binding.commentTv1
         val ivAvatar: ImageView = binding.commentImg

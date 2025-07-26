@@ -8,7 +8,6 @@
     android:background="@drawable/md_background"
     tools:context=".SongActivity">
 
-    <!-- 固定显示的返回按钮 -->
     <ImageView
         android:id="@+id/back"
         android:layout_width="40dp"
@@ -21,7 +20,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- 专辑信息区（可隐藏，高度自适应） -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/album_area"
         android:layout_width="match_parent"
@@ -31,7 +29,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/back">
 
-        <!-- 专辑图片 -->
         <androidx.cardview.widget.CardView
             android:id="@+id/md_cardview"
             android:layout_width="80dp"
@@ -50,7 +47,6 @@
                 android:src="@drawable/md_music" />
         </androidx.cardview.widget.CardView>
 
-        <!-- 专辑标题 -->
         <TextView
             android:id="@+id/md_title"
             android:layout_width="0dp"
@@ -72,7 +68,6 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- “播放全部”区域 + 列表（可固定在顶部） -->
     <androidx.cardview.widget.CardView
         android:id="@+id/fixed_area"
         android:layout_width="match_parent"
@@ -86,7 +81,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/album_area">
 
-        <!-- 播放全部按钮区域 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
@@ -120,7 +114,6 @@
                 android:textColor="#8496F3"/>
         </LinearLayout>
 
-        <!-- 歌曲列表 -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/md_rv"
             android:layout_width="match_parent"

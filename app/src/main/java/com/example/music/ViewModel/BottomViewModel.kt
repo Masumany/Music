@@ -1,5 +1,6 @@
 package com.example.music.viewmodel
 
+import Adapter.MusicDataCache
 import android.app.Application
 import android.content.Context
 import android.content.Intent
@@ -8,23 +9,19 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.example.module_musicplayer.MusicPlayService
-import com.example.music.R
-import Adapter.MusicDataCache
-import data.ListMusicData
 import com.therouter.TheRouter
+import data.ListMusicData
 
 class BottomViewModel(application: Application) : AndroidViewModel(application) {
-    // 私有LiveData，仅在ViewModel内部修改
     private val _currentSong = MutableLiveData<ListMusicData.Song?>()
     private val _isPlaying = MutableLiveData<Boolean>(false)
     private val _currentPosition = MutableLiveData<Int>(0)
 
-    // 公开的LiveData，供View观察
+    // LiveData，供View观察
     val currentSong: LiveData<ListMusicData.Song?> = _currentSong
     val isPlaying: LiveData<Boolean> = _isPlaying
     val currentPosition: LiveData<Int> = _currentPosition
 
-    // 服务相关
     private var musicPlayService: MusicPlayService? = null
     private var isServiceBound = false
 
@@ -85,7 +82,7 @@ class BottomViewModel(application: Application) : AndroidViewModel(application) 
         return musicPlayService?.getCurrentPosition() ?: 0
     }
 
-    // 处理封面点击事件，返回是否成功跳转
+    // 封面点击事件
     fun handleCoverClick(context: Context): Boolean {
         val currentSongList = MusicDataCache.currentSongList ?: return false
         if (currentSongList.isEmpty()) return false

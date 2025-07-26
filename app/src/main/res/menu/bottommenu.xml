@@ -3,8 +3,7 @@
     <item
         android:id="@+id/action_home"
         android:icon="@drawable/icon_home"
-        android:title="推荐"
-        />
+        android:title="推荐" />
 
     <item
         android:id="@+id/action_hot"

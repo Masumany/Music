@@ -54,28 +54,32 @@ class SingerActivity : AppCompatActivity() {
                     switchFragment(SingerHomeFragment().apply { setSingerId(id.toLong()) })
                     true
                 }
+
                 R.id.action_songs -> {
                     val songFragment = SingerSongFragment()
                     Log.d("ForceCall", "准备手动调用setSingerId，id=$id")
-                    songFragment.setSingerId(id) // 强制调用，确保执行
+                    songFragment.setSingerId(id)
                     switchFragment(songFragment)
                     true
                 }
+
                 R.id.action_mv -> {
                     val songFragment = SingerMvFragment()
                     Log.d("ForceCall", "准备手动调用setSingerId，id=$id")
-                    songFragment.setSingerId(id) // 强制调用，确保执行
+                    songFragment.setSingerId(id)
                     switchFragment(songFragment)
                     true
                 }
+
                 else -> false
             }
         }
     }
+
     private fun switchFragment(fragment: Fragment) {
         supportFragmentManager.commit {
             replace(binding.fragmentContainer.id, fragment)
-            addToBackStack(null)
+            addToBackStack(null)   // 支持返回导航
         }
     }
 

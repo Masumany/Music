@@ -25,7 +25,6 @@ class SingerHomeFragment : Fragment() {
     private lateinit var similarViewModel: SimilarViewModel
     private var singerId: Long? = null
     private var isRequesting = false
-    // 修复：变量名改为小写开头（遵循规范）
     private val similarAdapter = SimilarAdapter(emptyList())
     private lateinit var similarList: RecyclerView
 
@@ -54,19 +53,16 @@ class SingerHomeFragment : Fragment() {
             false
         )
 
-        // 观察相似歌手数据变化（关键修复）
-        observeSimilarData()
+        observeSimilarData()  //观察相似歌手的数据变化
 
-        // 已有ID则触发请求
         if (singerId != null) {
             fetchData()
-            lifecycleScope.launch { // 修复：在协程中调用suspend函数
+            lifecycleScope.launch {
                 fetchSimilarData(singerId)
             }
         }
     }
 
-    // 新增：观察相似歌手数据的LiveData
     private fun observeSimilarData() {
         similarViewModel.similarData.observe(viewLifecycleOwner) { response ->
             if (response != null && response.artists.isNotEmpty()) {
@@ -78,7 +74,6 @@ class SingerHomeFragment : Fragment() {
         }
     }
 
-    // 修复：suspend函数的正确实现
     private suspend fun fetchSimilarData(singerId: Long?) {
         if (singerId == null || singerId <= 0) {
             Log.e("fetchSimilarData", "无效的歌手ID: $singerId")
@@ -87,9 +82,9 @@ class SingerHomeFragment : Fragment() {
 
         try {
             Log.d("fetchSimilarData", "开始请求相似歌手数据，ID=$singerId")
-            // 先请求数据（suspend函数，必须在协程中调用）
+            // 先请求数据
             similarViewModel.getSimilarData(singerId)
-            // 数据更新通过observeSimilarData处理，无需手动获取value
+            // 数据更新通过observeSimilarData处理
         } catch (e: Exception) {
             Log.e("fetchSimilarData", "请求失败", e)
         }
@@ -105,7 +100,6 @@ class SingerHomeFragment : Fragment() {
 
         if (isAdded) {
             fetchData()
-            // 修复：在协程中调用suspend函数
             lifecycleScope.launch {
                 fetchSimilarData(singerId)
             }
@@ -158,7 +152,7 @@ class SingerHomeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // 每次Fragment可见时，重新请求数据（利用已保存的singerId）
+        // 每次Fragment可见时，重新请求数据
         if (singerId != null && singerId!! > 0) {
             Log.d("SingerHomeFragment", "Fragment可见，重新请求数据，ID=$singerId")
             fetchData()

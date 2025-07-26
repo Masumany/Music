@@ -7,16 +7,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.lib.base.Song
 import com.example.module_recommened.adapter.LiAdapter
 import com.example.module_recommened.viewmodel.ListViewModel
-import androidx.lifecycle.ViewModelProvider
-import kotlinx.coroutines.launch
-import androidx.lifecycle.lifecycleScope
-import com.example.lib.base.Song
 import com.example.music.databinding.FragmentMusicplayerlistBinding
 import com.example.yourproject.converter.DataConverter
+import kotlinx.coroutines.launch
 
 class MusicPlayerListFragment : Fragment() {
 
@@ -74,7 +74,7 @@ class MusicPlayerListFragment : Fragment() {
         })
     }
 
-    // 加载第一页数据（重置）
+    // 加载第一页数据
     private fun loadFirstPage() {
         currentPage = 1
         fetchListData(currentPage)
@@ -124,7 +124,6 @@ class MusicPlayerListFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // 清除适配器引用，避免内存泄漏
         binding.rvlist.adapter = null
     }
 }

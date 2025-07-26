@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager2.widget.ViewPager2
-import com.example.lib.base.Song as BaseSong
 import com.example.module_recommened.adapter.BannerAdapter
 import com.example.module_recommened.adapter.LiAdapter
 import com.example.module_recommened.adapter.ReAdapter
@@ -26,6 +25,7 @@ import com.example.module_recommened.viewmodel.ListViewModel
 import com.example.module_recommened.viewmodel.RecommenedViewModel
 import com.example.yourproject.converter.DataConverter
 import kotlinx.coroutines.launch
+import com.example.lib.base.Song as BaseSong
 
 class RecommendFragment : Fragment() {
     private var _binding: FragmentRecommendBinding? = null
@@ -103,7 +103,7 @@ class RecommendFragment : Fragment() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-                    // 纵向滑动时允许刷新，但需判断是否在横向区域
+                    // 纵向滑动时允许刷新，但要判断是否在横向区域
                     recyclerView.requestDisallowInterceptTouchEvent(!isInHorizontalArea)
                     viewPager.requestDisallowInterceptTouchEvent(isInHorizontalArea)
                 }
@@ -122,7 +122,7 @@ class RecommendFragment : Fragment() {
             false
         }
 
-        // ViewPager2(Banner)触摸事件处理
+        // Banner触摸事件处理
         viewPager.setOnTouchListener { _, event ->
             handleHorizontalTouchEvent(event, viewPager)
             false
@@ -180,6 +180,7 @@ class RecommendFragment : Fragment() {
                 isHorizontalScrolling = false
                 swipeRefreshLayout.isEnabled = false  // 触摸横向组件时禁用刷新
             }
+
             MotionEvent.ACTION_MOVE -> {
                 val currentX = event.x
                 val currentY = event.y
@@ -209,6 +210,7 @@ class RecommendFragment : Fragment() {
                 lastX = currentX
                 lastY = currentY
             }
+
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 // 触摸结束，延迟恢复刷新状态，防止误触发
                 isHorizontalScrolling = false

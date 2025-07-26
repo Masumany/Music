@@ -4,25 +4,22 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.lib.base.NetWorkClient
+import com.example.lib.base.NetworkClient
 import data.CommentData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.net.ConnectException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
 
 class CommentViewModel : ViewModel() {
     val hotComments = MutableLiveData<List<CommentData.HotComment>>()
     val errorMsg = MutableLiveData<String>()
 
-    // 获取评论数据（与Fragment中的调用对应）
+    // 获取评论数据
     fun fetchCommentData(songId: String) {
         viewModelScope.launch {
             try {
                 val response = withContext(Dispatchers.IO) {
-                    NetWorkClient.apiService5.getComment(songId)
+                    NetworkClient.apiService.getComment(songId)
                 }
                 if (response.code == 200) {
                     Log.d("CommentVM", "热门评论数量：${response.hotComments.size}")

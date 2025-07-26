@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
 
     >
 
@@ -26,10 +26,10 @@
         android:layout_height="wrap_content"
         android:text="欢迎来到MT Music!"
         android:textAlignment="center"
-        android:textStyle="bold"
         android:textColor="#F0E8A0"
         android:textSize="20sp"
-        app:layout_constraintTop_toBottomOf="@+id/Topimg"/>
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@+id/Topimg" />
 
 
     <LinearLayout
@@ -39,19 +39,21 @@
         android:orientation="horizontal"
         android:padding="10dp"
         app:layout_constraintTop_toBottomOf="@+id/textView">
+
         <ImageView
             android:layout_width="45dp"
             android:layout_height="match_parent"
-            android:src="@drawable/we_more"
-            />
+            android:src="@drawable/we_more" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:textSize="17sp"
             android:text="关于我们"
-            android:textStyle="bold"
-            android:textColor="#D0C192"/>
+            android:textColor="#D0C192"
+            android:textSize="17sp"
+            android:textStyle="bold" />
     </LinearLayout>
+
     <LinearLayout
         android:id="@+id/backlogin"
         android:layout_width="match_parent"
@@ -60,32 +62,35 @@
         android:padding="10dp"
         app:layout_constraintTop_toBottomOf="@+id/more"
         tools:ignore="DuplicateIds">
+
         <ImageView
             android:layout_width="45dp"
             android:layout_height="match_parent"
-            android:src="@drawable/backlogin"
-            />
+            android:src="@drawable/backlogin" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:textSize="17sp"
             android:text="退出登录"
-            android:textStyle="bold"
-            android:textColor="#D0C192"/>
+            android:textColor="#D0C192"
+            android:textSize="17sp"
+            android:textStyle="bold" />
     </LinearLayout>
+
     <LinearLayout
         android:id="@+id/tv"
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:padding="10dp"
         android:orientation="horizontal"
+        android:padding="10dp"
         app:layout_constraintTop_toBottomOf="@+id/backlogin">
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:textSize="17sp"
             android:text="更多精彩内容正在赶来...敬请期待"
-            android:textColor="#D0C192"/>
+            android:textColor="#D0C192"
+            android:textSize="17sp" />
     </LinearLayout>
 
 

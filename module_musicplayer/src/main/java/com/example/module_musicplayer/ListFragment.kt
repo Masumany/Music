@@ -9,8 +9,8 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.module_musicplayer.databinding.FragmentPlaylistBinding
 import com.example.lib.base.Song
+import com.example.module_musicplayer.databinding.FragmentPlaylistBinding
 
 class ListFragment : Fragment() {
 
@@ -39,7 +39,6 @@ class ListFragment : Fragment() {
             return
         }
 
-        // 即使在隐藏状态也要更新数据，以便显示时能正确展示
         songAdapter.updateData(list, currentIndex)
 
         if (currentIndex >= 0) {
@@ -90,7 +89,7 @@ class ListFragment : Fragment() {
         }
     }
 
-    // 关闭按钮逻辑
+    // 关闭按钮
     private fun initCloseButton() {
         binding.mpImgBack.setOnClickListener {
             (activity as? MusicPlayerActivity)?.hideFragment()
@@ -114,9 +113,12 @@ class ListFragment : Fragment() {
         }
 
         inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            val songName: androidx.appcompat.widget.AppCompatTextView = itemView.findViewById(com.example.module_recommened.R.id.list_tv)
-            val singer: androidx.appcompat.widget.AppCompatTextView = itemView.findViewById(com.example.module_details.R.id.list_tv1)
-            val cover: androidx.appcompat.widget.AppCompatImageView = itemView.findViewById(com.example.module_details.R.id.list_img)
+            val songName: androidx.appcompat.widget.AppCompatTextView =
+                itemView.findViewById(com.example.module_recommened.R.id.list_tv)
+            val singer: androidx.appcompat.widget.AppCompatTextView =
+                itemView.findViewById(com.example.module_details.R.id.list_tv1)
+            val cover: androidx.appcompat.widget.AppCompatImageView =
+                itemView.findViewById(com.example.module_details.R.id.list_img)
 
             init {
                 itemView.setOnClickListener {

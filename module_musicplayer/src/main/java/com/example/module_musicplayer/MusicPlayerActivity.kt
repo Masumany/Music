@@ -20,10 +20,9 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.bumptech.glide.Glide
-import com.example.lib.base.NetWorkClient
+import com.example.lib.base.NetworkClient
 import com.example.lib.base.Song
 import com.example.module_musicplayer.databinding.MusicPlayerBinding
 import com.therouter.TheRouter
@@ -81,7 +80,7 @@ class MusicPlayerActivity : AppCompatActivity() {
     private var currentIndex = -1
     private var listFragment: ListFragment? = null
 
-    // 其他变量
+    //其他的一些
     private var needApplyPlayProgress = false
     private var lastPausedProgress = 0
     private var totalDuration = 0
@@ -107,7 +106,7 @@ class MusicPlayerActivity : AppCompatActivity() {
     private var musicService: MusicPlayService? = null
     private var isServiceBound = false
     private var isServiceReady = false
-    private var pendingPlayTask: (() -> Unit)? = null
+    private var pendingPlayTask: (() -> Unit)? = null  //等待执行播放的任务
     private val isPreparePlayNext = false
 
     private val serviceConnection = object : ServiceConnection {
@@ -134,7 +133,6 @@ class MusicPlayerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // 确保先初始化binding
         binding = MusicPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.mpName.requestFocus()
@@ -162,10 +160,8 @@ class MusicPlayerActivity : AppCompatActivity() {
         updateModeIcon()
         initProgressEventSender()
         initFragment() // 初始化列表Fragment
-
-        // 初始化歌曲信息和列表
         initMusicInfo()
-        // 延迟初始化播放列表，确保Fragment有足够时间创建
+        // 延迟初始化播放列表，确保Fragment有足够的时间去创建
         handler.postDelayed({
             initCurrentPlayList()
         }, 300)
@@ -189,10 +185,9 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
-    // 更新列表Fragment数据，添加安全检查
+    // 更新列表Fragment数据
     private fun updateFragmentPlayList() {
-        // 确保Fragment已添加且视图已创建
-        if (listFragment?.isAdded == true && _isFragmentViewCreated(listFragment)) {
+        if (listFragment?.isAdded == true) {
             val songs = currentPlayList?.map {
                 Song(
                     id = it.id,
@@ -208,18 +203,6 @@ class MusicPlayerActivity : AppCompatActivity() {
             handler.postDelayed({
                 updateFragmentPlayList()
             }, 200)
-        }
-    }
-
-    // 检查Fragment视图是否已创建
-    private fun _isFragmentViewCreated(fragment: ListFragment?): Boolean {
-        return try {
-            // 通过反射检查Fragment的内部状态
-            val field = Fragment::class.java.getDeclaredField("mView")
-            field.isAccessible = true
-            field.get(fragment) != null
-        } catch (e: Exception) {
-            false
         }
     }
 
@@ -260,7 +243,7 @@ class MusicPlayerActivity : AppCompatActivity() {
 
     // 初始化当前播放列表
     private fun initCurrentPlayList() {
-        // 1. 优先使用缓存列表
+        // 先使用缓存列表
         currentPlayList = MusicDataCache.currentSongList
         if (currentPlayList != null && currentPlayList!!.isNotEmpty()) {
             currentIndex = currentPosition ?: findSongIndexById(id ?: "")
@@ -272,7 +255,7 @@ class MusicPlayerActivity : AppCompatActivity() {
             return
         }
 
-        // 2. 加载默认列表
+        // 加载默认列表
         Log.d("PlayListInit", "加载默认列表")
         loadDefaultPlayList()
     }
@@ -281,9 +264,10 @@ class MusicPlayerActivity : AppCompatActivity() {
     private fun loadDefaultPlayList() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val dailySongsResponse = NetWorkClient.apiService2.getListData()
+                val dailySongsResponse = NetworkClient.apiService.getDailyRecommendSongs()
                 if (dailySongsResponse.code == 200 && !dailySongsResponse.data?.dailySongs.isNullOrEmpty()) {
-                    currentPlayList = dailySongsResponse.data?.dailySongs as? List<ListMusicData.Song>?
+                    currentPlayList =
+                        dailySongsResponse.data?.dailySongs as? List<ListMusicData.Song>?
                     withContext(Dispatchers.Main) {
                         if (currentPlayList != null && currentPlayList!!.isNotEmpty()) {
                             // 缓存当前列表
@@ -303,7 +287,8 @@ class MusicPlayerActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     Log.e("PlayListError", "加载默认列表失败: ${e.message}")
-                    Toast.makeText(this@MusicPlayerActivity, "播放列表加载失败", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MusicPlayerActivity, "播放列表加载失败", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
         }
@@ -345,11 +330,12 @@ class MusicPlayerActivity : AppCompatActivity() {
 
     // 初始化中心图片旋转动画
     private fun initCenterImgAnimation() {
-        centerRotationAnimator = ObjectAnimator.ofFloat(binding.mpCenter, ImageView.ROTATION, 0f, 360f).apply {
-            duration = 20000  // 旋转一周的时间（毫秒）
-            repeatCount = ObjectAnimator.INFINITE
-            interpolator = LinearInterpolator()
-        }
+        centerRotationAnimator =
+            ObjectAnimator.ofFloat(binding.mpCenter, ImageView.ROTATION, 0f, 360f).apply {
+                duration = 20000  // 旋转一周的时间
+                repeatCount = ObjectAnimator.INFINITE
+                interpolator = LinearInterpolator()
+            }
     }
 
     // 进度事件发送器
@@ -439,7 +425,6 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
-    // 通用事件监听
     private fun initEventListeners() {
         // 返回按钮
         binding.mpMback.setOnClickListener {
@@ -582,7 +567,7 @@ class MusicPlayerActivity : AppCompatActivity() {
     private fun fetchAndPlayWithStateCheck(songId: String, songName: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val musicUrlResponse = NetWorkClient.apiService3.getMusicUrl(songId)
+                val musicUrlResponse = NetworkClient.apiService.getMusicUrl(songId)
                 withContext(Dispatchers.Main) {
                     if (musicUrlResponse.code == 200 && musicUrlResponse.data != null && musicUrlResponse.data.isNotEmpty()) {
                         val musicUrl = musicUrlResponse.data[0].url
@@ -910,7 +895,12 @@ class MusicPlayerActivity : AppCompatActivity() {
     private fun startCenterImgAnimation(startAngle: Float) {
         centerRotationAnimator?.cancel()
         binding.mpCenter.rotation = startAngle
-        centerRotationAnimator = ObjectAnimator.ofFloat(binding.mpCenter, ImageView.ROTATION, startAngle, startAngle + 360f).apply {
+        centerRotationAnimator = ObjectAnimator.ofFloat(
+            binding.mpCenter,
+            ImageView.ROTATION,
+            startAngle,
+            startAngle + 360f
+        ).apply {
             duration = 20000
             repeatCount = ObjectAnimator.INFINITE
             interpolator = LinearInterpolator()
@@ -1000,7 +990,7 @@ class MusicPlayerActivity : AppCompatActivity() {
                 lastPausedProgress = musicService?.getCurrentPosition() ?: lastPausedProgress
                 updateProgressUI(lastPausedProgress, totalDuration)
 
-                if(totalDuration>0&&lastPausedProgress>=(totalDuration-5000)&&!isPreparePlayNext){
+                if (totalDuration > 0 && lastPausedProgress >= (totalDuration - 5000) && !isPreparePlayNext) {
                     playNextSong()
                 }
             }

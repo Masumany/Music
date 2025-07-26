@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.drawerlayout.widget.DrawerLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mainDrawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:context=".MainActivity">
+    tools:context=".ui.MainActivity">
 
     <!-- 主内容区 -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -19,52 +18,51 @@
             android:id="@+id/drawerButton"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="25dp"
+            android:clickable="true"
+            android:contentDescription="打开侧边栏"
+            android:focusable="true"
             android:padding="10dp"
             android:src="@drawable/drawerbutton"
-            android:contentDescription="打开侧边栏"
-            android:clickable="true"
-            android:focusable="true"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="25dp"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <SearchView
             android:id="@+id/searchView"
             android:layout_width="0dp"
             android:layout_height="50dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="25dp"
+            android:layout_marginEnd="16dp"
             android:background="@drawable/search"
             android:paddingHorizontal="0dp"
-            app:layout_constraintStart_toEndOf="@id/drawerButton"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="25dp"/>
-
+            app:layout_constraintStart_toEndOf="@id/drawerButton"
+            app:layout_constraintTop_toTopOf="parent" />
 
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/mainContent"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@id/searchView"
             app:layout_constraintBottom_toTopOf="@id/player"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@id/searchView" />
 
 
         <androidx.cardview.widget.CardView
-            android:layout_marginStart="5dp"
-            android:layout_marginEnd="5dp"
             android:id="@+id/player"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="5dp"
-            android:padding="10dp"
             android:layout_width="match_parent"
             android:layout_height="50dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
             android:background="@color/white"
             android:elevation="8dp"
+            android:padding="10dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="5dp"
             app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
@@ -93,14 +91,14 @@
                 android:id="@+id/tv_song"
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="60dp"
+                android:layout_marginTop="5dp"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:text="歌曲"
                 android:textStyle="bold"
-                android:layout_marginTop="5dp"
-                android:maxLines="1"
-                android:ellipsize="end"
                 app:layout_constraintStart_toEndOf="@id/music_cd"
-                app:layout_constraintTop_toTopOf="@id/music_cd"
-                android:layout_marginStart="60dp"/>
+                app:layout_constraintTop_toTopOf="@id/music_cd" />
 
             <!-- 歌手名 -->
 
@@ -120,15 +118,15 @@
                 android:id="@+id/stop"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:layout_marginTop="8dp"
                 android:layout_marginStart="250dp"
+                android:layout_marginTop="8dp"
                 android:src="@drawable/list_start"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/iv_more"
                 app:layout_constraintHorizontal_bias="0.876"
                 app:layout_constraintStart_toEndOf="@id/tv_artist"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="1.0"/>
+                app:layout_constraintVertical_bias="1.0" />
 
             <!-- 更多按钮 -->
             <ImageView
@@ -136,11 +134,11 @@
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:layout_marginStart="300dp"
-                android:src="@drawable/m_more"
                 android:layout_marginTop="8dp"
+                android:src="@drawable/m_more"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
+                app:layout_constraintTop_toTopOf="parent" />
         </androidx.cardview.widget.CardView>
 
         <!-- 底部导航栏 -->
@@ -149,15 +147,15 @@
             android:layout_width="match_parent"
             android:layout_height="72dp"
             android:background="@color/white"
-            app:itemIconTint="@color/color"
-            app:itemTextColor="@color/color"
             app:elevation="10dp"
-            app:labelVisibilityMode="labeled"
-            app:menu="@menu/bottommenu"
+            app:itemIconTint="@color/color"
             app:itemRippleColor="@color/white"
+            app:itemTextColor="@color/color"
+            app:labelVisibilityMode="labeled"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:menu="@menu/bottommenu" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- 侧边栏 -->
@@ -166,5 +164,5 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="@color/white"/>
+        android:background="@color/white" />
 </androidx.drawerlayout.widget.DrawerLayout>

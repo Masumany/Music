@@ -4,6 +4,7 @@ import Adapter.Vp2Adapter
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.res.Resources
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
@@ -27,19 +28,16 @@ import com.example.lib.base.Song
 import com.example.module_musicplayer.MusicPlayService
 import com.example.module_recommened.adapter.LiAdapter
 import com.example.module_recommened.viewmodel.ListViewModel
-import com.example.music.databinding.ActivityHeaderBinding
+import com.example.music.R
 import com.example.music.databinding.ActivityMainBinding
 import com.example.music.databinding.NavHeaderBinding
+import com.example.music.viewmodel.BottomViewModel
 import com.example.yourproject.converter.DataConverter
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.therouter.TheRouter
 import com.therouter.router.Route
 import kotlinx.coroutines.launch
-import android.content.res.Resources
-import androidx.cardview.widget.CardView
-import com.example.music.R
-import com.example.music.viewmodel.BottomViewModel
-import com.therouter.TheRouter
 
 @Route(path = "/main/main")
 class MainActivity : AppCompatActivity() {
@@ -63,7 +61,7 @@ class MainActivity : AppCompatActivity() {
 
         Log.d("MainActivity", "onCreate:执行初始化")
 
-        if(savedInstanceState!=null){
+        if (savedInstanceState != null) {
             return  //不重复初始化
         }
 
@@ -71,9 +69,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         enableEdgeToEdge()
 
-        binding.searchView.setOnClickListener{
+        binding.searchView.setOnClickListener {
             TheRouter.build("/module_search/SearchActivity")
-                .navigation( this)
+                .navigation(this)
 
         }
 
@@ -160,9 +158,13 @@ class MainActivity : AppCompatActivity() {
                 val result = listViewModel.getListData(1, 5)
                 if (result.code == 200) {
                     val originalSongs: List<Song> = result.data?.dailySongs ?: emptyList()
-                    songAdapter.submitList(DataConverter.convertBaseSongList(originalSongs))
+                    songAdapter.submitList(DataConverter.convertBaseSongList(originalSongs))  //用数据转换将源数据转换成目标数据
                 } else {
-                    Toast.makeText(this@MainActivity, "数据错误: ${result.code}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@MainActivity,
+                        "数据错误: ${result.code}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             } catch (e: Exception) {
                 Log.e("MainActivity", "列表加载异常", e)
@@ -176,7 +178,7 @@ class MainActivity : AppCompatActivity() {
                 .findViewById<FrameLayout>(com.google.android.material.R.id.design_bottom_sheet)
             bottomSheet?.post {
                 bottomSheet.layoutParams.height = 400.dpToPx()
-                bottomSheet.requestLayout()
+                bottomSheet.requestLayout()  //重新布局
             }
         }
 
@@ -189,17 +191,17 @@ class MainActivity : AppCompatActivity() {
 
     private var isServiceBound = false
     private fun initMusicService() {
-        if(isServiceBound) return
+        if (isServiceBound) return
         serviceConnection = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 val binder = service as MusicPlayService.MusicBinder
-                val musicService = binder.service
-                bottomViewModel.onServiceConnected(musicService)
+                val musicService = binder.service  // 获取音乐服务实例
+                bottomViewModel.onServiceConnected(musicService)  // 通知ViewModel服务已连接
                 updateAnimationState(musicService.isPlaying)
 
                 musicService.setOnPlayStateChanged { isPlaying, _ ->
                     updateAnimationState(isPlaying)
-                }
+                }// 设置播放状态变化监听器
             }
 
             override fun onServiceDisconnected(name: ComponentName?) {
@@ -208,24 +210,24 @@ class MainActivity : AppCompatActivity() {
         }
 
         val bottomBarView = binding.player
-        bottomMusicController = BottomMusicController(this, bottomBarView )
+        bottomMusicController = BottomMusicController(this, bottomBarView)
 
-       bottomViewModel=ViewModelProvider(this)[BottomViewModel::class.java]
-        bottomViewModel.initService( this)
+        bottomViewModel = ViewModelProvider(this)[BottomViewModel::class.java]
+        bottomViewModel.initService(this)
 
 
         val musicServiceIntent = Intent(this, MusicPlayService::class.java)
-        startService(musicServiceIntent)
-        bindService(musicServiceIntent, serviceConnection, BIND_AUTO_CREATE)
+        startService(musicServiceIntent)  // 创建并启动音乐服务
+        bindService(musicServiceIntent, serviceConnection, BIND_AUTO_CREATE)   // 绑定服务
 
-        isServiceBound= true
+        isServiceBound = true  //标记服务已经绑定了
     }
 
     private fun initRotationAnimation() {
         rotationAnimation = AnimationUtils.loadAnimation(this, R.anim.anim_player).apply {
-            interpolator = LinearInterpolator()
+            interpolator = LinearInterpolator()  //动画速度均匀
             duration = 20000
-            repeatCount = Animation.INFINITE
+            repeatCount = Animation.INFINITE  // 无限循环
         }
     }
 
@@ -247,7 +249,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // 解绑服务：先检查serviceConnection是否已初始化
+        // 解绑时先检查serviceConnection是否已初始化
         if (::serviceConnection.isInitialized) {
             try {
                 unbindService(serviceConnection)
@@ -263,7 +265,7 @@ class MainActivity : AppCompatActivity() {
 
         musicIv.clearAnimation()
         if (::bottomSheetDialog.isInitialized && bottomSheetDialog.isShowing) {
-            bottomSheetDialog.dismiss()
+            bottomSheetDialog.dismiss()  //关闭弹窗
         }
     }
 }

@@ -3,7 +3,6 @@ package Adapter
 import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -20,55 +19,53 @@ import com.example.yourproject.converter.DataConverter
 import com.therouter.TheRouter
 import data.TopData
 
-class TopAdapter :ListAdapter<TopData.Song, TopAdapter.TopViewHolder>(TopDiffCallback()){
+class TopAdapter : ListAdapter<TopData.Song, TopAdapter.TopViewHolder>(TopDiffCallback()) {
 
-    private var onItemClickListener:((Int,TopData.Song)->Unit)?=null
-    class TopDiffCallback:DiffUtil.ItemCallback<TopData.Song>() {
+    private var onItemClickListener: ((Int, TopData.Song) -> Unit)? = null
+
+    class TopDiffCallback : DiffUtil.ItemCallback<TopData.Song>() {
         override fun areItemsTheSame(oldItem: TopData.Song, newItem: TopData.Song): Boolean {
-            return oldItem.id==newItem.id
+            return oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(oldItem: TopData.Song, newItem: TopData.Song): Boolean {
-            return oldItem==newItem
+            return oldItem == newItem
         }
     }
 
-        inner class TopViewHolder(private val binding: ItemTopBinding): RecyclerView.ViewHolder(binding.root) {
-            val textView: TextView =binding.topTv
-            val img:ImageView=binding.topImg
-            val moreImg:ImageView=binding.singerSongMore
-            fun bind(song: TopData.Song){
-                textView.text = song.name
-                val cover=song.al.picUrl
-                Glide.with(itemView.context)
-                    .load(cover)
-                    .into(img)
+    inner class TopViewHolder(private val binding: ItemTopBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        val textView: TextView = binding.topTv
+        val img: ImageView = binding.topImg
+        val moreImg: ImageView = binding.singerSongMore
+        fun bind(song: TopData.Song) {
+            textView.text = song.name
+            val cover = song.al.picUrl
+            Glide.with(itemView.context)
+                .load(cover)
+                .into(img)
 
-            }
         }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TopViewHolder {
-        val view=ItemTopBinding.inflate(LayoutInflater.from(parent.context),parent,false)
+        val view = ItemTopBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return TopViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: TopViewHolder, position: Int) {
-        val song=getItem(position)
+        val song = getItem(position)
         holder.bind(song)
 
-        holder.moreImg.setOnClickListener{
+        holder.moreImg.setOnClickListener {
             showPopupWindow(
                 holder.moreImg, song,
                 currentPosition = position
             )
         }
-        // 在TopAdapter的onBindViewHolder中
         holder.itemView.setOnClickListener {
             val currentSong = song
-            val currentPosition = position // 当前点击的索引
-
-          
-
+            val currentPosition = position
             val convertedList = DataConverter.convertTopSongList(currentList)
             MusicDataCache.currentSongList = convertedList // 存入缓存
 
@@ -81,22 +78,28 @@ class TopAdapter :ListAdapter<TopData.Song, TopAdapter.TopViewHolder>(TopDiffCal
                 .withInt("currentPosition", currentPosition) // 传递当前索引
                 .navigation(holder.itemView.context)
 
-            // 回调点击事件（可选）
             onItemClickListener?.invoke(currentPosition, currentSong)
         }
 
     }
+
     private fun dpToPx(context: Context, dp: Int): Int {
         return (dp * context.resources.displayMetrics.density).toInt()
     }
-    private fun showPopupWindow(moreImg: ImageView, currentSong: TopData.Song?, currentPosition: Int) {
-            val context=moreImg.context
+
+    private fun showPopupWindow(
+        moreImg: ImageView,
+        currentSong: TopData.Song?,
+        currentPosition: Int
+    ) {
+        val context = moreImg.context
         val popUpView = LayoutInflater.from(context).inflate(R.layout.popuplayout, null)
         val popupWindow = PopupWindow(
             popUpView,
             dpToPx(context, 150),
             ViewGroup.LayoutParams.WRAP_CONTENT,
-            true)
+            true
+        )
 
         popupWindow.setBackgroundDrawable(context.getDrawable(R.color.white))
 
@@ -114,10 +117,6 @@ class TopAdapter :ListAdapter<TopData.Song, TopAdapter.TopViewHolder>(TopDiffCal
         }
 
         popupWindow.showAsDropDown(moreImg, 0, 0)
-        }
-
-
-
-
+    }
 }
 

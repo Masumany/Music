@@ -99,7 +99,7 @@ class SplashActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-       //避免重复跳转和内存泄漏
+        //避免重复跳转和内存泄漏
         handler.removeCallbacksAndMessages(null)
     }
 }
