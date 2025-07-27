@@ -3,9 +3,9 @@ package com.example.moudle_search.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.moudle_search.bean.SongResult
-import com.example.moudle_search.bean.SongsResultData
 import com.example.moudle_search.repository.NetRepository
+import data.SongResult
+import data.SongsResultData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 class SongsViewModel: ViewModel() {
 
-    private val _songsResult = MutableStateFlow(SongsResultData(0,SongResult(0, emptyList())) )
+    private val _songsResult = MutableStateFlow(SongsResultData(0, SongResult(0, emptyList())) )
     val songsResult: StateFlow<SongsResultData> = _songsResult.asStateFlow()
 
     private val _loadState = MutableStateFlow<LoadState>(LoadState.Init)

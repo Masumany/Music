@@ -7,8 +7,8 @@ import data.ListMusicData
  * 根响应类（对应整个JSON）
  */
 data class ListData(
-  val code: Int,
-  val data: SongData?
+    val code: Int,
+    val data: SongData?
 )
 
 
@@ -16,8 +16,8 @@ data class ListData(
  * 数据容器类（对应JSON中的data字段）
  */
 data class SongData(
-  val fromCache: Boolean,
-  val dailySongs: List<Song>?
+    val fromCache: Boolean,
+    val dailySongs: List<Song>?
 )
 
 /**
@@ -34,15 +34,15 @@ data class Song(
  * 歌手类（对应ar中的元素）
  */
 data class Artist(
-  val id: Long,
-  val name: String // 歌手名称
+    val id: Long,
+    val name: String // 歌手名称
 )
 
 /**
  * 专辑类（对应al字段）
  */
 data class Album(
-  val id: Long,
-  val name: String,
-  val picUrl: String? // 专辑封面URL
+    val id: Long,
+    val name: String,
+    val picUrl: String? // 专辑封面URL
 )

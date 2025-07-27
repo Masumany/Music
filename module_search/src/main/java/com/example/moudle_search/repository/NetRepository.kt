@@ -2,12 +2,12 @@ package com.example.moudle_search.repository
 
 import com.example.moudle_search.bean.ListsResultData
 import com.example.moudle_search.bean.SingerResultData
-import com.example.moudle_search.bean.SongsResultData
 import com.example.moudle_search.bean.VideosResultData
 import com.example.moudle_search.bean.list_songs.ListSongsData
 import com.example.moudle_search.bean.searchHot.SearchHotData
 import com.example.moudle_search.bean.searchKeyWord.SearchKeyWordData
 import com.example.moudle_search.bean.searchSuggestionData.SearchSuggestionData
+import data.SongsResultData
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory

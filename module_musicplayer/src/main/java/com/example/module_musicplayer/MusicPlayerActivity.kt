@@ -24,7 +24,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.bumptech.glide.Glide
 import com.example.lib.base.NetworkClient
-import com.example.lib.base.Song
 import com.example.module_musicplayer.databinding.MusicPlayerBinding
 import com.therouter.TheRouter
 import com.therouter.router.Autowired
@@ -58,10 +57,6 @@ class MusicPlayerActivity : AppCompatActivity() {
 
     @Autowired
     @JvmField
-    var song: Song? = null
-
-    @Autowired
-    @JvmField
     var songListName: String? = null
 
     @Autowired
@@ -76,7 +71,7 @@ class MusicPlayerActivity : AppCompatActivity() {
     @Autowired
     var singerId: Long? = 0
 
-    // 当前播放列表相关
+    // 当前播放列表（仅使用data包下的Song类型）
     private var currentPlayList: List<ListMusicData.Song>? = null
     private var currentIndex = -1
     private var listFragment: ListFragment? = null
@@ -117,13 +112,16 @@ class MusicPlayerActivity : AppCompatActivity() {
             isServiceBound = true
             isServiceReady = true
 
-            // 同步服务中的播放列表
+            // 同步服务中的播放列表（强制过滤类型）
             currentPlayList = musicService?.currentPlayList
+                ?.filterIsInstance<ListMusicData.Song>()
+                ?.takeIf { it.isNotEmpty() }
+
             currentIndex = musicService?.currentIndex ?: currentIndex
 
             syncServiceStateAfterConnection()
             setupServiceListeners()
-            updateFragmentPlayList() // 更新列表Fragment
+            updateFragmentPlayList()
         }
 
         override fun onServiceDisconnected(arg0: ComponentName) {
@@ -134,7 +132,6 @@ class MusicPlayerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // 确保先初始化binding
         binding = MusicPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.mpName.requestFocus()
@@ -161,11 +158,10 @@ class MusicPlayerActivity : AppCompatActivity() {
         initLastSong()
         updateModeIcon()
         initProgressEventSender()
-        initFragment() // 初始化列表Fragment
+        initFragment()
 
         // 初始化歌曲信息和列表
         initMusicInfo()
-        // 延迟初始化播放列表，确保Fragment有足够时间创建
         handler.postDelayed({
             initCurrentPlayList()
         }, 300)
@@ -180,7 +176,6 @@ class MusicPlayerActivity : AppCompatActivity() {
         val transaction = supportFragmentManager.beginTransaction()
             .replace(binding.mpFragment.id, listFragment!!)
         transaction.commit()
-        // 立即执行事务，确保Fragment尽快初始化
         supportFragmentManager.executePendingTransactions()
 
         // 设置列表点击监听
@@ -189,22 +184,13 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
-    // 更新列表Fragment数据，添加安全检查
+    // 更新列表Fragment数据（使用正确类型）
     private fun updateFragmentPlayList() {
-        // 确保Fragment已添加且视图已创建
         if (listFragment?.isAdded == true && _isFragmentViewCreated(listFragment)) {
-            val songs = currentPlayList?.map {
-                Song(
-                    id = it.id,
-                    name = it.name,
-                    ar = it.ar,
-                    al = it.al
-                )
-            } ?: emptyList()
-            listFragment?.updatePlayList(songs, currentIndex)
+            // 确保传递给Fragment的是正确类型
+            listFragment?.updatePlayList(currentPlayList ?: emptyList() , currentIndex)
         } else {
             Log.w("MusicPlayerActivity", "Fragment未准备好，暂不更新列表")
-            // 延迟重试
             handler.postDelayed({
                 updateFragmentPlayList()
             }, 200)
@@ -214,7 +200,6 @@ class MusicPlayerActivity : AppCompatActivity() {
     // 检查Fragment视图是否已创建
     private fun _isFragmentViewCreated(fragment: ListFragment?): Boolean {
         return try {
-            // 通过反射检查Fragment的内部状态
             val field = Fragment::class.java.getDeclaredField("mView")
             field.isAccessible = true
             field.get(fragment) != null
@@ -231,7 +216,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         currentIndex = index
         musicService?.currentIndex = index
         playCurrentMusicWithCheck()
-        hideFragment() // 隐藏列表
+        hideFragment()
     }
 
     // 隐藏Fragment
@@ -258,10 +243,13 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
-    // 初始化当前播放列表
+    // 初始化当前播放列表（添加类型过滤）
     private fun initCurrentPlayList() {
-        // 1. 优先使用缓存列表
+        // 1. 优先使用缓存列表（强制过滤类型）
         currentPlayList = MusicDataCache.currentSongList
+            ?.filterIsInstance<ListMusicData.Song>()
+            ?.takeIf { it.isNotEmpty() }
+
         if (currentPlayList != null && currentPlayList!!.isNotEmpty()) {
             currentIndex = currentPosition ?: findSongIndexById(id ?: "")
             if (currentIndex < 0 || currentIndex >= currentPlayList!!.size) {
@@ -283,9 +271,12 @@ class MusicPlayerActivity : AppCompatActivity() {
             try {
                 val dailySongsResponse = NetworkClient.apiService.getDailyRecommendSongs()
                 if (dailySongsResponse.code == 200 && !dailySongsResponse.data?.dailySongs.isNullOrEmpty()) {
+                    // 确保转换为正确类型
                     currentPlayList = dailySongsResponse.data?.dailySongs as? List<ListMusicData.Song>?
+                        ?: emptyList()
+
                     withContext(Dispatchers.Main) {
-                        if (currentPlayList != null && currentPlayList!!.isNotEmpty()) {
+                        if (currentPlayList!!.isNotEmpty()) {
                             // 缓存当前列表
                             MusicDataCache.currentSongList = currentPlayList
                             currentIndex = findSongIndexById(id ?: "")
@@ -326,7 +317,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         // 恢复当前歌曲的收藏状态
         restoreLikeState(currentSong.id.toString())
 
-        // 同步列表到服务
+        // 同步列表到服务（确保类型正确）
         musicService?.currentPlayList = currentPlayList as List<ListMusicData.Song>
         musicService?.currentIndex = currentIndex
 
@@ -354,27 +345,30 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
-    // 进度事件发送器
+    // 进度事件发送器（彻底修复类型问题）
     private fun initProgressEventSender() {
         handler.postDelayed(object : Runnable {
             override fun run() {
                 if (isServiceReady && musicService != null) {
-                    val currentSong = currentPlayList?.getOrNull(currentIndex)
-                    val currentSongId = currentSong?.id?.toString() ?: "" // 避免id为null
+                    // 安全获取当前歌曲（只使用data包下的类型）
+                    val currentSong: ListMusicData.Song? = try {
+                        currentPlayList?.getOrNull(currentIndex)
+                    } catch (e: ClassCastException) {
+                        Log.e("TypeError", "列表元素类型错误", e)
+                        null
+                    }
+
+                    val currentSongId = currentSong?.id?.toString() ?: ""
                     val currentProgress = musicService?.getCurrentPosition() ?: 0
-                    val duration = musicService?.getDuration() ?: 0
 
-                    //直接创建事件对象
-                    val progressEvent = PlayProgressEvent(
-                        songId = currentSongId,
-                        position = currentProgress,
-                        duration = duration
+                    EventBus.getDefault().post(
+                        PlayProgressEvent(
+                            songId = currentSongId,
+                            position = currentProgress,
+                            duration = musicService?.getDuration() ?: 0,
+                        )
                     )
-
-                    //确保事件非null后再发送
-                    EventBus.getDefault().post(progressEvent)
                 }
-                //继续延迟发送
                 handler.postDelayed(this, 100)
             }
         }, 100)
@@ -420,13 +414,9 @@ class MusicPlayerActivity : AppCompatActivity() {
 
     // 初始化歌曲信息UI
     private fun initMusicInfo() {
-        song?.let {
-            updateMusicInfo(it.name, it.al.picUrl ?: "", it.ar.joinToString { a -> a.name })
-        } ?: run {
-            val safeSongName = songListName ?: "未知歌曲"
-            val safeCover = cover ?: ""
-            updateMusicInfo(safeSongName, safeCover)
-        }
+        val safeSongName = songListName ?: "未知歌曲"
+        val safeCover = cover ?: ""
+        updateMusicInfo(safeSongName, safeCover)
     }
 
     // 上一首按钮监听
@@ -935,7 +925,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         centerRotationAnimator?.cancel()
     }
 
-    // 播放音频
+    // 播放音频（确保使用正确类型）
     private fun playAudio(url: String, onPrepared: (Boolean) -> Unit) {
         if (!isServiceReady || musicService == null) {
             onPrepared(false)
@@ -965,6 +955,7 @@ class MusicPlayerActivity : AppCompatActivity() {
             binding.mpRecord.rotation = ROTATION_PAUSED
             currentRotation = ROTATION_PAUSED
 
+            // 确保传递正确类型的歌曲对象
             musicService?.play(
                 url,
                 song = currentSong
@@ -985,11 +976,16 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
-    // 获取当前歌曲ID
+    // 获取当前歌曲ID（安全版本）
     private fun getCurrentSongId(): String {
-        return if (currentIndex in currentPlayList?.indices ?: emptyList()) {
-            currentPlayList!![currentIndex].id.toString()
-        } else {
+        return try {
+            if (currentIndex in currentPlayList?.indices ?: emptyList()) {
+                currentPlayList!![currentIndex].id.toString()
+            } else {
+                id ?: ""
+            }
+        } catch (e: ClassCastException) {
+            Log.e("TypeError", "获取歌曲ID时类型转换失败", e)
             id ?: ""
         }
     }
@@ -1025,7 +1021,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
-    // 服务状态同步 - 重点修复进度恢复问题
+    // 服务状态同步
     private fun syncServiceStateAfterConnection() {
         if (musicService == null) return
 
@@ -1097,10 +1093,15 @@ class MusicPlayerActivity : AppCompatActivity() {
                     Log.e("MusicPlayer", "暂停音乐失败", e)
                 }
             }
-            val targetSingerId = if (currentIndex in currentPlayList?.indices ?: emptyList()) {
-                currentPlayList!![currentIndex].ar.firstOrNull()?.id ?: 0L
-            } else {
-                singerId?.toLong() ?: 0L
+            val targetSingerId = try {
+                if (currentIndex in currentPlayList?.indices ?: emptyList()) {
+                    currentPlayList!![currentIndex].ar.firstOrNull()?.id ?: 0L
+                } else {
+                    singerId?.toLong() ?: 0L
+                }
+            } catch (e: ClassCastException) {
+                Log.e("TypeError", "获取歌手ID时类型转换失败", e)
+                0L
             }
 
             if (targetSingerId <= 0) {
@@ -1137,7 +1138,7 @@ class MusicPlayerActivity : AppCompatActivity() {
             }
             TheRouter.build("/song/SongWord")
                 .withString("id", currentSongId)
-                .withInt("currentPos", lastPausedProgress) // 确保传递最新进度
+                .withInt("currentPos", lastPausedProgress)
                 .navigation()
         }
 
@@ -1149,23 +1150,30 @@ class MusicPlayerActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        // 保存进度到服务
-        musicService?.lastSavedProgress = lastPausedProgress
-        // 额外保存到SharedPreferences确保不丢失
-        val currentSongId = getCurrentSongId()
-        if (currentSongId.isNotBlank()) {
-            val prefs = getSharedPreferences("MusicProgress", MODE_PRIVATE)
-            prefs.edit()
-                .putInt("progress_$currentSongId", lastPausedProgress)
-                .apply()
+        try {
+            // 保存进度到服务
+            musicService?.lastSavedProgress = lastPausedProgress
+            // 额外保存到SharedPreferences确保不丢失
+            val currentSongId = getCurrentSongId()
+            if (currentSongId.isNotBlank()) {
+                val prefs = getSharedPreferences("MusicProgress", MODE_PRIVATE)
+                prefs.edit()
+                    .putInt("progress_$currentSongId", lastPausedProgress)
+                    .apply()
+            }
+        } catch (e: Exception) {
+            Log.e("PauseError", "暂停时保存进度失败", e)
         }
     }
 
     override fun onResume() {
         super.onResume()
         if (isServiceReady && musicService != null) {
-            // 从服务同步最新的列表和索引
+            // 从服务同步最新的列表和索引（过滤类型）
             currentPlayList = musicService?.currentPlayList
+                ?.filterIsInstance<ListMusicData.Song>()
+                ?.takeIf { it.isNotEmpty() }
+
             currentIndex = musicService?.currentIndex ?: currentIndex
             updateFragmentPlayList()
 
@@ -1177,16 +1185,20 @@ class MusicPlayerActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // 最终保存进度
-        musicService?.lastSavedProgress = lastPausedProgress
+        try {
+            // 最终保存进度
+            musicService?.lastSavedProgress = lastPausedProgress
 
-        // 保存到本地缓存
-        val currentSongId = getCurrentSongId()
-        if (currentSongId.isNotBlank()) {
-            val prefs = getSharedPreferences("MusicProgress", MODE_PRIVATE)
-            prefs.edit()
-                .putInt("progress_$currentSongId", lastPausedProgress)
-                .apply()
+            // 保存到本地缓存
+            val currentSongId = getCurrentSongId()
+            if (currentSongId.isNotBlank()) {
+                val prefs = getSharedPreferences("MusicProgress", MODE_PRIVATE)
+                prefs.edit()
+                    .putInt("progress_$currentSongId", lastPausedProgress)
+                    .apply()
+            }
+        } catch (e: Exception) {
+            Log.e("DestroyError", "销毁时保存进度失败", e)
         }
 
         handler.removeCallbacksAndMessages(null)

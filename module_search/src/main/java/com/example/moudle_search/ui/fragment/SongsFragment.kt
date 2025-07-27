@@ -2,26 +2,23 @@ package com.example.moudle_search.ui.fragment
 
 import androidx.fragment.app.viewModels
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.moudle_search.adapter.SearchResultAdapter
 import com.example.moudle_search.adapter.SongsAdapter
 import com.example.moudle_search.databinding.FragmentSongsBinding
-import com.example.moudle_search.ui.fragment.SingersFragment.Companion
 import com.example.moudle_search.viewModel.LoadState
 import com.example.moudle_search.viewModel.SongsViewModel
 import com.therouter.TheRouter
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-import java.lang.ref.WeakReference
+import Adapter.MusicDataCache  // 导入缓存适配器
+import android.util.Log
+import data.ListMusicData
+import data.SongsResultData
 
 class SongsFragment : Fragment(), SearchResultAdapter.Searchable {
 
@@ -31,6 +28,7 @@ class SongsFragment : Fragment(), SearchResultAdapter.Searchable {
             viewModel.getSongsData(keyword)
         }
     }
+
     companion object {
         private const val ARG_KEYWORDS = "keywords"
         fun newInstance(keywords: String) = SongsFragment().apply {
@@ -41,37 +39,33 @@ class SongsFragment : Fragment(), SearchResultAdapter.Searchable {
     }
 
     private val viewModel: SongsViewModel by viewModels()
-    private var _binding: FragmentSongsBinding? = null
+    private lateinit var _binding: FragmentSongsBinding
     private val binding get() = _binding!!
-    // 使用弱引用存储上下文，避免强引用持有
-    private var weakContext = WeakReference<Fragment>(this)
+
+    // 保存当前搜索到的完整歌曲列表（用于缓存）
+    private var currentSongList: List<ListMusicData.Song> = emptyList()
 
     private val adapter by lazy {
-        SongsAdapter (
+        SongsAdapter(
             onItemClick = { song ->
-                // 通过弱引用获取上下文，避免直接持有Fragment
-                weakContext.get()?.let { fragment ->
-                    fragment.context?.let { context ->
-                        try {
-                            // 用应用上下文显示Toast，避免持有Activity
-                            Toast.makeText(context.applicationContext, song.name, Toast.LENGTH_SHORT).show()
-                            val author = if (song.ar.isNotEmpty()) song.ar[0].name ?: "未知歌手" else "未知歌手"
-                            TheRouter.build("/module_musicplayer/musicplayer")
-                                .withString("songListName", song.name ?: "未知歌曲")
-                                .withString("cover", song.al.picUrl ?: "")
-                                .withLong("id", song.id)
-                                .withString("athour", author)
-                                // 检查Fragment是否已附加到Activity
-                                .navigation(if (fragment.isAdded) fragment.requireActivity() else null)
-                        } catch (e: Exception) {
-                            Log.e("SongsFragment", "跳转音乐播放器失败: ${e.message}")
-                        }
-                    }
-                }
+                // 点击歌曲时，将当前完整列表存入缓存
+                MusicDataCache.currentSongList = currentSongList
+                // 获取当前点击歌曲在列表中的位置
+                val currentPosition = currentSongList.indexOfFirst { it.id == song.id }
+
+                Toast.makeText(requireContext(), song.name, Toast.LENGTH_SHORT).show()
+                TheRouter.build("/module_musicplayer/musicplayer")
+                    .withString("songListName", song.name)
+                    .withString("cover", song.al.picUrl)
+                    .withLong("id", song.id)
+                    .withString("athour", song.ar[0].name ?: "未知")
+                    .withLong("singerId", song.ar[0].id)  // 使用正确的getId()方法
+                    .withInt("currentPosition", currentPosition)  // 传递当前歌曲位置
+                    .navigation(this)
             }
         )
     }
-    // 当前搜索关键词
+
     private var currentKeyword: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,59 +80,43 @@ class SongsFragment : Fragment(), SearchResultAdapter.Searchable {
         _binding = FragmentSongsBinding.inflate(inflater, container, false)
         return binding.root
     }
-    override fun onDestroyView() {
-        super.onDestroyView()
-        binding.rvSongs.adapter = null
-        adapter.onItemClick = null
-        _binding = null
-        // 清除适配器回调引用
-        adapter.onItemClick = null
-        // 清除弱引用，加速回收
-        weakContext.clear()
-    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.rvSongs.adapter = adapter
-        binding.rvSongs.layoutManager = LinearLayoutManager(context)
+        binding.rvSongs.layoutManager = LinearLayoutManager(requireContext())
 
-        loadSongsData (currentKeyword)
+        loadSongsData(currentKeyword)
     }
-    private fun loadSongsData (keywords: String) {
+
+    private fun loadSongsData(keywords: String) {
         viewModel.getSongsData(keywords)
-        // 使用repeatOnLifecycle确保协程在生命周期外自动取消
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.songsResult.collect { songs ->
-                        adapter.submitList(songs.result.songs)
-                    }
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.songsResult.collect { resultData ->
+                // 转换数据并保存到当前列表变量
+                currentSongList = resultData?.let { DataConverter.convertSongsResultData(it) } ?: emptyList()
+                // 提交数据给适配器
+                adapter.submitList(currentSongList)
+
+                // 调试信息：显示当前列表大小
+                if (currentSongList.isNotEmpty()) {
+                    Log.d("SongsFragment", "加载歌曲成功，共 ${currentSongList.size} 首")
+                } else {
+                    Log.d("SongsFragment", "未加载到歌曲数据")
                 }
-                launch {
-                    viewModel.loadState.collect {
-                        when (it) {
-                            is LoadState.Init -> {
-                                binding.pbSongs.visibility = android.view.View.VISIBLE
-                            }
-
-                            is LoadState.Loading -> {
-                                binding.pbSongs.visibility = android.view.View.VISIBLE
-                            }
-
-                            is LoadState.Success -> {
-                                binding.pbSongs.visibility = android.view.View.GONE
-                            }
-
-                            is LoadState.Error -> {
-                                binding.pbSongs.visibility = android.view.View.GONE
-                                Toast.makeText(requireContext(), "加载失败", Toast.LENGTH_SHORT)
-                                    .show()
-                            }
-
-                            else -> {
-                                binding.pbSongs.visibility = android.view.View.GONE
-                            }
-                        }
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.loadState.collect { state ->
+                when (state) {
+                    is LoadState.Init -> binding.pbSongs.visibility = View.VISIBLE
+                    is LoadState.Loading -> binding.pbSongs.visibility = View.VISIBLE
+                    is LoadState.Success -> binding.pbSongs.visibility = View.GONE
+                    is LoadState.Error -> {
+                        binding.pbSongs.visibility = View.GONE
+                        Toast.makeText(requireContext(), "加载失败", Toast.LENGTH_SHORT).show()
                     }
+                    else -> binding.pbSongs.visibility = View.GONE
                 }
             }
         }

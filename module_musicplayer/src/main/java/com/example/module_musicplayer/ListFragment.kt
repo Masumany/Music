@@ -9,31 +9,30 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.lib.base.Song
 import com.example.module_musicplayer.databinding.FragmentPlaylistBinding
+import data.ListMusicData  // 导入新的Song类型所在包
 
 class ListFragment : Fragment() {
 
     private var _binding: FragmentPlaylistBinding? = null
     private val binding get() = _binding!!
 
-    private val songAdapter = PlayListAdapter()
-    private var currentPlayList: List<Song> = emptyList()
+    // 1. 将列表类型改为新的Song类型
+    private var currentPlayList: List<ListMusicData.Song> = emptyList()
     private var currentPlayingIndex = -1
 
-    // 歌曲选择监听器
+    private val songAdapter = PlayListAdapter()
     private var onSongSelectListener: ((Int) -> Unit)? = null
 
     fun setOnSongSelectListener(listener: (Int) -> Unit) {
         onSongSelectListener = listener
     }
 
-    fun updatePlayList(list: List<Song>, currentIndex: Int) {
-        // 保存数据，无论视图是否初始化
+    // 2. 修改updatePlayList方法参数类型为新的Song列表
+    fun updatePlayList(list: List<ListMusicData.Song>, currentIndex: Int) {
         currentPlayList = list
         currentPlayingIndex = currentIndex
 
-        // 检查视图是否已初始化
         if (_binding == null) {
             Log.w("ListFragment", "视图尚未初始化，暂不更新列表UI")
             return
@@ -53,7 +52,6 @@ class ListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentPlaylistBinding.inflate(inflater, container, false)
-        // 初始状态设置为隐藏
         _binding?.root?.visibility = View.GONE
         return binding.root
     }
@@ -64,45 +62,42 @@ class ListFragment : Fragment() {
         initCloseButton()
         initAdapterListener()
 
-        // 视图创建后，如果有缓存数据，立即更新
         if (currentPlayList.isNotEmpty()) {
             songAdapter.updateData(currentPlayList, currentPlayingIndex)
         }
     }
 
-    // 控制Fragment显示/隐藏的方法
     fun setVisible(visible: Boolean) {
         _binding?.root?.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
-    // 初始化RecyclerView
     private fun initRecyclerView() {
         val layoutManager = LinearLayoutManager(requireContext())
         binding.rvlist.layoutManager = layoutManager
         binding.rvlist.adapter = songAdapter
     }
 
-    // 初始化适配器点击事件
     private fun initAdapterListener() {
         songAdapter.setOnItemClickListener { position ->
             onSongSelectListener?.invoke(position)
         }
     }
 
-    // 关闭按钮
     private fun initCloseButton() {
         binding.mpImgBack.setOnClickListener {
             (activity as? MusicPlayerActivity)?.hideFragment()
         }
     }
 
-    // 播放列表适配器
+    // 3. 修改适配器以支持新的Song类型
     inner class PlayListAdapter : RecyclerView.Adapter<PlayListAdapter.ViewHolder>() {
-        private var dataList: List<Song> = emptyList()
+        // 适配器内部列表类型改为新的Song
+        private var dataList: List<ListMusicData.Song> = emptyList()
         private var currentIndex = -1
         private var itemClickListener: ((Int) -> Unit)? = null
 
-        fun updateData(list: List<Song>, currentPos: Int) {
+        // 更新数据的方法参数类型同步修改
+        fun updateData(list: List<ListMusicData.Song>, currentPos: Int) {
             dataList = list
             currentIndex = currentPos
             notifyDataSetChanged()
@@ -136,12 +131,14 @@ class ListFragment : Fragment() {
             return ViewHolder(view)
         }
 
+        // 4. 绑定数据时使用新Song类型的属性（字段名需与新类型一致）
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val song = dataList[position]
-            holder.songName.text = song.name
-            holder.singer.text = song.ar.joinToString { it.name }
-            Glide.with(holder.itemView).load(song.al.picUrl).into(holder.cover)
+            holder.songName.text = song.name  // 假设新类型有name字段
+            holder.singer.text = song.ar.joinToString { it.name }  // 假设新类型有ar字段（歌手列表）
+            Glide.with(holder.itemView).load(song.al.picUrl).into(holder.cover)  // 假设新类型有al字段（专辑信息）
 
+            // 设置选中状态的颜色
             if (position == currentIndex) {
                 holder.songName.setTextColor(holder.itemView.context.getColor(com.example.module_details.R.color.white))
                 holder.singer.setTextColor(holder.itemView.context.getColor(com.example.module_details.R.color.white))
@@ -154,7 +151,6 @@ class ListFragment : Fragment() {
         override fun getItemCount() = dataList.size
     }
 
-    // 释放binding引用，避免内存泄漏
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
