@@ -16,25 +16,25 @@
 
 使用 `AlertDialog.Builder` 创建选择对话框（“拍照 / 相册选择 / 取消”），通过 `setItems` 设置选项列表，通过 `Intent(MediaStore.ACTION_IMAGE_CAPTURE)` 启动系统相机，使用 `MediaStore.EXTRA_OUTPUT` 指定拍照结果的存储路径，实现拍照功能，通过 `AvatarStorageUtil` 工具类，将头像 `Uri` 转为字符串后存储到 `SharedPreferences`
 
-[Music/xt的README/2d018faf5f9070a0182ee6ef8e39565e.gif at main · Masumany/Music](https://github.com/Masumany/Music/blob/main/xt的README/2d018faf5f9070a0182ee6ef8e39565e.gif)
+![](https://github.com/Masumany/Music/blob/main/xt的README/2d018faf5f9070a0182ee6ef8e39565e.gif)
 
 #### Hot模块
 
 主要是rv和网络请求，导航用的BottomNavigationView，和vp2联动，用SwipeRefreshLayout实现了下拉刷新的效果，listFragment使用了两次网络请求，加载的慢，即使使用了缓存还是效果不佳
 
-[Music/xt的README/4fc35c681a5db7ba4cf67f3645484575.gif at main · Masumany/Music](https://github.com/Masumany/Music/blob/main/xt的README/4fc35c681a5db7ba4cf67f3645484575.gif)
+![](https://github.com/Masumany/Music/blob/main/xt的README/4fc35c681a5db7ba4cf67f3645484575.gif)
 
 #### search模块
 
 通过 `TextWatcher` 监听输入框文本变化，在 `onTextChanged` 中实时调用 `loadSuggestion(keyWord)`，输入过程中自动加载并显示匹配的搜索建议，搜索结果界面接收SearchActivity传入的 keywords 并显示在输入框，对搜索按钮，搜索框添加监听，通过 `setResult(RESULT_OK, intent)` 将修改后的关键词回传，当 Activity 创建 Fragment 时，通过 `newInstance` （接口）传递关键词
 
-[Music/xt的README/6d5d58ce945f34a4eab6eb07aeae604c.gif at main · Masumany/Music](https://github.com/Masumany/Music/blob/main/xt的README/6d5d58ce945f34a4eab6eb07aeae604c.gif)
+![](https://github.com/Masumany/Music/blob/main/xt的README/6d5d58ce945f34a4eab6eb07aeae604c.gif)
 
 #### MV模块
 
 用了`ExoPlayer`（Media3 库的）实现视频播放，实现了MV的分享功能，查看评论使用的是底部弹窗BottomSheet
 
-[Music/xt的README/ca7576ca9e68f241a13a8f2871abd312.gif at main · Masumany/Music](https://github.com/Masumany/Music/blob/main/xt的README/ca7576ca9e68f241a13a8f2871abd312.gif)
+![](https://github.com/Masumany/Music/blob/main/xt的README/ca7576ca9e68f241a13a8f2871abd312.gif)
 
 ### 技术体现
 
