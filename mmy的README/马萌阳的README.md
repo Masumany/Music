@@ -24,10 +24,12 @@
 
 这个模块主要是对音乐播放器里面各个详细的板块的深入。
 
-1.点击音乐播放器页面中的歌手名字，会跳转到这个模块。包括歌手的百科，相似的艺人，歌手的最热歌曲以及MV。在歌手的最热歌曲中，运用PopUpWindow展示分享与下载。
+1.点击音乐播放器页面中的歌手名字，会跳转到这个模块。包括歌手的百科，相似的艺人，歌手的最热歌曲以及MV。在歌手的最热歌曲中，运用PopUpWindow展示分享与下载。  
+
 ![](https://github.com/Masumany/Music/blob/main/mmy%E7%9A%84README/3e4414c83e272ae69000a3ad2ff0228b.gif)
 
-2.点击音乐播放器的封面会跳转到这个模块的歌词界面。实现歌词会随音乐的播放而滚动，为了实现这个效果，我重新定义歌词的数据类，运用正则表达式将时间戳与歌词分隔开。同时，使用了EventBus与播放器进行通信，LiveData观察，及时更新并标记当前播放的歌词，在自动切换下一首歌时，也能及时关闭。在写歌词滚动的时候也出现了许多问题，歌词很多时候就不自动滚动了或者退出这个界面再进来，当前的歌词也不变了...改了也是有些时间的。
+2.点击音乐播放器的封面会跳转到这个模块的歌词界面。实现歌词会随音乐的播放而滚动，为了实现这个效果，我重新定义歌词的数据类，运用正则表达式将时间戳与歌词分隔开。同时，使用了EventBus与播放器进行通信，LiveData观察，及时更新并标记当前播放的歌词，在自动切换下一首歌时，也能及时关闭。在写歌词滚动的时候也出现了许多问题，歌词很多时候就不自动滚动了或者退出这个界面再进来，当前的歌词也不变了...改了也是有些时间的。  
+
 ![](https://github.com/Masumany/Music/blob/main/mmy%E7%9A%84README/25e031327ff440959d176283e338e22e.gif)
 
 #### module_musicplayer模块
@@ -36,14 +38,12 @@
 
 1.音乐播放功能，获取传入的音乐id，再用api转为url，最后用MediaPlayer实现音乐的播放。
 
-2.暂停，播放；下一首，上一首；随机播放，顺序播放以及单曲循环；音乐列表。可以实现连播的效果，与首页的音乐底部栏进行联动。音乐列表获取当前列表，并将正在播放的音乐显示为高亮状态。
-![](https://github.com/Masumany/Music/blob/main/mmy%E7%9A%84README/f0fd2ea7ce0a36bdd5270407bb4ff04c.gif)
+2.暂停，播放；下一首，上一首；随机播放，顺序播放以及单曲循环；音乐列表。可以实现连播的效果，与首页的音乐底部栏进行联动。音乐列表获取当前列表，并将正在播放的音乐显示为高亮状态。  
 
-![](https://github.com/Masumany/Music/blob/main/mmy%E7%9A%84README/fd1aa33e35c219fcbcf1571f3f39a05b.gif)
-
+![](https://github.com/Masumany/Music/blob/main/mmy%E7%9A%84README/f0fd2ea7ce0a36bdd5270407bb4ff04c.gif)  
+![](https://github.com/Masumany/Music/blob/main/mmy%E7%9A%84README/fd1aa33e35c219fcbcf1571f3f39a05b.gif)  
 3.收藏；评论；分享。收藏状态使用sharedPreferences进行保存，评论比较简单就是一个Fragment。
-![](https://github.com/Masumany/Music/blob/main/mmy%E7%9A%84README/08e08a8bba0fb66e71a1f01909c9727d.gif)
-
+![](https://github.com/Masumany/Music/blob/main/mmy%E7%9A%84README/08e08a8bba0fb66e71a1f01909c9727d.gif)  
 4.动画。我写了个动画，一个是歌曲封面的旋转；另一个是仿网易云的固定角度的播放杆的旋转。与播放状态联动，播放暂停动画会停止或者旋转到初始位置。
 
 #### module_recommend模块
@@ -52,9 +52,8 @@
 
 1.Banner，运用vp2和Handle的定时任务实现自动轮播。
 
-2.每日推荐歌单这个板块里，我写了一个动画，向上滑动时自动隐藏专辑区，更加便捷。顶部的播放全部默认从索引为0的歌曲开始播放。由于这些歌曲列表过大，我写了个缓存列表，这样就不会因为给音乐播放器传递过大的列表而报错。
-![](https://github.com/Masumany/Music/blob/main/mmy%E7%9A%84README/3c202506cade05848bde453c386aae7a.gif)
-
+2.每日推荐歌单这个板块里，我写了一个动画，向上滑动时自动隐藏专辑区，更加便捷。顶部的播放全部默认从索引为0的歌曲开始播放。由于这些歌曲列表过大，我写了个缓存列表，这样就不会因为给音乐播放器传递过大的列表而报错。  
+![](https://github.com/Masumany/Music/blob/main/mmy%E7%9A%84README/3c202506cade05848bde453c386aae7a.gif)  
 3.歌曲板块，我使用的是rv和分页逻辑。
 
 ### 技术亮点
