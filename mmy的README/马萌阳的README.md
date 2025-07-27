@@ -40,7 +40,7 @@
 
 2.暂停，播放；下一首，上一首；随机播放，顺序播放以及单曲循环；音乐列表。可以实现连播的效果，与首页的音乐底部栏进行联动。音乐列表获取当前列表，并将正在播放的音乐显示为高亮状态。  
 
-![](https://github.com/Masumany/Music/blob/main/mmy%E7%9A%84README/f0fd2ea7ce0a36bdd5270407bb4ff04c.gif)  
+![](https://github.com/Masumany/Music/blob/main/mmy%E7%9A%84README/f0fd2ea7ce0a36bdd5270407bb4ff04c.gif)
 ![](https://github.com/Masumany/Music/blob/main/mmy%E7%9A%84README/fd1aa33e35c219fcbcf1571f3f39a05b.gif)  
 3.收藏；评论；分享。收藏状态使用sharedPreferences进行保存，评论比较简单就是一个Fragment。
 ![](https://github.com/Masumany/Music/blob/main/mmy%E7%9A%84README/08e08a8bba0fb66e71a1f01909c9727d.gif)  
