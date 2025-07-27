@@ -11,6 +11,7 @@ import com.example.module_personage.adapter.LikeAdapter
 import com.example.module_personage.bean.like.Follow
 import com.example.module_personage.viewModel.LikeViewModel
 import com.example.module_personage.viewModel.LoadState
+import com.therouter.TheRouter
 
 class LikeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLikeBinding
@@ -18,7 +19,10 @@ class LikeActivity : AppCompatActivity() {
     private val adapter by lazy{
         LikeAdapter(
             onItemClick = { follow: Follow ->
-                // 跳转主页
+                Toast.makeText(this@LikeActivity, follow.nickname, Toast.LENGTH_SHORT).show()
+                TheRouter.build("/singer/SingerActivity")
+                    .withLong("id", follow.userId.toLong())
+                    .navigation(this@LikeActivity)
             },
 //            onItemLikeClick = { follow: Follow ->
 //                //接口

@@ -19,7 +19,6 @@
             android:id="@+id/personage_imageView"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:background="@drawable/no_user"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.183"
@@ -129,7 +128,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:menu="@menu/menu" />
+            app:menu="@menu/menu2" />
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/personage_viewPager"

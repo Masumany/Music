@@ -10,8 +10,8 @@
 
     <ImageView
         android:id="@+id/liked_item_image"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:scaleType="centerCrop"
         android:layout_marginEnd="5dp"/>
 
@@ -22,10 +22,4 @@
         android:layout_weight="1"
         android:paddingStart="5dp"/>
 
-    <android.widget.Button
-        android:id="@+id/liked_item_button"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:background="@drawable/dislike_button"
-        android:layout_marginStart="5dp"/>
 </LinearLayout>

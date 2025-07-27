@@ -3,6 +3,7 @@ package com.example.module_personage.ui.activity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -11,6 +12,7 @@ import com.example.module_personage.adapter.LikedAdapter
 import com.example.module_personage.bean.liked.Followed
 import com.example.module_personage.viewModel.LikedViewModel
 import com.example.module_personage.viewModel.LoadState
+import com.therouter.TheRouter
 
 class LikedActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLikedBinding
@@ -18,7 +20,10 @@ class LikedActivity : AppCompatActivity() {
     private val adapter by lazy{
         LikedAdapter(
             onItemClick = { followed: Followed ->
-                // 跳转主页
+                Toast.makeText(this@LikedActivity, followed.nickname, Toast.LENGTH_SHORT).show()
+                TheRouter.build("/singer/SingerActivity")
+                    .withLong("id", followed.userId)
+                    .navigation(this@LikedActivity)
             },
 //            onItemLikeClick = { follow: Follow ->
 //                //接口
@@ -47,8 +52,8 @@ class LikedActivity : AppCompatActivity() {
         }
     }
     private fun loadLikedData(){
-        val uid = intent.getIntExtra("uid", 0)
-        viewModel.getLikedData(uid)
+//        val uid = intent.getIntExtra("uid", 0)
+        viewModel.getLikedData()
 
         lifecycleScope.launchWhenStarted {
             viewModel.likedData.collect{

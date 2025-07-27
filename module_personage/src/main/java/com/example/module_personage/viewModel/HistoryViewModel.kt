@@ -26,7 +26,7 @@ class HistoryViewModel : ViewModel() {
             try {
                 _loadState.value = LoadState.Loading
 
-                val response = NetRepository.apiService.getHistory(uid, type)
+                val response = NetRepository.apiService.getHistory()
                 Log.d("HistoryViewModel", "接口请求结果：${response.message()}")
 
                 if (response.isSuccessful) {

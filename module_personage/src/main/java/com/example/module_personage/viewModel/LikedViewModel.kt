@@ -17,14 +17,14 @@ class LikedViewModel : ViewModel(){
     private val _loadState = MutableStateFlow<LoadState>(LoadState.Init)
     val loadState: StateFlow<LoadState> = _loadState.asStateFlow()
 
-    fun getLikedData(id: Int) {
+    fun getLikedData() {
         if (_loadState.value is LoadState.Loading){
             return
         }
         viewModelScope.launch {
             try {
                 _loadState.value = LoadState.Loading
-                val response = NetRepository.apiService.getFolloweds(id.toString())
+                val response = NetRepository.apiService.getFolloweds()
                 Log.d("LikedViewModel", "获取成功 ${response.message()}")
                 if (response.isSuccessful){
                     val data = response.body()

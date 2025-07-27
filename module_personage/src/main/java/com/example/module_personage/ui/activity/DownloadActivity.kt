@@ -6,16 +6,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.module_login_register.R
+import com.example.module_login_register.databinding.ActivityDownloadBinding
+import com.example.module_login_register.databinding.ActivityLikeBinding
 
 class DownloadActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityDownloadBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_download)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+        binding = ActivityDownloadBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        initClick()
+    }
+    private fun initClick() {
+        binding.button.setOnClickListener {
+            finish()
         }
     }
 }

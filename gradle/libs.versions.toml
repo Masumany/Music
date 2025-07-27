@@ -18,6 +18,7 @@ runtimeSavedInstanceState = "1.0.0-alpha11"
 firebaseCrashlyticsBuildtoolsVersion = "3.0.5"
 fragment = "1.5.4"
 fragmentVersion = "1.6.1"
+lifecycleViewmodelSavedstate = "2.7.0"
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
@@ -36,6 +37,7 @@ androidx-runtime-saved-instance-state = { group = "androidx.compose.runtime", na
 google-firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebaseCrashlyticsBuildtoolsVersion" }
 androidx-fragment = { group = "androidx.fragment", name = "fragment", version.ref = "fragment" }
 fragment = { group = "androidx.fragment", name = "fragment", version.ref = "fragmentVersion" }
+androidx-lifecycle-viewmodel-savedstate = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-savedstate", version.ref = "lifecycleViewmodelSavedstate" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

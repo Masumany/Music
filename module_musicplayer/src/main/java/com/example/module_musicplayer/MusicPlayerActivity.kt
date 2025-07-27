@@ -360,19 +360,21 @@ class MusicPlayerActivity : AppCompatActivity() {
             override fun run() {
                 if (isServiceReady && musicService != null) {
                     val currentSong = currentPlayList?.getOrNull(currentIndex)
-                    val currentSongId = currentSong?.id
+                    val currentSongId = currentSong?.id?.toString() ?: "" // 避免id为null
                     val currentProgress = musicService?.getCurrentPosition() ?: 0
+                    val duration = musicService?.getDuration() ?: 0
 
-                    EventBus.getDefault().post(
-                        currentPosition?.let {
-                            PlayProgressEvent(
-                                songId = currentSongId.toString(),
-                                position = currentProgress,
-                                duration = musicService?.getDuration() ?: 0,
-                            )
-                        }
+                    //直接创建事件对象
+                    val progressEvent = PlayProgressEvent(
+                        songId = currentSongId,
+                        position = currentProgress,
+                        duration = duration
                     )
+
+                    //确保事件非null后再发送
+                    EventBus.getDefault().post(progressEvent)
                 }
+                //继续延迟发送
                 handler.postDelayed(this, 100)
             }
         }, 100)

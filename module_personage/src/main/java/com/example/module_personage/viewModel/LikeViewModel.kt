@@ -25,7 +25,7 @@ class LikeViewModel: ViewModel() {
         viewModelScope.launch {
             try {
                 _loadState.value = LoadState.Loading
-                val response = NetRepository.apiService.getFollows(id.toString())
+                val response = NetRepository.apiService.getFollows()
                 Log.d("LikeViewModel", "获取成功 ${response.message()}")
                 if (response.isSuccessful){
                     val data = response.body()

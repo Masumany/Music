@@ -11,6 +11,7 @@ import com.example.moudle_search.databinding.ActivitySearchResultBinding
 
 class SearchResultActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySearchResultBinding
+    private var searchAdapter: SearchResultAdapter? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySearchResultBinding.inflate(layoutInflater)
@@ -25,7 +26,8 @@ class SearchResultActivity : AppCompatActivity() {
         // 设置搜索框文本
         binding.searchEt.setText(keywords)
         binding.searchEt.setSelection(keywords.length) // 光标移到末尾
-        binding.searchViewPager.adapter = SearchResultAdapter(this,keywords)
+        searchAdapter = SearchResultAdapter(this, keywords)
+        binding.searchViewPager.adapter = searchAdapter
 
         // 导航与ViewPager2联动
         binding.searchBottomNavigationView.setOnItemSelectedListener { item ->
@@ -50,7 +52,7 @@ class SearchResultActivity : AppCompatActivity() {
                 }
             }
         })
-        binding.searchViewPager.offscreenPageLimit = 3  // 预加载3页（总4页，全部加载）
+        binding.searchViewPager.offscreenPageLimit = 1  // 预加载
         initClick()
     }
     private fun initClick() {
@@ -77,5 +79,13 @@ class SearchResultActivity : AppCompatActivity() {
         intent.putExtra("keywords", keyword) // 携带当前关键词
         setResult(RESULT_OK, intent)
         finish() // 关闭当前页面，返回 SearchActivity
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        // 清理ViewPager2适配器，避免持有Fragment引用
+        binding.searchViewPager.adapter = null
+        searchAdapter = null
+        // 移除回调监听
+        binding.searchViewPager.unregisterOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {})
     }
 }

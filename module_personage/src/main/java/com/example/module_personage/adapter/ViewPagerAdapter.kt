@@ -4,7 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.module_personage.ui.fragment.HistoryFragment
-import com.example.module_personage.ui.fragment.SongListFragment
+import com.example.module_personage.ui.fragment.SongListsFragment
 
 class ViewPagerAdapter(
     private val parentFragment: Fragment // 接收 Fragment 作为父容器
@@ -14,7 +14,7 @@ class ViewPagerAdapter(
 ) {
 
     private val fragments = listOf(
-        SongListFragment.newInstance(),
+        SongListsFragment.newInstance(),
         HistoryFragment.newInstance()
     )
 

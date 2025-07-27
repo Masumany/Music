@@ -27,7 +27,7 @@ class SongListViewModel : ViewModel() {
             try {
                 _loadState.value = LoadState.Loading
                 val response = NetRepository.apiService.getListsResult( keywords)
-                Log.d("SingerViewModel", "获取成功 ${response.body()}")
+                Log.d("ListViewModel", "获取成功 ${response.body()}")
                 if (response.isSuccessful){
                     val data = response.body()
                     if (data != null && data.code == 200){
@@ -43,10 +43,10 @@ class SongListViewModel : ViewModel() {
 
                 }else{
                     _loadState.value = LoadState.Error("获取失败 ${response.message()}")
-                    Log.e("SingerViewModel", "获取失败 ${response.message()}")
+                    Log.e("ListViewModel", "获取失败 ${response.message()}")
                 }
             }catch (e: Exception){
-                Log.e("SingerViewModel", "获取异常 ${e.message}")
+                Log.e("ListViewModel", "获取异常 ${e.message}")
                 _loadState.value = LoadState.Error("获取异常 ${e.message}")
                 e.printStackTrace()
             }

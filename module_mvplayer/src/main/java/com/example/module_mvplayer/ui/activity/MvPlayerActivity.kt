@@ -334,6 +334,10 @@ class MvPlayerActivity : AppCompatActivity() {
 
             binding.mvInfo.visibility = View.VISIBLE
             binding.mvBackLayout.visibility = View.VISIBLE
+            binding.mvInfo.requestLayout()
+            binding.mvBackLayout.requestLayout()
+            binding.mvInfo.invalidate()
+            binding.mvBackLayout.invalidate()
             binding.fullscreenButton.setBackgroundResource(R.drawable.full)
         }
         //应用约束

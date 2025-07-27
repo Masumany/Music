@@ -44,6 +44,7 @@ android {
 dependencies {
 
     implementation(project(":lib_base"))
+    implementation(libs.androidx.lifecycle.viewmodel.savedstate)
 //    // TheRouter 核心库
 //    implementation("cn.therouter:api:1.2.2" )
 //    // 注解处理器（用于生成路由表）
