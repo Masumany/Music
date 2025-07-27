@@ -1,6 +1,5 @@
 package com.example.module_hot.bean.list
 
-import com.example.module_hot.bean.list_songs.Song
 
 data class ListItem(
     val id: Long,

@@ -28,7 +28,7 @@ object NetRepository {
             // 缓存大小：10MB（10 * 1024 * 1024字节）
             Cache(cacheDir, 10 * 1024 * 1024L)
         } catch (e: Exception) {
-            // 异常时不使用缓存（如存储权限问题）
+            // 异常时不使用缓存
             e.printStackTrace()
             null
         }

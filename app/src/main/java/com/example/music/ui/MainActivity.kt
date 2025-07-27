@@ -14,6 +14,7 @@ import android.view.animation.AnimationUtils
 import android.view.animation.LinearInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.SearchView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -28,6 +29,7 @@ import com.example.lib.base.Song
 import com.example.module_musicplayer.MusicPlayService
 import com.example.module_recommened.adapter.LiAdapter
 import com.example.module_recommened.viewmodel.ListViewModel
+import com.example.moudle_search.ui.activity.SearchActivity
 import com.example.music.R
 import com.example.music.databinding.ActivityMainBinding
 import com.example.music.databinding.NavHeaderBinding
@@ -37,6 +39,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.therouter.TheRouter
 import com.therouter.router.Route
 import kotlinx.coroutines.launch
+import androidx.appcompat.widget.SearchView.SearchAutoComplete
 
 @Route(path = "/main/main")
 class MainActivity : AppCompatActivity() {

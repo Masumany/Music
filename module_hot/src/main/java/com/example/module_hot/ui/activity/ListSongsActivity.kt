@@ -45,7 +45,10 @@ class ListSongsActivity : AppCompatActivity() {
         binding.rvSongsList.adapter = adapter
         binding.rvSongsList.layoutManager = LinearLayoutManager(this)
         viewModel = ViewModelProvider(this)[ListSongsViewModel::class.java]
-        binding.tvSongsListTitle.text = intent.getStringExtra("name") ?: "未知歌单"
+        val playlistId = intent.getLongExtra("id", 0)
+        val playlistName = intent.getStringExtra("name") ?: "未知歌单"
+        binding.tvSongsListTitle.text =playlistName
+        currentPlaylist = Item0(id = playlistId, name = playlistName,"",0L,"")
         // 初始化 SwipeRefreshLayout
         binding.songsListSwipeRefresh.apply {
             // 设置刷新动画的颜色

@@ -68,10 +68,10 @@ class PersonageFragment : Fragment() {
                 viewModel.userDetailData.collect { userDetail ->
                     // 处理数据为null的情况
                     userDetail?.let { detail ->
-                        // 显示用户名（TextView赋值）
+                        // 显示用户名
                         binding.personageTextView.text = detail.profile.nickname ?: "未知用户"
 
-                        // 显示默认头像（ImageView加载网络图片，需用Glide）
+                        // 显示默认头像
                         val avatarUrl = detail.profile.avatarUrl
                         if (!avatarUrl.isNullOrEmpty()) {
                             // 只有当本地没有自定义头像时，才显示默认头像

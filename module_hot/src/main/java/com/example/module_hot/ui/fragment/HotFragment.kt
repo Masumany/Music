@@ -47,6 +47,7 @@ class HotFragment : Fragment() {
                 }
             }
         })
+        binding.hotViewPager.offscreenPageLimit = 1  // 预加载
     }
 
     override fun onDestroyView() {

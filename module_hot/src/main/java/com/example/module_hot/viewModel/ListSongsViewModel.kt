@@ -50,4 +50,8 @@ class ListSongsViewModel: ViewModel() {
             }
         }
     }
+    override fun onCleared() {
+        super.onCleared()
+        _loadState.value = LoadState.Init
+    }
 }

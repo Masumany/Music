@@ -28,9 +28,11 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <SearchView
+        <EditText
             android:id="@+id/searchView"
             android:focusable="false"
+            android:hint="搜索"
+            android:gravity="center"
             android:focusableInTouchMode="false"
             android:clickable="true"
             android:layout_width="0dp"
